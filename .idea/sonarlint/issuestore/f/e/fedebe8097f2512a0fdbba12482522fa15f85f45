@@ -1,0 +1,7 @@
+
+kpython:S1192"GDefine a constant instead of duplicating this literal ".cache" 3 times.(ıŒ¯úüÿÿÿÿ8ê±˜Û1
+Lpython:S1940"-Use the opposite operator ("not in") instead.(³›¹ù8ê±˜Û1
+[python:S5754*"<Specify an exception class to catch or reraise the exception(ˆÊÉ·8ê±˜Û1
+Lpython:S1940%"-Use the opposite operator ("not in") instead.(±ÅØğ8ê±˜Û1
+Lpython:S1940("-Use the opposite operator ("not in") instead.(±ÅØğ8ê±˜Û1
+xpython:S3776/"TRefactor this function to reduce its Cognitive Complexity from 53 to the 15 allowed.(úìçêüÿÿÿÿ8ê±˜Û1

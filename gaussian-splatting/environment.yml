@@ -1,0 +1,40 @@
+name: eg-view
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  # - cudatoolkit=11.8
+  - plyfile
+  - python=3.10
+  - pip
+  - click
+  - pillow
+  - scipy
+  - pytorch-cuda=11.8
+  - torchaudio
+  - torchvision
+  - requests
+  - tqdm
+  - ninja=1.10.2
+  - matplotlib
+  - imageio
+  - opencv
+  - scikit-learn
+  - pip:
+    - imgui==1.4.1
+    - glfw
+    - pyopengl
+    - imageio-ffmpeg
+    - pyspng
+    - psutil
+    - mrcfile
+    - tensorboard
+    - gaussian-splatting/submodules/diff-gaussian-rasterization
+    - gaussian-splatting/submodules/simple-knn
+    - wandb
+    - smplx
+    - chumpy==0.70
+    - numpy==1.23.1
+    - pytorch_msssim

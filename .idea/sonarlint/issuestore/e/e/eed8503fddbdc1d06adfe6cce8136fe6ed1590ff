@@ -1,0 +1,21 @@
+
+dpython:S117"MRename this parameter "R" to match the regular expression ^[_a-z][a-z0-9_]*$.(’©Ί–
+jpython:S117 "SRename this local variable "Rt" to match the regular expression ^[_a-z][a-z0-9_]*$.(²ΫΈΦ
+kpython:S1542"SRename function "getWorld2View" to match the regular expression ^[a-z_][a-z0-9_]*$.(’©Ί–
+dpython:S117&"MRename this parameter "R" to match the regular expression ^[_a-z][a-z0-9_]*$.(…
+jpython:S117'"SRename this local variable "Rt" to match the regular expression ^[_a-z][a-z0-9_]*$.(²ΫΈΦ
+lpython:S1542&"TRename function "getWorld2View2" to match the regular expression ^[a-z_][a-z0-9_]*$.(…
+dpython:S1763-"GDelete this unreachable code or refactor the code to make it reachable.(ξιÒόÿÿÿÿ
+lpython:S1174"PRename this parameter "fovX" to match the regular expression ^[_a-z][a-z0-9_]*$.(“Χ΄υϊÿÿÿÿ
+lpython:S1174"PRename this parameter "fovY" to match the regular expression ^[_a-z][a-z0-9_]*$.(“Χ΄υϊÿÿÿÿ
+xpython:S1176"\Rename this local variable "tanHalfFovX" to match the regular expression ^[_a-z][a-z0-9_]*$.(«„ωÿÿÿÿ
+xpython:S1175"\Rename this local variable "tanHalfFovY" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ό†…ϊÿÿÿÿ
+vpython:S15424"YRename function "getProjectionMatrix" to match the regular expression ^[a-z_][a-z0-9_]*$.(“Χ΄υϊÿÿÿÿ
+6python:S125G"Remove this commented out code.(•Τ™
+Apython:S1172M")Remove the unused function parameter "W".(–λύ°
+Bpython:S1172M"*Remove the unused function parameter "cx".(–λύ°
+Bpython:S1172M"*Remove the unused function parameter "cy".(–λύ°
+Apython:S1172M")Remove the unused function parameter "H".(–λύ°
+dpython:S117M"MRename this parameter "H" to match the regular expression ^[_a-z][a-z0-9_]*$.(–λύ°
+dpython:S117M"MRename this parameter "W" to match the regular expression ^[_a-z][a-z0-9_]*$.(–λύ°
+wpython:S1542M"_Rename function "getProjectionMatrixCustom" to match the regular expression ^[a-z_][a-z0-9_]*$.(–λύ°

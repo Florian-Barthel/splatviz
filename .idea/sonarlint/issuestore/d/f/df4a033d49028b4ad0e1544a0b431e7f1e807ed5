@@ -1,0 +1,5 @@
+
+epython:S1542"MRename function "loadCam" to match the regular expression ^[a-z_][a-z0-9_]*$.(²ûØ›
+{python:S15426"^Rename function "cameraList_from_camInfos" to match the regular expression ^[a-z_][a-z0-9_]*$.(¹¾”éùÿÿÿÿ
+jpython:S117?"SRename this local variable "Rt" to match the regular expression ^[_a-z][a-z0-9_]*$.(²Û¸Ö
+qpython:S1542>"TRename function "camera_to_JSON" to match the regular expression ^[a-z_][a-z0-9_]*$.(ä¢¨âýÿÿÿÿ
