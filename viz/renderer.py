@@ -8,12 +8,15 @@
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
 import copy
+import os
 import re
 
+import imageio
 import numpy as np
 import torch
 import torch.fft
 import torch.nn
+from tqdm import tqdm
 
 from gaussian_renderer import render_simple
 from scene import GaussianModel
@@ -37,6 +40,7 @@ class Renderer:
         self._net_layers = dict()
         self._last_model_input = None
         self.gaussian_model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
+        self.bg_color = torch.tensor([1, 1, 1], dtype=torch.float32).to("cuda")
 
     def render(self, **args):
         self._is_timing = True
@@ -87,6 +91,10 @@ class Renderer:
         size,
         ply_file_path,
         up_vector,
+        current_ply_name,
+        video_cams=[],
+        render_depth=False,
+        render_alpha=False,
         img_normalize=False,
         z_near=0.01,
         z_far=10,
@@ -98,20 +106,18 @@ class Renderer:
         cam = EasyDict(radius=radius, z_near=z_near, z_far=z_far, fov=fov, pitch=pitch, yaw=yaw, lookat_point=lookat_point)
         width = size
         height = size
-        bg_color = [0, 0, 0]
         gaussian = copy.deepcopy(self.gaussian_model)
         command = re.sub(';+', ';', edit_text.replace("\n", ";"))
         exec(command)
 
+        if len(video_cams) > 0:
+            self.render_video(f"./videos/{current_ply_name}", video_cams)
+
         extrinsic = LookAtPoseSampler.sample(3.14 / 2 + cam.yaw, 3.14 / 2 + cam.pitch, cam.lookat_point, radius=cam.radius, up_vector=up_vector)[0]
         fov_rad = cam.fov / 360 * 2 * np.pi
         render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=cam.z_near, zfar=cam.z_far, extr=extrinsic)
-        bg_color = torch.tensor(bg_color, dtype=torch.float32).to("cuda")
-        render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=bg_color)
+        render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
         img = render["render"]
-        if len(eval_text) > 0:
-            res.eval = eval(eval_text)
-
         res.stats = torch.stack(
             [
                 img.mean(),
@@ -122,9 +128,25 @@ class Renderer:
                 img.norm(float("inf")),
             ]
         )
-
+        if render_alpha:
+            img = render["alpha"]
+        if render_depth:
+            img = render["depth"] / render["depth"].max()
         # Scale and convert to uint8.
         if img_normalize:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
         img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
         res.image = img
+        if len(eval_text) > 0:
+            res.eval = eval(eval_text)
+
+    def render_video(self, save_path, video_cams):
+        os.makedirs(save_path, exist_ok=True)
+        filename = f'{save_path}/rotate_{len(os.listdir(save_path))}.mp4'
+        video = imageio.get_writer(filename, mode='I', fps=30, codec='libx264', bitrate='16M', quality=10)
+        for render_cam in tqdm(video_cams):
+            img = render_simple(viewpoint_camera=render_cam, pc=self.gaussian_model, bg_color=self.bg_color)["render"]
+            img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()
+            video.append_data(img)
+        video.close()
+        print(f"Video saved in {filename}.")

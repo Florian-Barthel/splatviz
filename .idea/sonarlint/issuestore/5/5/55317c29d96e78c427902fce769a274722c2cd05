@@ -1,8 +1,0 @@
-
-ppython:S117["TRename this local variable "Ll1" to match the regular expression ^[_a-z][a-z0-9_]*$.(Å­ÊÓûÿÿÿÿ
-Bpython:S1481@"%Remove the unused local variable "e".(¼–¯¸ÿÿÿÿÿ
-qpython:S3776"TRefactor this function to reduce its Cognitive Complexity from 51 to the 15 allowed.(áÓ¢øùÿÿÿÿ
-lpython:S117œ"ORename this parameter "Ll1" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ï¦êæúÿÿÿÿ
-spython:S117œ"VRename this parameter "renderArgs" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ï¦êæúÿÿÿÿ
-spython:S117œ"VRename this parameter "renderFunc" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ï¦êæúÿÿÿÿ
-rpython:S3776œ"TRefactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed.(Ï¦êæúÿÿÿÿ

@@ -27,18 +27,27 @@ gaussian._scaling = gaussian._scaling[start:end, ...]
 gaussian._opacity = gaussian._opacity[start:end, ...]
 gaussian._features_dc = gaussian._features_dc[start:end, ...]
 gaussian._features_rest = gaussian._features_rest[start:end, ...]
-bg_color = [1, 1, 1]
+self.bg_color[:] = 0
 """
 
         self.x = 0
+        self.render_alpha = False
+        self.render_depth = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            # changed, self.text = imgui.input_text("Variable", self.text, 2000, width=viz.pane_w, height=10 + viz.font_size * (self.text.count("\n") + 2))
-            _changed, self.x = imgui.slider_float("x", self.x, -10, 10)
+            alpha_changed, self.render_alpha = imgui.checkbox("Render alpha", self.render_alpha)
+            depth_changed, self.render_depth = imgui.checkbox("Render depth", self.render_depth)
+            if self.render_alpha and alpha_changed:
+                self.render_depth = False
+            if self.render_depth and depth_changed:
+                self.render_alpha = False
 
+            _changed, self.x = imgui.slider_float("x", self.x, -10, 10)
             _changed, self.text = imgui.input_text_multiline("", self.text, 2000, width=viz.pane_w, height=10 + viz.font_size * (self.text.count("\n") + 2))
         viz.args.edit_text = self.text
         viz.args.x = self.x
+        viz.args.render_alpha = self.render_alpha
+        viz.args.render_depth = self.render_depth

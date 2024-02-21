@@ -1,7 +1,6 @@
 import click
 import imgui
 import numpy as np
-import pprint
 import torch
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
@@ -11,7 +10,7 @@ from gui_utils import imgui_utils
 from gui_utils import gl_utils
 from gui_utils import text_utils
 from viz_utils.dict import EasyDict
-from widgets import pose_widget, zoom_widget, edit_widget, eval_widget, performance_widget, pickle_widget
+from widgets import pose_widget, zoom_widget, edit_widget, eval_widget, performance_widget, pickle_widget, video_widget
 from viz.async_renderer import AsyncRenderer
 
 
@@ -38,6 +37,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.edit_widget = edit_widget.EditWidget(self)
         self.eval_widget = eval_widget.EvalWidget(self)
         self.perf_widget = performance_widget.PerformanceWidget(self)
+        self.video_widget = video_widget.VideoWidget(self)
 
 
         """
@@ -114,8 +114,11 @@ class Visualizer(imgui_window.ImguiWindow):
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         self.pose_widget(expanded)
         self.zoom_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Edit & Eval", default=True)
+        expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
+        self.video_widget(expanded)
+        expanded, _visible = imgui_utils.collapsing_header("Edit", default=True)
         self.edit_widget(expanded)
+        expanded, _visible = imgui_utils.collapsing_header("Eval", default=True)
         self.eval_widget(expanded)
 
 

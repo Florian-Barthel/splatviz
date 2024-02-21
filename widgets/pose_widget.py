@@ -32,8 +32,8 @@ class PoseWidget:
 
     def drag(self, dx, dy):
         viz = self.viz
-        self.pose.yaw -= -dx / viz.font_size * 3e-2
-        self.pose.pitch -= -dy / viz.font_size * 3e-2
+        self.pose.yaw += dx / viz.font_size * 3e-2
+        self.pose.pitch = np.clip(self.pose.pitch + dy / viz.font_size * 3e-2, -np.pi/2, np.pi/2)
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):

@@ -151,15 +151,24 @@ def render_simple(viewpoint_camera, pc: GaussianModel, bg_color: torch.Tensor, s
     # If precomputed colors are provided, use them. Otherwise, if it is desired to precompute colors
     # from SHs in Python, do it. If not, then SH -> RGB conversion will be done by rasterizer.
     shs = None
+    convert_shs_python = False
     colors_precomp = None
     if override_color is None:
-
-        shs = pc.get_features
+        if convert_shs_python:
+            shs_view = pc.get_features.transpose(1, 2).view(-1, 3, (pc.max_sh_degree+1)**2)
+            dir_pp = (pc.get_xyz - viewpoint_camera.camera_center.repeat(pc.get_features.shape[0], 1))
+            dir_pp_normalized = dir_pp/dir_pp.norm(dim=1, keepdim=True)
+            sh2rgb = eval_sh(pc.active_sh_degree, shs_view, dir_pp_normalized)
+            colors_precomp = torch.clamp_min(sh2rgb + 0.5, 0.0)
+        else:
+            shs = pc.get_features
     else:
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen).
-    rendered_image, radii = rasterizer(
+
+    #rendered_image, radii
+    rendered_image, radii, depth, alpha = rasterizer(
         means3D=means3D,
         means2D=means2D,
         shs=shs,
@@ -168,10 +177,14 @@ def render_simple(viewpoint_camera, pc: GaussianModel, bg_color: torch.Tensor, s
         scales=scales,
         rotations=rotations,
         cov3D_precomp=cov3D_precomp)
-
     # Those Gaussians that were frustum culled or had a radius of 0 were not visible.
     # They will be excluded from value updates used in the splitting criteria.
-    return {"render": rendered_image,
-            "viewspace_points": screenspace_points,
-            "visibility_filter": radii > 0,
-            "radii": radii}
+
+    return {
+        "render": rendered_image,
+        "viewspace_points": screenspace_points,
+        "visibility_filter": radii > 0,
+        "radii": radii,
+        "alpha": alpha,
+        "depth": depth
+    }

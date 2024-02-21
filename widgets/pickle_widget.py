@@ -15,8 +15,8 @@ from gui_utils import imgui_utils
 class PickleWidget:
     def __init__(self, viz, root):
         self.viz = viz
-
         self.root = root
+        self.filter = "iteration_30000"
         self.items = self.list_runs_and_pkls()
         self.ply = self.items[0]
 
@@ -24,11 +24,12 @@ class PickleWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
+            _changed, self.filter = imgui.input_text("Filter", self.filter)
             if imgui_utils.button('Browse', width=viz.button_w, enabled=True):
                 imgui.open_popup('browse_pkls_popup')
 
             if imgui.begin_popup('browse_pkls_popup'):
-                for item in self.items:
+                for item in self.list_runs_and_pkls():
                     clicked, _state = imgui.menu_item(item)
                     if clicked:
                         self.ply = item
@@ -37,11 +38,14 @@ class PickleWidget:
             imgui.same_line()
             imgui.text(self.ply)
         viz.args.ply_file_path = os.path.join(self.root, self.ply)
+        viz.args.current_ply_name = self.ply.replace('/', "_").replace('\\', "_")
 
     def list_runs_and_pkls(self):
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
                 if file.endswith("cloud.ply"):
-                    self.items.append(root[len(self.root)+1:] + "/" + file)
+                    current_path = root[len(self.root)+1:] + "/" + file
+                    if self.filter in current_path:
+                        self.items.append(current_path)
         return self.items

@@ -1,7 +1,0 @@
-
-qpython:S116D"SRename this field "max_radii2D" to match the regular expression ^[_a-z][_a-z0-9]*$.(¸Â”ı8‡ÄÎÛ1
-upython:S100ˆ"QRename method "oneupSHdegree" to match the regular expression ^[a-z_][a-z0-9_]*$.(®›ñ˜ùÿÿÿÿ8‡ÄÎÛ1
-hpython:S5632§"IChange this code so that it raises an object deriving from BaseException.(Œ¹×N8‡ÄÎÛ1
->python:S125µ"Remove this commented out code.(†üİ8‡ÄÎÛ1
-qpython:S117˜"MRename this parameter "N" to match the regular expression ^[_a-z][a-z0-9_]*$.(îÍØúÿÿÿÿ8‡ÄÎÛ1
-Cpython:S125¥"Remove this commented out code.(Í¿Á úÿÿÿÿ8‡ÄÎÛ1
