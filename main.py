@@ -151,7 +151,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
 @click.command()
 @click.option("--capture-dir", help="Where to save screenshot captures", metavar="PATH", default=None)
-@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="C:/Users/fbarthel/Desktop/faces_ply_3dil")
+@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", required=True)
 def main(capture_dir, data_path):
     viz = Visualizer(capture_dir=capture_dir, data_path=data_path)
     while not viz.should_close():

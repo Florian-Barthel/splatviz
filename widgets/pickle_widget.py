@@ -10,13 +10,12 @@
 import os
 import imgui
 from gui_utils import imgui_utils
-from pathlib import Path
 
 
 class PickleWidget:
     def __init__(self, viz, root):
         self.viz = viz
-        self.root = Path(root)
+        self.root = root
         self.filter = "30000"
         self.items = self.list_runs_and_pkls()
         self.ply = self.items[0]
