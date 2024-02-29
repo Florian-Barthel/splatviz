@@ -46,3 +46,4 @@ dependencies:
     - chumpy==0.70
     - numpy==1.23.1
     - pytorch_msssim
+    - imagecodecs[all]

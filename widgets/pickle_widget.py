@@ -10,13 +10,14 @@
 import os
 import imgui
 from gui_utils import imgui_utils
+from pathlib import Path
 
 
 class PickleWidget:
     def __init__(self, viz, root):
         self.viz = viz
-        self.root = root
-        self.filter = "iteration_30000"
+        self.root = Path(root)
+        self.filter = "30000"
         self.items = self.list_runs_and_pkls()
         self.ply = self.items[0]
 
@@ -29,23 +30,23 @@ class PickleWidget:
                 imgui.open_popup('browse_pkls_popup')
 
             if imgui.begin_popup('browse_pkls_popup'):
-                for item in self.list_runs_and_pkls():
-                    clicked, _state = imgui.menu_item(item)
+                for item in self.items:
+                    clicked, _state = imgui.menu_item(os.path.relpath(item, self.root))
                     if clicked:
                         self.ply = item
                 imgui.end_popup()
 
             imgui.same_line()
             imgui.text(self.ply)
-        viz.args.ply_file_path = os.path.join(self.root, self.ply)
+        viz.args.ply_file_path = self.ply
         viz.args.current_ply_name = self.ply.replace('/', "_").replace('\\', "_")
 
     def list_runs_and_pkls(self):
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
-                if file.endswith("cloud.ply"):
-                    current_path = root[len(self.root)+1:] + "/" + file
+                if file.endswith(".ply") or file.endswith("compression_config.yml"):
+                    current_path = os.path.join(root, file)
                     if self.filter in current_path:
                         self.items.append(current_path)
         return self.items

@@ -10,11 +10,9 @@
 import imgui
 import numpy as np
 import torch
-
-from gui_utils import imgui_utils
-from imgui_bundle import implot, ImVec2
 import pprint
 
+from gui_utils import imgui_utils
 from viz_utils.dict import EasyDict
 
 
@@ -28,12 +26,9 @@ class EvalWidget:
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
-        # if implot.begin_plot("hallo"):
-        #    implot.plot_bars("bars", xs=np.arange(10), ys=np.arange(10), bar_size=2)
-        #    implot.end_plot()
 
         if show:
-            _changed, self.text = imgui.input_text("", self.text, 2000)
+            _changed, self.text = imgui.input_text("", self.text)
             self.format()
         viz.args.eval_text = self.text
 
@@ -44,17 +39,15 @@ class EvalWidget:
         if hasattr(result, "__dict__") and len(result.__dict__.keys()) > 0 or isinstance(result, dict) and len(
                 result.keys()) > 0:
             if isinstance(result, EasyDict):
-                result_dict = dict(result)
+                result = dict(result)
             elif hasattr(result, "__dict__"):
-                result_dict = result.__dict__
-            else:
-                imgui.text(pprint.pformat(result, compact=True))
-                return
-            sorted_keys = sorted(result_dict.keys(), key=lambda x: type(result_dict[x]).__name__)
+                result = result.__dict__
+
+            sorted_keys = sorted(result.keys(), key=lambda x: type(result[x]).__name__)
             for key in sorted_keys:
                 imgui.new_line()
                 imgui.same_line(depth)
-                info, primitive = self.get_short_info(key, result_dict[key])
+                info, primitive = self.get_short_info(key, result[key])
                 if primitive:
                     imgui.new_line()
                     imgui.same_line(depth)
@@ -62,7 +55,7 @@ class EvalWidget:
                 else:
                     expanded, _visible = imgui_utils.collapsing_header(info, default=False)
                     if expanded:
-                        self.handle_type_rec(result_dict[key], depth=depth + 20, obj_name=key)
+                        self.handle_type_rec(result[key], depth=depth + 20, obj_name=key)
 
         else:
             # write a non-primitive object that is not an object with __dict__
@@ -98,7 +91,6 @@ class EvalWidget:
             self.hist_cache[var_name] = hist
         imgui.same_line()
         imgui.core.plot_histogram("", self.hist_cache[var_name][0].astype(np.float32))
-
 
     @staticmethod
     def get_short_info(key, value):

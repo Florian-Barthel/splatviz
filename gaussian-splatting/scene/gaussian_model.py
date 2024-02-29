@@ -123,7 +123,7 @@ class GaussianModel:
     @property
     def get_features(self):
         features_dc = self._features_dc
-        features_rest = self._features_rest
+        features_rest = self._features_rest.to(features_dc.device)
         return torch.cat((features_dc, features_rest), dim=1)
     
     @property
@@ -174,17 +174,9 @@ class GaussianModel:
             "_scaling": (3,),
             "_opacity": (1,),
         }
-        img = img.permute(1, 2, 0)
+        # img = img.permute(1, 2, 0)
         target_shape = attr_shapes[attr_name]
-        img = img.reshape(-1, *target_shape)
-
-        # if attr_name == "_scaling":
-        #     img = self.scaling_activation(img)
-        # if attr_name == "_opacity":
-        #     img = self.opacity_activation(img)
-        # if attr_name == "_rotation":
-        #     img = self.rotation_activation(img)
-
+        img = img.reshape(-1, *target_shape).float()
         setattr(self, attr_name, img)
 
     def set_color(self, color):

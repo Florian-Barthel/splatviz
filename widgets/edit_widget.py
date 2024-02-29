@@ -8,10 +8,10 @@
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
 import imgui
+import numpy as np
+
 from gui_utils import imgui_utils
-
-
-# ----------------------------------------------------------------------------
+from viz_utils.dict import EasyDict
 
 
 class EditWidget:
@@ -30,7 +30,15 @@ gaussian._features_rest = gaussian._features_rest[start:end, ...]
 self.bg_color[:] = 0
 """
 
-        self.x = 0
+        self.slider_values = EasyDict()
+        self.slider_ranges = EasyDict()
+        self.var_names = "xyzijklmnuvwabcdefghopqrst"
+        self.var_name_index = 1
+        self._cur_min_slider = -10
+        self._cur_max_slider = 10
+        self._cur_val_slider = 0
+        self._cur_name_slider = "x"
+
         self.render_alpha = False
         self.render_depth = False
 
@@ -45,9 +53,56 @@ self.bg_color[:] = 0
             if self.render_depth and depth_changed:
                 self.render_alpha = False
 
-            _changed, self.x = imgui.slider_float("x", self.x, -10, 10)
-            _changed, self.text = imgui.input_text_multiline("", self.text, 2000, width=viz.pane_w, height=10 + viz.font_size * (self.text.count("\n") + 2))
+            self.render_sliders()
+            imgui.new_line()
+
+            _changed, self.text = imgui.input_text_multiline("##input_text", self.text, width=viz.pane_w, height=10 + viz.font_size * (self.text.count("\n") + 2))
         viz.args.edit_text = self.text
-        viz.args.x = self.x
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
+        viz.args.update(self.slider_values)
+
+    def render_sliders(self):
+        delete_keys = []
+        for slider_key in self.slider_values.keys():
+            _changed, self.slider_values[slider_key] = imgui.slider_float(
+                slider_key,
+                self.slider_values[slider_key],
+                self.slider_ranges[slider_key][0],
+                self.slider_ranges[slider_key][1]
+            )
+            imgui.same_line()
+            if imgui.button("Remove " + slider_key):
+                delete_keys.append(slider_key)
+
+        for key in delete_keys:
+            del self.slider_values[key]
+            del self.slider_ranges[key]
+
+        imgui.push_item_width(70)
+        imgui.text("Var name")
+        imgui.same_line()
+        _changed, self._cur_name_slider = imgui.input_text("##input_name", self._cur_name_slider)
+
+        imgui.same_line()
+        imgui.text("min")
+        imgui.same_line()
+        _changed, self._cur_min_slider = imgui.input_int("##input_min", self._cur_min_slider, 0)
+
+        imgui.same_line()
+        imgui.text("val")
+        imgui.same_line()
+        _changed, self._cur_val_slider = imgui.input_int("##input_val", self._cur_val_slider, 0)
+
+        imgui.same_line()
+        imgui.text("max")
+        imgui.same_line()
+        _changed, self._cur_max_slider = imgui.input_int("##input_max", self._cur_max_slider, 0)
+        imgui.pop_item_width()
+
+        imgui.same_line()
+        if imgui.button("Add Slider"):
+            self.slider_values[self._cur_name_slider] = self._cur_val_slider
+            self.slider_ranges[self._cur_name_slider] = [self._cur_min_slider, self._cur_max_slider]
+            self._cur_name_slider = self.var_names[self.var_name_index % len(self.var_names)]
+            self.var_name_index += 1

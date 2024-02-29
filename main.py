@@ -39,22 +39,6 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget = performance_widget.PerformanceWidget(self)
         self.video_widget = video_widget.VideoWidget(self)
 
-
-        """
-        self.latent_widget = latent_widget.LatentWidget(self)
-        self.stylemix_widget = stylemix_widget.StyleMixingWidget(self)
-        self.trunc_noise_widget = trunc_noise_widget.TruncationNoiseWidget(self)
-        self.capture_widget = capture_widget.CaptureWidget(self)
-        self.backbone_cache_widget = backbone_cache_widget.BackboneCacheWidget(self)
-        self.layer_widget = layer_widget.LayerWidget(self)
-        self.conditioning_pose_widget = conditioning_pose_widget.ConditioningPoseWidget(self)
-        self.render_type_widget = render_type_widget.RenderTypeWidget(self)
-        self.render_depth_sample_widget = render_depth_sample_widget.RenderDepthSampleWidget(self)
-        self.gaussian_widget = gaussian_widget.GaussianWidget(self)
-        # self.stats_widget             = stats_widget.StatsWidget(self)
-        self.camera_widget = camera_widget.CameraWidget(self)
-        """
-
         # Initialize window.
         self.set_position(0, 0)
         self._adjust_font_size()
@@ -121,28 +105,6 @@ class Visualizer(imgui_window.ImguiWindow):
         expanded, _visible = imgui_utils.collapsing_header("Eval", default=True)
         self.eval_widget(expanded)
 
-
-        """
-        self.pickle_widget(expanded)
-        self.conditioning_pose_widget(expanded)
-        self.render_type_widget(expanded)
-        self.render_depth_sample_widget(expanded)
-        self.latent_widget(expanded)
-        self.stylemix_widget(expanded)
-        self.trunc_noise_widget(expanded)
-
-        self.capture_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Layers & channels", default=False)
-        self.backbone_cache_widget(expanded)
-        self.layer_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Scale Gaussians", default=True)
-        self.gaussian_widget(expanded)
-        # expanded, _visible = imgui_utils.collapsing_header('Stats', default=True)
-        # self.stats_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Camera", default=True)
-        self.camera_widget(expanded)
-        """
-
         # Render.
         if self.is_skipping_frames():
             pass
@@ -189,7 +151,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
 @click.command()
 @click.option("--capture-dir", help="Where to save screenshot captures", metavar="PATH", default=None)
-@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="C:/Users/fbarthel/Documents/CVGGaussianSplatting/download_output/relevant_runs")
+@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="C:/Users/fbarthel/Desktop/faces_ply_3dil")
 def main(capture_dir, data_path):
     viz = Visualizer(capture_dir=capture_dir, data_path=data_path)
     while not viz.should_close():

@@ -14,6 +14,8 @@ def equal_dicts(dict1, dict2):
             if not np.array_equal(dict1[key], dict2[key]):
                 return False
         else:
+            if key not in dict2.keys():
+                return False
             if dict1[key] != dict2[key]:
                 return False
     return True

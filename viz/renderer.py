@@ -10,14 +10,13 @@
 import copy
 import os
 import re
-
 import imageio
 import numpy as np
 import torch
-import torch.fft
 import torch.nn
 from tqdm import tqdm
-
+from pathlib import Path
+from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
@@ -30,10 +29,7 @@ class Renderer:
     def __init__(self):
         self._current_ply_file_path = None
         self._device = torch.device("cuda")
-        self._pkl_data = dict()  # {pkl: dict | CapturedException, ...}
-        self._networks = dict()  # {cache_key: torch.nn.Module, ...}
         self._pinned_bufs = dict()  # {(shape, dtype): torch.Tensor, ...}
-        self._cmaps = dict()  # {name: torch.Tensor, ...}
         self._is_timing = False
         self._start_event = torch.cuda.Event(enable_timing=True)
         self._end_event = torch.cuda.Event(enable_timing=True)
@@ -87,7 +83,6 @@ class Renderer:
         fov,
         edit_text,
         eval_text,
-        x,
         size,
         ply_file_path,
         up_vector,
@@ -99,9 +94,14 @@ class Renderer:
         z_near=0.01,
         z_far=10,
         radius=2.7,
+        **slider
     ):
+        slider = EasyDict(slider)
         if ply_file_path != self._current_ply_file_path:
-            self.gaussian_model.load_ply(ply_file_path)
+            if ply_file_path.endswith(".ply"):
+                self.gaussian_model.load_ply(ply_file_path)
+            elif ply_file_path.endswith("compression_config.yml"):
+                self.gaussian_model = run_single_decompression(Path(ply_file_path).parent.absolute())
             self._current_ply_file_path = ply_file_path
         cam = EasyDict(radius=radius, z_near=z_near, z_far=z_far, fov=fov, pitch=pitch, yaw=yaw, lookat_point=lookat_point)
         width = size
