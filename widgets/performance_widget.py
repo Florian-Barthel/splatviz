@@ -13,7 +13,6 @@ import numpy as np
 import imgui
 from gui_utils import imgui_utils
 
-#----------------------------------------------------------------------------
 
 class PerformanceWidget:
     def __init__(self, viz):
@@ -61,8 +60,6 @@ class PerformanceWidget:
             imgui.same_line(viz.label_w + viz.font_size * 14)
             imgui.text(f'{1/t:.1f} FPS' if t > 0 else 'N/A')
 
-
         viz.set_fps_limit(self.fps_limit)
         viz.set_vsync(self.use_vsync)
 
-#----------------------------------------------------------------------------

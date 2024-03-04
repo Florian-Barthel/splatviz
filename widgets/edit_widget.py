@@ -8,8 +8,6 @@
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
 import imgui
-import numpy as np
-
 from gui_utils import imgui_utils
 from viz_utils.dict import EasyDict
 

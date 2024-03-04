@@ -28,7 +28,6 @@ class VideoWidget:
         self.resolution = 1024
         self.fov = 45
 
-
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
@@ -43,7 +42,7 @@ class VideoWidget:
             if imgui.button("Render"):
                 xs = np.linspace(0, 2 * np.pi, self.num_frames, endpoint=False)
                 for x in xs:
-                    extrinsic_gaus = LookAtPoseSampler.sample(x, np.pi / 2 + self.cam_height, torch.tensor([0., 0., 0.]), radius=self.radius)
+                    extrinsic = LookAtPoseSampler.sample(x, np.pi / 2 + self.cam_height, torch.tensor([0., 0., 0.]), radius=self.radius)[0]
                     viz.args.video_cams.append(CustomCam(
                         width=self.resolution,
                         height=self.resolution,
@@ -51,5 +50,5 @@ class VideoWidget:
                         fovx=self.fov,
                         znear=0.01,
                         zfar=100,
-                        extr=extrinsic_gaus[0],
+                        extr=extrinsic,
                     ))

@@ -10,12 +10,12 @@ from gui_utils import imgui_utils
 from gui_utils import gl_utils
 from gui_utils import text_utils
 from viz_utils.dict import EasyDict
-from widgets import pose_widget, zoom_widget, edit_widget, eval_widget, performance_widget, pickle_widget, video_widget
+from widgets import edit_widget, eval_widget, performance_widget, load_widget, video_widget, cam_widget
 from viz.async_renderer import AsyncRenderer
 
 
 class Visualizer(imgui_window.ImguiWindow):
-    def __init__(self, capture_dir=None, data_path=None):
+    def __init__(self, data_path=None):
         super().__init__(title="Gaussian Machine", window_width=1920, window_height=1200, font="fonts/JetBrainsMono-Regular.ttf")
 
         # Internals.
@@ -31,9 +31,8 @@ class Visualizer(imgui_window.ImguiWindow):
         self.result = EasyDict()
 
         # Widgets.
-        self.pckl_widget = pickle_widget.PickleWidget(self, data_path)
-        self.pose_widget = pose_widget.PoseWidget(self)
-        self.zoom_widget = zoom_widget.ZoomWidget(self)
+        self.load_widget = load_widget.LoadWidget(self, data_path)
+        self.cam_widget = cam_widget.CamWidget(self)
         self.edit_widget = edit_widget.EditWidget(self)
         self.eval_widget = eval_widget.EvalWidget(self)
         self.perf_widget = performance_widget.PerformanceWidget(self)
@@ -80,7 +79,7 @@ class Visualizer(imgui_window.ImguiWindow):
             "##result_area", x=self.pane_w, y=0, width=self.content_width - self.pane_w, height=self.content_height
         )
         if dragging:
-            self.pose_widget.drag(dx, dy)
+            self.cam_widget.drag(dx, dy)
 
         # Begin control pane.
         imgui.set_next_window_position(0, 0)
@@ -92,12 +91,11 @@ class Visualizer(imgui_window.ImguiWindow):
         )
 
         # Widgets.
-        self.pckl_widget(True)
-        expanded, _visible = imgui_utils.collapsing_header("Performance & capture", default=False)
+        self.load_widget(True)
+        expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
         self.perf_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
-        self.pose_widget(expanded)
-        self.zoom_widget(expanded)
+        self.cam_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
         self.video_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Edit", default=True)
@@ -150,10 +148,9 @@ class Visualizer(imgui_window.ImguiWindow):
 
 
 @click.command()
-@click.option("--capture-dir", help="Where to save screenshot captures", metavar="PATH", default=None)
-@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", required=True)
-def main(capture_dir, data_path):
-    viz = Visualizer(capture_dir=capture_dir, data_path=data_path)
+@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="./sample_scenes")
+def main(data_path):
+    viz = Visualizer(data_path=data_path)
     while not viz.should_close():
         viz.draw_frame()
     viz.close()
