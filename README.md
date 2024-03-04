@@ -1,6 +1,7 @@
 # Gaussian Viewer
 This interactive viewer allows to display 3D Gaussian Splatting objects
-stored as .ply files or as compressed objects from Compact 3D Gaussian Splatting.
+stored as .ply files or as compressed objects from 
+<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">Compact 3D Scene Representation via Self-Organizing Gaussian Grids</a>.
 The viewer is fully written in python, which makes development and debugging very simple.
 
 <img src="images/full.png">
@@ -8,7 +9,7 @@ The viewer is fully written in python, which makes development and debugging ver
 ## Install
 Clone repository **recursively** in order to install glm from the diff_gaussian_rasterization package.
 ```
-git clone "url" --recursive
+git clone https://github.com/Florian-Barthel/gaussian_viewer --recursive
 ```
 
 Create conda environment:
@@ -66,29 +67,16 @@ rendering, the UI is frozen. A loading screen is shown in the terminal output.
 
 ## Contribute
 You are more than welcome to add further functionality to this interactive viewer!
+The main goal is to create an easy-to-use tool that can be applied for debugging and for understanding
+3D Gaussian Splatting objects. Possible extensions could be to visualize the model during
+the training, visualize the gradients of the gaussian positions or to simulate a densification step.
 
 ## References
 This viewer is inspired by the visualizer from Efficient Geometry-aware 3D Generative Adversarial 
-Networks (EG3D):
-```
-@inproceedings{Chan2022,
-  author = {Eric R. Chan and Connor Z. Lin and Matthew A. Chan and Koki Nagano and Boxiao Pan and Shalini De Mello and Orazio Gallo and Leonidas Guibas and Jonathan Tremblay and Sameh Khamis and Tero Karras and Gordon Wetzstein},
-  title = {Efficient Geometry-aware {3D} Generative Adversarial Networks},
-  booktitle = {CVPR},
-  year = {2022}
-}
-```
+Networks (EG3D).
 
-3D Gaussian Splatting
-```
-@Article{kerbl3Dgaussians,
-      author       = {Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
-      title        = {3D Gaussian Splatting for Real-Time Radiance Field Rendering},
-      journal      = {ACM Transactions on Graphics},
-      number       = {4},
-      volume       = {42},
-      month        = {July},
-      year         = {2023},
-      url          = {https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/}
-}
-```
+<a href="https://github.com/NVlabs/eg3d">EG3D</a>
+
+<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"> 3D Gaussian Splatting</a>
+
+<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">Compact 3D Scene Representation via Self-Organizing Gaussian Grids</a>
