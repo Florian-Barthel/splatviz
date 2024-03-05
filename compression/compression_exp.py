@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-from gaussian_renderer import GaussianModel
+from scene import GaussianModel
 import yaml
 import pandas as pd
 
