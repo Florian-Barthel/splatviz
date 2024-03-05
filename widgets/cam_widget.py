@@ -47,14 +47,12 @@ class CamWidget:
             self.radius += wheel / 2
 
         if show:
+            imgui.push_item_width(200)
             imgui.text("Up Vector")
             imgui.same_line()
-            imgui.push_item_width(150)
-            _changed, up_vector_tuple = imgui.input_float3("##fov", *self.up_vector, format="%.1f")
+            _changed, up_vector_tuple = imgui.input_float3("##up_vector", *self.up_vector, format="%.1f")
             self.up_vector = torch.tensor(up_vector_tuple)
-            imgui.pop_item_width()
             imgui.same_line()
-
             if imgui.button("Set current direction"):
                 self.up_vector = get_forward_vector(
                     lookat_position=self.lookat_point,
@@ -65,6 +63,15 @@ class CamWidget:
                 self.pose.yaw = 0
                 self.pose.pitch = 0
 
+            imgui.text("Look at point")
+            imgui.same_line()
+            _changed, look_at_point_tuple = imgui.input_float3("##lookat", *self.lookat_point, format="%.1f")
+            self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
+            imgui.same_line()
+            if imgui.button("Set to xyz mean") and "mean_xyz" in viz.result.keys():
+                self.lookat_point = viz.result.mean_xyz
+            imgui.pop_item_width()
+
             imgui.text("FOV")
             imgui.same_line()
             _changed, self.fov = imgui.slider_float("##fov", self.fov, 1, 180, format="%.1f °")
@@ -72,6 +79,9 @@ class CamWidget:
             imgui.text("Radius")
             imgui.same_line()
             _changed, self.radius = imgui.slider_float("##radius", self.radius, 0, 10, format="%.1f")
+            imgui.same_line()
+            if imgui.button("Set to xyz stddev") and "std_xyz" in viz.result.keys():
+                self.radius = viz.result.std_xyz.item()
 
             imgui.text("Size")
             imgui.same_line()

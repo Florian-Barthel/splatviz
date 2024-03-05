@@ -137,6 +137,8 @@ class Renderer:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
         img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
         res.image = img
+        res.mean_xyz = torch.mean(gaussian.get_xyz, dim=0)
+        res.std_xyz = torch.std(gaussian.get_xyz)
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 

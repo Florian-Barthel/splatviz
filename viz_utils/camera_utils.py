@@ -16,56 +16,39 @@ import torch
 
 
 class LookAtPoseSampler:
-    """
-    Same as GaussianCameraPoseSampler, except the
-    camera is specified as looking at 'lookat_position', a 3-vector.
-
-    Example:
-    For a camera pose looking at the origin with the camera at position [0, 0, 1]:
-    cam2world = LookAtPoseSampler.sample(math.pi/2, math.pi/2, torch.tensor([0, 0, 0]), radius=1)
-    """
-
     @staticmethod
     def sample(
             horizontal_mean,
             vertical_mean,
             lookat_position,
-            radius=1,
-            up_vector=torch.tensor([0, -1, 0]),
-            device=torch.device("cuda:0")
+            radius,
+            up_vector,
+            device=torch.device("cuda")
     ):
-        camera_origins = get_origin(horizontal_mean, vertical_mean, radius)
+        camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position)
         forward_vectors = get_forward_vector(lookat_position, horizontal_mean, vertical_mean, radius, camera_origins=camera_origins)
         return create_cam2world_matrix(forward_vectors, camera_origins, up_vector=up_vector).to(device)
 
 
-def get_origin(horizontal_mean, vertical_mean, radius):
+def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, device=torch.device("cuda")):
     h = torch.tensor(horizontal_mean)
     v = torch.tensor(vertical_mean)
     v = torch.clamp(v, 1e-5, math.pi - 1e-5)
 
-    theta = h
-    v = v / math.pi
-    phi = torch.arccos(1 - 2 * v)
-
-    camera_origins = torch.zeros((3))
-    camera_origins[0:1] = radius * torch.sin(phi) * torch.cos(math.pi - theta)
-    camera_origins[2:3] = radius * torch.sin(phi) * torch.sin(math.pi - theta)
-    camera_origins[1:2] = radius * torch.cos(phi)
-    return camera_origins
+    camera_origins = torch.zeros(3, device=device)
+    camera_origins[0] = radius * torch.sin(v) * torch.cos(math.pi - h)
+    camera_origins[2] = radius * torch.sin(v) * torch.sin(math.pi - h)
+    camera_origins[1] = radius * torch.cos(v)
+    return camera_origins + lookat_position
 
 
 def get_forward_vector(lookat_position, horizontal_mean, vertical_mean, radius, camera_origins=None):
     if camera_origins is None:
-        camera_origins = get_origin(horizontal_mean, vertical_mean, radius)
+        camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position)
     return normalize_vecs(lookat_position.to(camera_origins.device) - camera_origins)
 
 
-def create_cam2world_matrix(forward_vector, origin, up_vector=torch.tensor([0, -1, 0])):
-    """
-    Takes in the direction the camera is pointing and the camera origin and returns a cam2world matrix.
-    Works on batches of forward_vectors, origins. Assumes y-axis is up and that there is no camera roll.
-    """
+def create_cam2world_matrix(forward_vector, origin, up_vector):
     forward_vector = normalize_vecs(forward_vector)
     up_vector = up_vector.float().to(origin.device).expand_as(forward_vector)
 
