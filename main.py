@@ -2,6 +2,9 @@ import click
 import imgui
 import numpy as np
 import torch
+import sys
+sys.path.append("./gaussian-splatting")
+
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
 
