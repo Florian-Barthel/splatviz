@@ -21,8 +21,6 @@ class PerformanceWidget:
         self.render_times   = [float('nan')] * 30
         self.fps_limit      = 60
         self.use_vsync      = False
-        self.is_async       = False
-        self.force_fp32     = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):

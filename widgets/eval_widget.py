@@ -77,7 +77,7 @@ class EvalWidget:
             imgui.new_line()
             imgui.same_line(depth)
             imgui.text(pprint.pformat(
-                f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.std().mean():.2f}, std:{result.std().item():.2f}",
+                f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().std().mean():.2f}, std:{result.float().std().item():.2f}",
                 compact=True))
 
         var_name += self.viz.args.ply_file_path

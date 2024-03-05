@@ -19,7 +19,7 @@ class LoadWidget:
         self.filter = ""
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
-            raise FileNotFoundError(f"No .ply or compression_config.yml found in {root}")
+            raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
         self.ply = self.items[0]
 
     @imgui_utils.scoped_by_object_id
