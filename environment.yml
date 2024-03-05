@@ -29,7 +29,7 @@ dependencies:
   - pandas
   - trimesh
   - pip:
-    - imgui==1.4.1
+    - imgui==2.0.0
     - imgui_bundle
     - glfw
     - pyopengl

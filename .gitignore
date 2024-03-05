@@ -1,4 +1,6 @@
 .idea/*
 videos
 **/__PYCACHE__/**
-viz_utils/__pycache__/
+**/__pycache__/**
+
+gui_utils/__pycache__/
