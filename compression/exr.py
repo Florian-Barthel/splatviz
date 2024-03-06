@@ -1,7 +1,8 @@
 from compression.codec import Codec
 
 import os
-os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '1'
+
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
 
 import cv2
 
@@ -9,6 +10,7 @@ import cv2
 # parameters:
 # type: ["half", "float"]
 # compression: ["none", "rle", "zps", "zip", "piz", "pxr24", "b4a", "b44", "dwaa", "dwab"]
+
 
 class EXRCodec(Codec):
 

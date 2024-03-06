@@ -2,6 +2,7 @@ from compression.codec import Codec
 
 import numpy as np
 
+
 class NpzCodec(Codec):
 
     def encode_image(self, image, out_file, **kwargs):

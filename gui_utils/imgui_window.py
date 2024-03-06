@@ -20,8 +20,9 @@ from . import text_utils
 
 # ----------------------------------------------------------------------------
 
+
 class ImguiWindow(glfw_window.GlfwWindow):
-    def __init__(self, *, title='ImguiWindow', font=None, font_sizes=range(14, 24), **glfw_kwargs):
+    def __init__(self, *, title="ImguiWindow", font=None, font_sizes=range(14, 24), **glfw_kwargs):
         if font is None:
             font = text_utils.get_default_font()
         font_sizes = {int(size) for size in font_sizes}
@@ -35,8 +36,8 @@ class ImguiWindow(glfw_window.GlfwWindow):
         self._cur_font_size = max(font_sizes)
 
         # Delete leftover imgui.ini to avoid unexpected behavior.
-        if os.path.isfile('imgui.ini'):
-            os.remove('imgui.ini')
+        if os.path.isfile("imgui.ini"):
+            os.remove("imgui.ini")
 
         # Init ImGui.
         self._imgui_context = imgui.create_context()
@@ -102,6 +103,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
 # ----------------------------------------------------------------------------
 # Wrapper class for GlfwRenderer to fix a mouse wheel bug on Linux.
 
+
 class _GlfwRenderer(imgui.integrations.glfw.GlfwRenderer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -109,5 +111,6 @@ class _GlfwRenderer(imgui.integrations.glfw.GlfwRenderer):
 
     def scroll_callback(self, window, x_offset, y_offset):
         self.io.mouse_wheel += y_offset * self.mouse_wheel_multiplier
+
 
 # ----------------------------------------------------------------------------

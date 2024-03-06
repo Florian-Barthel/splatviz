@@ -36,7 +36,7 @@ class CamWidget:
         x_dir = -1 if self.invert_x else 1
         y_dir = -1 if self.invert_y else 1
         self.pose.yaw += x_dir * dx / viz.font_size * 3e-2
-        self.pose.pitch = np.clip(self.pose.pitch + y_dir * dy / viz.font_size * 3e-2, -np.pi/2, np.pi/2)
+        self.pose.pitch = np.clip(self.pose.pitch + y_dir * dy / viz.font_size * 3e-2, -np.pi / 2, np.pi / 2)
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -59,7 +59,7 @@ class CamWidget:
                     lookat_position=self.lookat_point,
                     horizontal_mean=self.pose.yaw + np.pi / 2,
                     vertical_mean=self.pose.pitch + np.pi / 2,
-                    radius=self.radius
+                    radius=self.radius,
                 )
                 self.pose.yaw = 0
                 self.pose.pitch = 0

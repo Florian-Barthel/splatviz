@@ -54,7 +54,10 @@ self.bg_color[:] = 0
             self.render_sliders()
             imgui.new_line()
 
-            _changed, self.text = imgui.input_text_multiline("##input_text", self.text, width=viz.pane_w, height=10 + viz.font_size * (self.text.count("\n") + 2))
+            dynamic_height = 10 + viz.font_size * (self.text.count("\n") + 2)
+            _changed, self.text = imgui.input_text_multiline(
+                "##input_text", self.text, width=viz.pane_w, height=dynamic_height
+            )
         viz.args.edit_text = self.text
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
@@ -67,7 +70,7 @@ self.bg_color[:] = 0
                 slider_key,
                 self.slider_values[slider_key],
                 self.slider_ranges[slider_key][0],
-                self.slider_ranges[slider_key][1]
+                self.slider_ranges[slider_key][1],
             )
             imgui.same_line()
             if imgui.button("Remove " + slider_key):

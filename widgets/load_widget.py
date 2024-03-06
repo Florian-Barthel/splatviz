@@ -29,6 +29,7 @@ class LoadWidget:
             _changed, self.filter = imgui.input_text("Filter", self.filter)
             if imgui_utils.button("Browse", width=viz.button_w, enabled=True):
                 imgui.open_popup("browse_pkls_popup")
+                self.items = self.list_runs_and_pkls()
 
             if imgui.begin_popup("browse_pkls_popup"):
                 for item in self.items:

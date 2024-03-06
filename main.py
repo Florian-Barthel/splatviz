@@ -3,6 +3,7 @@ import imgui
 import numpy as np
 import torch
 import sys
+
 sys.path.append("./gaussian-splatting")
 
 torch.set_printoptions(precision=2, sci_mode=False)
@@ -19,7 +20,9 @@ from viz.async_renderer import AsyncRenderer
 
 class Visualizer(imgui_window.ImguiWindow):
     def __init__(self, data_path=None):
-        super().__init__(title="Gaussian Machine", window_width=1920, window_height=1200, font="fonts/JetBrainsMono-Regular.ttf")
+        super().__init__(
+            title="Gaussian Machine", window_width=1920, window_height=1200, font="fonts/JetBrainsMono-Regular.ttf"
+        )
 
         # Internals.
         self._last_error_print = None

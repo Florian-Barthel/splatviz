@@ -36,8 +36,12 @@ class EvalWidget:
         self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
 
     def handle_type_rec(self, result, depth, obj_name):
-        if hasattr(result, "__dict__") and len(result.__dict__.keys()) > 0 or isinstance(result, dict) and len(
-                result.keys()) > 0:
+        if (
+            hasattr(result, "__dict__")
+            and len(result.__dict__.keys()) > 0
+            or isinstance(result, dict)
+            and len(result.keys()) > 0
+        ):
             if isinstance(result, EasyDict):
                 result = dict(result)
             elif hasattr(result, "__dict__"):
@@ -76,9 +80,8 @@ class EvalWidget:
             imgui.text(pprint.pformat(list(result.shape), compact=True))
             imgui.new_line()
             imgui.same_line(depth)
-            imgui.text(pprint.pformat(
-                f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().std().mean():.2f}, std:{result.float().std().item():.2f}",
-                compact=True))
+            stats_text = f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().std().mean():.2f}, std:{result.float().std().item():.2f}"
+            imgui.text(pprint.pformat(stats_text, compact=True))
 
         var_name += self.viz.args.ply_file_path
         if var_name not in self.use_cache_dict.keys():

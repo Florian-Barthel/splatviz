@@ -3,7 +3,9 @@ from compression.codec import Codec
 import numpy as np
 import cv2
 
+
 # dtype: uint8, uint16
+
 
 class PNGCodec(Codec):
 

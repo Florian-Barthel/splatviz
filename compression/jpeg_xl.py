@@ -2,6 +2,7 @@ from compression.codec import Codec
 
 import imagecodecs
 
+
 class JpegXlCodec(Codec):
 
     def encode_image(self, image, out_file, **kwargs):

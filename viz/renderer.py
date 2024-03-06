@@ -94,7 +94,7 @@ class Renderer:
         z_near=0.01,
         z_far=10,
         radius=2.7,
-        **slider
+        **slider,
     ):
         slider = EasyDict(slider)
         if ply_file_path != self._current_ply_file_path:
@@ -103,19 +103,25 @@ class Renderer:
             elif ply_file_path.endswith("compression_config.yml"):
                 self.gaussian_model = run_single_decompression(Path(ply_file_path).parent.absolute())
             self._current_ply_file_path = ply_file_path
-        cam = EasyDict(radius=radius, z_near=z_near, z_far=z_far, fov=fov, pitch=pitch, yaw=yaw, lookat_point=lookat_point)
+        cam = EasyDict(
+            radius=radius, z_near=z_near, z_far=z_far, fov=fov, pitch=pitch, yaw=yaw, lookat_point=lookat_point
+        )
         width = size
         height = size
         gaussian = copy.deepcopy(self.gaussian_model)
-        command = re.sub(';+', ';', edit_text.replace("\n", ";"))
+        command = re.sub(";+", ";", edit_text.replace("\n", ";"))
         exec(command)
 
         if len(video_cams) > 0:
             self.render_video(f"./videos/{current_ply_name}", video_cams)
 
-        extrinsic = LookAtPoseSampler.sample(3.14 / 2 + cam.yaw, 3.14 / 2 + cam.pitch, cam.lookat_point, radius=cam.radius, up_vector=up_vector)[0]
+        extrinsic = LookAtPoseSampler.sample(
+            3.14 / 2 + cam.yaw, 3.14 / 2 + cam.pitch, cam.lookat_point, radius=cam.radius, up_vector=up_vector
+        )[0]
         fov_rad = cam.fov / 360 * 2 * np.pi
-        render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=cam.z_near, zfar=cam.z_far, extr=extrinsic)
+        render_cam = CustomCam(
+            width, height, fovy=fov_rad, fovx=fov_rad, znear=cam.z_near, zfar=cam.z_far, extr=extrinsic
+        )
         render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
         img = render["render"]
         res.stats = torch.stack(
@@ -144,8 +150,8 @@ class Renderer:
 
     def render_video(self, save_path, video_cams):
         os.makedirs(save_path, exist_ok=True)
-        filename = f'{save_path}/rotate_{len(os.listdir(save_path))}.mp4'
-        video = imageio.get_writer(filename, mode='I', fps=30, codec='libx264', bitrate='16M', quality=10)
+        filename = f"{save_path}/rotate_{len(os.listdir(save_path))}.mp4"
+        video = imageio.get_writer(filename, mode="I", fps=30, codec="libx264", bitrate="16M", quality=10)
         for render_cam in tqdm(video_cams):
             img = render_simple(viewpoint_camera=render_cam, pc=self.gaussian_model, bg_color=self.bg_color)["render"]
             img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()

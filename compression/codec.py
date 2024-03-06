@@ -1,7 +1,7 @@
 from abc import ABC
 
-def normalize_img(img, min_val, max_val):
 
+def normalize_img(img, min_val, max_val):
     # min_clipped_count = (img < min_val).sum()
     # max_clipped_count = (img > max_val).sum()
     # print(f"Clipped {(min_clipped_count + max_clipped_count) / img.size * 100}% of values")
@@ -10,27 +10,27 @@ def normalize_img(img, min_val, max_val):
     img = (img - min_val) / (max_val - min_val)
     return img
 
+
 # from print_ranges.py
 min_thresholds = {
     "_features_dc": -2,
     "_features_rest": -1,
     "_scaling": -13,
-    "_rotation": -1, # TODO better range
+    "_rotation": -1,  # TODO better range
     "_opacity": -6,
 }
 
 max_thresholds = {
     "_features_dc": 4,
     "_features_rest": 1,
-    
     # from print_ranges.py
     # "_scaling": -1,
-    
     # manually overriden, because clipping large scaled gaussians to smaller scales messes up the results big time
     "_scaling": 3,
     "_rotation": 2,
     "_opacity": 12,
 }
+
 
 class Codec(ABC):
 
@@ -44,7 +44,6 @@ class Codec(ABC):
         raise NotImplementedError("Subclasses should implement this!")
 
     def normalize_to_thresholds(self, img, attr_name):
-
         # normalize coordinates to 0...1
         if attr_name == "_xyz":
             xyz_min = img.min()
@@ -59,7 +58,7 @@ class Codec(ABC):
     def read_file_bytes(self, file_path):
         with open(file_path, "rb") as f:
             return f.read()
-    
+
     def write_file_bytes(self, file_path, bytes):
         with open(file_path, "wb") as f:
             f.write(bytes)
@@ -74,8 +73,7 @@ class Codec(ABC):
         img_norm, min_val, max_val = self.normalize_to_thresholds(image, attr_name)
         self.encode(img_norm, out_file, **kwargs)
         return min_val, max_val
-    
+
     def decode_with_normalization(self, file_name, min_val, max_val):
         img_norm = self.decode(file_name)
         return img_norm * (max_val - min_val) + min_val
-
