@@ -27,10 +27,10 @@ class LoadWidget:
         viz = self.viz
         if show:
             _changed, self.filter = imgui.input_text("Filter", self.filter)
-            if imgui_utils.button('Browse', width=viz.button_w, enabled=True):
-                imgui.open_popup('browse_pkls_popup')
+            if imgui_utils.button("Browse", width=viz.button_w, enabled=True):
+                imgui.open_popup("browse_pkls_popup")
 
-            if imgui.begin_popup('browse_pkls_popup'):
+            if imgui.begin_popup("browse_pkls_popup"):
                 for item in self.items:
                     clicked, _state = imgui.menu_item(os.path.relpath(item, self.root))
                     if clicked:
@@ -40,7 +40,7 @@ class LoadWidget:
             imgui.same_line()
             imgui.text(self.ply)
         viz.args.ply_file_path = self.ply
-        viz.args.current_ply_name = self.ply.replace('/', "_").replace('\\', "_")
+        viz.args.current_ply_name = self.ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_")
 
     def list_runs_and_pkls(self):
         self.items = []
