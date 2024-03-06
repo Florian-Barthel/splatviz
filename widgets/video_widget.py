@@ -42,13 +42,21 @@ class VideoWidget:
             if imgui.button("Render"):
                 xs = np.linspace(0, 2 * np.pi, self.num_frames, endpoint=False)
                 for x in xs:
-                    extrinsic = LookAtPoseSampler.sample(x, np.pi / 2 + self.cam_height, torch.tensor([0., 0., 0.]), radius=self.radius)[0]
-                    viz.args.video_cams.append(CustomCam(
-                        width=self.resolution,
-                        height=self.resolution,
-                        fovy=self.fov,
-                        fovx=self.fov,
-                        znear=0.01,
-                        zfar=100,
-                        extr=extrinsic,
-                    ))
+                    extrinsic = LookAtPoseSampler.sample(
+                        horizontal_mean=x,
+                        vertical_mean=np.pi / 2 + self.cam_height,
+                        lookat_position=self.viz.cam_widget.lookat_point,
+                        radius=self.radius,
+                        up_vector=self.viz.cam_widget.up_vector,
+                    )[0]
+                    viz.args.video_cams.append(
+                        CustomCam(
+                            width=self.resolution,
+                            height=self.resolution,
+                            fovy=self.fov,
+                            fovx=self.fov,
+                            znear=0.01,
+                            zfar=100,
+                            extr=extrinsic,
+                        )
+                    )

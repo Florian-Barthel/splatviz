@@ -25,7 +25,7 @@ class CamWidget:
         self.fov = 45
         self.size = 512
         self.radius = 3
-        self.up_vector = torch.tensor([0, -1, 0])
+        self.up_vector = torch.tensor([0, -1, 0], device="cuda")
         self.pose = EasyDict(yaw=0, pitch=0)
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
         self.invert_x = False
@@ -51,7 +51,8 @@ class CamWidget:
             imgui.text("Up Vector")
             imgui.same_line()
             _changed, up_vector_tuple = imgui.input_float3("##up_vector", *self.up_vector, format="%.1f")
-            self.up_vector = torch.tensor(up_vector_tuple)
+            if _changed:
+                self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
             imgui.same_line()
             if imgui.button("Set current direction"):
                 self.up_vector = get_forward_vector(
