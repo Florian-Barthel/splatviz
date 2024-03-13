@@ -49,6 +49,6 @@ class LoadWidget:
             for file in files:
                 if file.endswith(".ply") or file.endswith("compression_config.yml"):
                     current_path = os.path.join(root, file)
-                    if self.filter in current_path:
+                    if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(current_path)
         return self.items
