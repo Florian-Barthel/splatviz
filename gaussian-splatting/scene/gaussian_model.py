@@ -249,6 +249,9 @@ class GaussianModel:
         self._opacity = optimizable_tensors["opacity"]
 
     def load_ply(self, path):
+        self.disable_xyz_log_activation = True
+        self.xyz_activation = lambda x: x
+        self.inverse_xyz_activation = lambda x: x
         path = path.replace('\\', "/")
         plydata = PlyData.read(path)
 
