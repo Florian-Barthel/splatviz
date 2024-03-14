@@ -65,11 +65,16 @@ The video widget creates a video sequence of a full rotation around the current 
 Simply define the height of the camera and the rendering resolution. While the video is
 rendering, the UI is frozen. A loading screen is shown in the terminal output.
 
+## Future Plans
+- Improve camera controls (WASD movement similar to Unity)
+- Compare two Gaussian Splatting scenes side by side
+- Attach to Gaussian Splatting training for live tracking
+- Better visualization for tensors 
+
 ## Contribute
 You are more than welcome to add further functionality to this interactive viewer!
 The main goal is to create an easy-to-use tool that can be applied for debugging and for understanding
-3D Gaussian Splatting objects. Possible extensions could be to visualize the model during
-the training, visualize the gradients of the gaussian positions or to simulate a densification step.
+3D Gaussian Splatting objects. 
 
 ## References
 This viewer is inspired by the visualizer from Efficient Geometry-aware 3D Generative Adversarial 
