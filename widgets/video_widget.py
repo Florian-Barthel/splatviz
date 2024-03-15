@@ -9,7 +9,6 @@
 # its affiliates is strictly prohibited.
 import imgui
 import numpy as np
-import torch
 
 from gui_utils import imgui_utils
 from scene.cameras import CustomCam

@@ -113,7 +113,7 @@ class Renderer:
         exec(command)
 
         if len(video_cams) > 0:
-            self.render_video(f"./videos/{current_ply_name}", video_cams)
+            self.render_video(f"./_videos/{current_ply_name}", video_cams)
 
         extrinsic = LookAtPoseSampler.sample(
             3.14 / 2 + cam.yaw, 3.14 / 2 + cam.pitch, cam.lookat_point, radius=cam.radius, up_vector=up_vector
