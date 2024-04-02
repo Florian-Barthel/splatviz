@@ -16,7 +16,7 @@ class LoadWidget:
     def __init__(self, viz, root):
         self.viz = viz
         self.root = root
-        self.filter = "final_runs"
+        self.filter = ""
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
