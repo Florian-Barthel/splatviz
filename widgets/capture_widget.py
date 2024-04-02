@@ -5,13 +5,15 @@ import imgui
 import numpy as np
 
 from gui_utils import imgui_utils
-from viz import renderer
+from viz.render_utils import CapturedException
 
 
 class CaptureWidget:
     def __init__(self, viz):
         self.viz = viz
         self.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_screenshots"))
+        self.path_ply = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_ply_files"))
+
         self.dump_image = False
         self.dump_gui = False
         self.defer_frames = 0
@@ -35,6 +37,12 @@ class CaptureWidget:
                     if 'image' in viz.result:
                         self.save_png(viz.result.image)
 
+                if imgui_utils.button('Save ply', width=viz.button_w):
+                    viz.args.save_ply_path = self.path_ply
+                else:
+                    viz.args.save_ply_path = None
+
+
     def save_png(self, image):
         viz = self.viz
         try:
@@ -54,4 +62,4 @@ class CaptureWidget:
                 pil_image = PIL.Image.fromarray(image, "RGB")
             pil_image.save(os.path.join(self.path, f"{file_id:05d}.png"))
         except:
-            viz.result.error = renderer.CapturedException()
+            viz.result.error = CapturedException()

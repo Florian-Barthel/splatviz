@@ -19,8 +19,10 @@ class PerformanceWidget:
         self.viz = viz
         self.gui_times = [float("nan")] * 60
         self.render_times = [float("nan")] * 30
+        self.render_times_smooth = 0
         self.fps_limit = 60
         self.use_vsync = False
+        self.fast_render_mode = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -56,9 +58,15 @@ class PerformanceWidget:
             imgui.same_line(viz.label_w + viz.font_size * 9)
             t = [x for x in self.render_times if x > 0]
             t = np.mean(t) if len(t) > 0 else 0
+            self.render_times_smooth = self.render_times_smooth * 0.99 + 1 / t * 0.01
             imgui.text(f"{t * 1e3:.1f} ms" if t > 0 else "N/A")
             imgui.same_line(viz.label_w + viz.font_size * 14)
             imgui.text(f"{1 / t:.1f} FPS" if t > 0 else "N/A")
+            imgui.text(f"{self.render_times_smooth:.1f} FPS smooth")
+
+            _clicked, self.fast_render_mode = imgui.checkbox("Fast Render mode", self.fast_render_mode)
+
+        viz.args.fast_render_mode = self.fast_render_mode
 
         viz.set_fps_limit(self.fps_limit)
         viz.set_vsync(self.use_vsync)

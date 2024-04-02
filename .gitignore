@@ -1,5 +1,6 @@
 .idea/*
-videos
 **/__PYCACHE__/**
 **/__pycache__/**
 _screenshots
+_videos
+_ply_files

@@ -6,6 +6,7 @@ import sys
 
 sys.path.append("./gaussian-splatting")
 
+
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
 
@@ -14,8 +15,11 @@ from gui_utils import imgui_utils
 from gui_utils import gl_utils
 from gui_utils import text_utils
 from viz_utils.dict import EasyDict
-from widgets import edit_widget, eval_widget, performance_widget, load_widget, video_widget, cam_widget, capture_widget
+from widgets import edit_widget, eval_widget, performance_widget, load_widget, video_widget, cam_widget, capture_widget, latent_widget
 from viz.async_renderer import AsyncRenderer
+from viz.gaussian_renderer import GaussianRenderer
+# from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
+
 
 
 class Visualizer(imgui_window.ImguiWindow):
@@ -26,7 +30,8 @@ class Visualizer(imgui_window.ImguiWindow):
 
         # Internals.
         self._last_error_print = None
-        self._async_renderer = AsyncRenderer()
+        self._async_renderer = AsyncRenderer(GaussianRenderer())
+        # self._async_renderer = AsyncRenderer(GaussianDecoderRenderer())
         self._defer_rendering = 0
         self._tex_img = None
         self._tex_obj = None
@@ -39,6 +44,7 @@ class Visualizer(imgui_window.ImguiWindow):
         # Widgets.
         self.load_widget = load_widget.LoadWidget(self, data_path)
         self.cam_widget = cam_widget.CamWidget(self)
+        self.latent_widget = latent_widget.LatentWidget(self)
         self.edit_widget = edit_widget.EditWidget(self)
         self.eval_widget = eval_widget.EvalWidget(self)
         self.perf_widget = performance_widget.PerformanceWidget(self)
@@ -103,6 +109,8 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         self.cam_widget(expanded)
+        expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
+        self.latent_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
         self.video_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Screenshot", default=False)

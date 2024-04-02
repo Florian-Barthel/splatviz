@@ -123,6 +123,8 @@ class GaussianModel:
     @property
     def get_features(self):
         features_dc = self._features_dc
+        if self.active_sh_degree == 0:
+            return features_dc
         features_rest = self._features_rest.to(features_dc.device)
         return torch.cat((features_dc, features_rest), dim=1)
     
@@ -230,7 +232,10 @@ class GaussianModel:
         xyz = self._xyz.detach().cpu().numpy()
         normals = np.zeros_like(xyz)
         f_dc = self._features_dc.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
+        if self._features_rest.shape[0] == 0:
+            self._features_rest = torch.zeros((self._features_dc.shape[0], 3, (3 + 1) ** 2)).float().cuda()[:,:,1:]
         f_rest = self._features_rest.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
+
         opacities = self._opacity.detach().cpu().numpy()
         scale = self._scaling.detach().cpu().numpy()
         rotation = self._rotation.detach().cpu().numpy()

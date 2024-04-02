@@ -16,7 +16,7 @@ class LoadWidget:
     def __init__(self, viz, root):
         self.viz = viz
         self.root = root
-        self.filter = ""
+        self.filter = "final_runs"
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
@@ -47,7 +47,7 @@ class LoadWidget:
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
-                if file.endswith(".ply") or file.endswith("compression_config.yml"):
+                if file.endswith(".ply") or file.endswith("compression_config.yml") or file.endswith(".pkl"):
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(current_path)

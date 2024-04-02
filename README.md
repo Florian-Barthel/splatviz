@@ -22,7 +22,7 @@ conda activate gs-view
 Launch:
 
 `
-python main.py --data_path="path/to/directory/with/gaussian/objects"
+python run_main.py --data_path="path/to/directory/with/gaussian/objects"
 `
 
 ## Current Features
@@ -66,10 +66,15 @@ Simply define the height of the camera and the rendering resolution. While the v
 rendering, the UI is frozen. A loading screen is shown in the terminal output.
 
 ## Future Plans
-- Improve camera controls (WASD movement similar to Unity)
 - Compare two Gaussian Splatting scenes side by side
 - Attach to Gaussian Splatting training for live tracking
 - Better visualization for tensors 
+
+## Recent Updates ⚡ 
+- Improved camera controls
+  - Orbit Mode: Camera moves on a sphere around a look_at_point
+  - Free mode: Camera moves free and can be controlled with WASD
+- Save screenshots and .ply files of the current scene
 
 ## Contribute
 You are more than welcome to add further functionality to this interactive viewer!

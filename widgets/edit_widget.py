@@ -1,12 +1,3 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-#
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
 import imgui
 from gui_utils import imgui_utils
 from viz_utils.dict import EasyDict
@@ -25,7 +16,7 @@ gaussian._scaling = gaussian._scaling[start:end, ...]
 gaussian._opacity = gaussian._opacity[start:end, ...]
 gaussian._features_dc = gaussian._features_dc[start:end, ...]
 gaussian._features_rest = gaussian._features_rest[start:end, ...]
-self.bg_color[:] = 0
+self.bg_color[:] = 1
 """
 
         self.slider_values = EasyDict()
@@ -39,6 +30,7 @@ self.bg_color[:] = 0
 
         self.render_alpha = False
         self.render_depth = False
+        self.render_gan_image = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -46,10 +38,13 @@ self.bg_color[:] = 0
         if show:
             alpha_changed, self.render_alpha = imgui.checkbox("Render alpha", self.render_alpha)
             depth_changed, self.render_depth = imgui.checkbox("Render depth", self.render_depth)
+            _, self.render_gan_image = imgui.checkbox("Render GAN", self.render_gan_image)
+
             if self.render_alpha and alpha_changed:
                 self.render_depth = False
             if self.render_depth and depth_changed:
                 self.render_alpha = False
+
 
             self.render_sliders()
             imgui.new_line()
@@ -61,6 +56,7 @@ self.bg_color[:] = 0
         viz.args.edit_text = self.text
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
+        viz.args.render_gan_image = self.render_gan_image
         viz.args.update(self.slider_values)
 
     def render_sliders(self):

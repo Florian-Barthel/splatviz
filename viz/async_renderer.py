@@ -1,11 +1,13 @@
 import multiprocessing
 import numpy as np
-from viz import renderer
+
+from viz.render_utils import CapturedException
 from viz_utils.compare_dict import equal_dicts
 
 
 class AsyncRenderer:
-    def __init__(self):
+    def __init__(self, renderer):
+        self.renderer = renderer
         self._closed = False
         self._is_async = False
         self._cur_args = None
@@ -69,7 +71,7 @@ class AsyncRenderer:
 
     def _set_args_sync(self, **args):
         if self._renderer_obj is None:
-            self._renderer_obj = renderer.Renderer()
+            self._renderer_obj = self.renderer
         self._cur_result = self._renderer_obj.render(**args)
 
     def get_result(self):
@@ -87,9 +89,8 @@ class AsyncRenderer:
         self._cur_result = None
         self._cur_stamp += 1
 
-    @staticmethod
-    def _process_fn(args_queue, result_queue):
-        renderer_obj = renderer.Renderer()
+    def _process_fn(self, args_queue, result_queue):
+        renderer_obj = self.renderer
         cur_args = None
         cur_stamp = None
         while True:
@@ -99,7 +100,7 @@ class AsyncRenderer:
             if args != cur_args or stamp != cur_stamp:
                 result = renderer_obj.render(**args)
                 if "error" in result:
-                    result.error = renderer.CapturedException(result.error)
+                    result.error = CapturedException(result.error)
                 result_queue.put([result, stamp])
                 cur_args = args
                 cur_stamp = stamp

@@ -17,17 +17,11 @@ import torch
 
 class LookAtPoseSampler:
     @staticmethod
-    def sample(
-            horizontal_mean,
-            vertical_mean,
-            lookat_position,
-            radius,
-            up_vector,
-            device=torch.device("cuda")
-    ):
+    def sample(horizontal_mean, vertical_mean, lookat_position, radius, up_vector, forward_vector=None, device=torch.device("cuda")):
         camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position)
-        forward_vectors = get_forward_vector(lookat_position, horizontal_mean, vertical_mean, radius, camera_origins=camera_origins)
-        return create_cam2world_matrix(forward_vectors, camera_origins, up_vector=up_vector).to(device)
+        if forward_vector is None:
+            forward_vector = get_forward_vector(lookat_position, horizontal_mean, vertical_mean, radius, camera_origins)
+        return create_cam2world_matrix(forward_vector, camera_origins, up_vector).to(device)
 
 
 def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, device=torch.device("cuda")):
@@ -68,3 +62,14 @@ def normalize_vecs(vectors: torch.Tensor) -> torch.Tensor:
     return vectors / (torch.norm(vectors, dim=-1, keepdim=True))
 
 
+def fov_to_intrinsics(fov_degrees, imsize=1, device="cpu"):
+    """
+    Creates a 3x3 camera intrinsics matrix from the camera field of view, specified in degrees.
+    Note the intrinsics are returned as normalized by image size, rather than in pixel units.
+    Assumes principal point is at image center.
+    """
+
+    fov_rad = fov_degrees * 2 * 3.14159 / 360
+    focal_length = float(imsize / (2 * math.tan(fov_rad / 2)))
+    intrinsics = torch.tensor([[focal_length, 0, 0.5], [0, focal_length, 0.5], [0, 0, 1.0]], device=device)
+    return intrinsics
