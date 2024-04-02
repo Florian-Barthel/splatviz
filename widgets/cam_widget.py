@@ -27,13 +27,13 @@ class CamWidget:
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
         self.cam_pos = torch.tensor([0.0, 0.0, 1.0], device="cuda")
-        self.up_vector = torch.tensor([0.0, 1.0, 0.0], device="cuda")
+        self.up_vector = torch.tensor([0.0, -1.0, 0.0], device="cuda")
         self.forward = torch.tensor([0.0, 0.0, -1.0], device="cuda")
 
         # controls
         self.pose = EasyDict(yaw=0, pitch=0)
-        self.invert_x = True
-        self.invert_y = True
+        self.invert_x = False
+        self.invert_y = False
         self.move_speed = 0.02
         self.control_modes = ["orbit", "free"]
         self.current_control_mode = 1
