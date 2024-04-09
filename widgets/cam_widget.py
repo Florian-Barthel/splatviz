@@ -51,7 +51,8 @@ class CamWidget:
                 lookat_position=self.cam_pos,
                 horizontal_mean=self.pose.yaw + np.pi / 2,
                 vertical_mean=self.pose.pitch + np.pi / 2,
-                radius=0.01
+                radius=0.01,
+                up_vector=self.up_vector
             )
 
             multiply = 1
@@ -69,7 +70,7 @@ class CamWidget:
                 self.cam_pos += self.sideways * self.move_speed * multiply
 
         elif self.control_modes[self.current_control_mode] == "orbit":
-            self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"))
+            self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
             if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 22):  # W
                 self.pose.pitch -= self.move_speed
