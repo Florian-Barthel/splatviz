@@ -67,7 +67,6 @@ class CamWidget:
                 self.cam_pos -= self.forward * self.move_speed * multiply
             if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 3):  # D
                 self.cam_pos += self.sideways * self.move_speed * multiply
-            self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")
 
         elif self.control_modes[self.current_control_mode] == "orbit":
             self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"))
@@ -86,7 +85,7 @@ class CamWidget:
         if mouse_pos.x >= self.viz.pane_w:
             wheel = imgui.get_io().mouse_wheel
             if self.control_modes[self.current_control_mode] == "free":
-                self.fov -= wheel
+                self.cam_pos += self.forward * self.move_speed * wheel
             elif self.control_modes[self.current_control_mode] == "orbit":
                 self.radius -= wheel / 10
 

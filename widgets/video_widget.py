@@ -13,7 +13,7 @@ class VideoWidget:
         self.cam_height = 0.3
         self.radius = 6
         self.resolution = 1024
-        self.fov = 45
+        self.fov = 40
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -40,8 +40,8 @@ class VideoWidget:
                         CustomCam(
                             width=self.resolution,
                             height=self.resolution,
-                            fovy=self.fov,
-                            fovx=self.fov,
+                            fovy=self.fov / 360 * 2 * np.pi,
+                            fovx=self.fov / 360 * 2 * np.pi,
                             znear=0.01,
                             zfar=100,
                             extr=extrinsic,

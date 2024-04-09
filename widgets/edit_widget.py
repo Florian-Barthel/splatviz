@@ -8,14 +8,12 @@ class EditWidget:
         self.viz = viz
 
         # Add a button to create slider that can be used in the code
-        self.text = """start = 0
-end = -1
-gaussian._xyz = gaussian._xyz[start:end, ...]
-gaussian._rotation = gaussian._rotation[start:end, ...]
-gaussian._scaling = gaussian._scaling[start:end, ...]
-gaussian._opacity = gaussian._opacity[start:end, ...]
-gaussian._features_dc = gaussian._features_dc[start:end, ...]
-gaussian._features_rest = gaussian._features_rest[start:end, ...]
+        self.text = """gaussian._xyz = gaussian._xyz
+gaussian._rotation = gaussian._rotation
+gaussian._scaling = gaussian._scaling
+gaussian._opacity = gaussian._opacity
+gaussian._features_dc = gaussian._features_dc
+gaussian._features_rest = gaussian._features_rest
 self.bg_color[:] = 1
 """
 
