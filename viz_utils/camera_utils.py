@@ -50,6 +50,9 @@ def rotate_coordinates(coordinates, vector):
     theta = torch.arccos(torch.dot(unit_vector, base_vector))  # Angle of rotation
     if theta == 0:
         rotation_matrix = torch.eye(3, device=coordinates.device)
+    elif theta == torch.pi:
+        rotation_matrix = -1 * torch.eye(3, device=coordinates.device)#
+        rotation_matrix[0, 0] = 1
     else:
         k = torch.cross(base_vector, unit_vector)
         k /= torch.linalg.norm(k)

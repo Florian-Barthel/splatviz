@@ -36,7 +36,7 @@ class CamWidget:
         self.invert_y = False
         self.move_speed = 0.02
         self.control_modes = ["orbit", "free"]
-        self.current_control_mode = 1
+        self.current_control_mode = 0
 
     def drag(self, dx, dy):
         viz = self.viz
