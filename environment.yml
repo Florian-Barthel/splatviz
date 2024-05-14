@@ -7,23 +7,21 @@ channels:
 dependencies:
   - python=3.10
   - pip
-  - pytorch
+  - pytorch=2.3.0
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
-  - tqdm
-  - click
-  - pillow
-  - imageio
-  - requests
-  - opencv
-  - scipy
-  - pandas
-  - plyfile
+  - tqdm=4.66.4
+  - click=8.1.7
+  - pillow=10.3.0
+  - imageio=2.34.1
+  - requests=2.31.0
+  - opencv=4.9.0
+  - scipy=1.13.0
+  - pandas=2.2.2
+  - plyfile=1.0.3
   - pip:
     - imgui==2.0.0
     - imgui_bundle
-    - glfw
-    - pyopengl
     - imageio-ffmpeg
     - gaussian-splatting/submodules/diff-gaussian-rasterization
     - gaussian-splatting/submodules/simple-knn
