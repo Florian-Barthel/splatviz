@@ -60,7 +60,7 @@ class GaussianDecoderRenderer(Renderer):
 
         # create videos
         if len(video_cams) > 0:
-            self.render_video(f"./_videos/{current_ply_name}", video_cams)
+            self.render_video("./_videos", video_cams)
 
         # create camera
         width = size

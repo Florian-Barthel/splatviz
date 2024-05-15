@@ -18,20 +18,21 @@ from viz_utils.dict import EasyDict
 from widgets import edit_widget, eval_widget, performance_widget, load_widget, video_widget, cam_widget, capture_widget, latent_widget
 from viz.async_renderer import AsyncRenderer
 from viz.gaussian_renderer import GaussianRenderer
-# from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
+from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
 
 
 
 class Visualizer(imgui_window.ImguiWindow):
-    def __init__(self, data_path=None):
+    def __init__(self, data_path=None, use_gan_decoder=False):
         super().__init__(
-            title="Gaussian Machine", window_width=1920, window_height=1200, font="fonts/JetBrainsMono-Regular.ttf"
+            title="Gaussian Machine", window_width=1920, window_height=1080, font="fonts/JetBrainsMono-Regular.ttf"
         )
 
         # Internals.
         self._last_error_print = None
-        self._async_renderer = AsyncRenderer(GaussianRenderer())
-        # self._async_renderer = AsyncRenderer(GaussianDecoderRenderer())
+        self.use_gan_decoder = use_gan_decoder
+        renderer = GaussianDecoderRenderer() if use_gan_decoder else GaussianRenderer()
+        self._async_renderer = AsyncRenderer(renderer)
         self._defer_rendering = 0
         self._tex_img = None
         self._tex_obj = None
@@ -109,11 +110,12 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         self.cam_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
-        self.latent_widget(expanded)
+        if self.use_gan_decoder:
+            expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
+            self.latent_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
         self.video_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Screenshot", default=False)
+        expanded, _visible = imgui_utils.collapsing_header("Save", default=False)
         self.capture_widget(expanded)
         expanded, _visible = imgui_utils.collapsing_header("Edit", default=True)
         self.edit_widget(expanded)
@@ -166,8 +168,9 @@ class Visualizer(imgui_window.ImguiWindow):
 
 @click.command()
 @click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="./sample_scenes")
-def main(data_path):
-    viz = Visualizer(data_path=data_path)
+@click.option("--use_decoder", help="Visualizes the results of a decoder", is_flag=True)
+def main(data_path, use_decoder):
+    viz = Visualizer(data_path=data_path, use_gan_decoder=use_decoder)
     while not viz.should_close():
         viz.draw_frame()
     viz.close()

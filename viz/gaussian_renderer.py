@@ -20,7 +20,6 @@ from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
 from scene.cameras import CustomCam
 from viz.base_renderer import Renderer
-from viz_utils.camera_utils import LookAtPoseSampler
 from viz_utils.dict import EasyDict
 
 
@@ -58,7 +57,7 @@ class GaussianRenderer(Renderer):
         exec(command)
 
         if len(video_cams) > 0:
-            self.render_video(f"./_videos/{current_ply_name}", video_cams, gaussian)
+            self.render_video("./_videos", video_cams, gaussian)
 
         fov_rad = fov / 360 * 2 * np.pi
         render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
