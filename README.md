@@ -81,6 +81,20 @@ You are more than welcome to add further functionality to this interactive viewe
 The main goal is to create an easy-to-use tool that can be applied for debugging and for understanding
 3D Gaussian Splatting objects. 
 
+
+## Citation
+Please cite our work when unsing the viewer:
+```
+@misc{barthel2024gaussian,
+    title={Gaussian Splatting Decoder for 3D-aware Generative Adversarial Networks}, 
+    author={Florian Barthel and Arian Beckmann and Wieland Morgenstern and Anna Hilsmann and Peter Eisert},
+    year={2024},
+    eprint={2404.10625},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
+}
+```
+
 ## References
 This viewer is inspired by the visualizer from Efficient Geometry-aware 3D Generative Adversarial 
 Networks (EG3D).
