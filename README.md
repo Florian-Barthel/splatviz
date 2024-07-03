@@ -66,11 +66,11 @@ Simply define the height of the camera and the rendering resolution. While the v
 rendering, the UI is frozen. A loading screen is shown in the terminal output.
 
 ## Future Plans
-- Compare two Gaussian Splatting scenes side by side
 - Attach to Gaussian Splatting training for live tracking
 - Better visualization for tensors 
 
 ## Recent Updates ⚡ 
+- Compare two or more Gaussian Splatting scenes side by side
 - Improved camera controls
   - Orbit Mode: Camera moves on a sphere around a look_at_point
   - Free mode: Camera moves free and can be controlled with WASD
