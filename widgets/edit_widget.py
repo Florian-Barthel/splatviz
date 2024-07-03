@@ -14,7 +14,7 @@ gaussian._scaling = gaussian._scaling
 gaussian._opacity = gaussian._opacity
 gaussian._features_dc = gaussian._features_dc
 gaussian._features_rest = gaussian._features_rest
-self.bg_color[:] = 1
+self.bg_color[:] = 0
 """
 
         self.slider_values = EasyDict()
