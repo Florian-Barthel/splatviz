@@ -9,14 +9,13 @@
 # its affiliates is strictly prohibited.
 import torch
 import torch.nn
-from scene import GaussianModel
 from viz.render_utils import CapturedException
 from viz_utils.dict import EasyDict
 
 
 class Renderer:
     def __init__(self):
-        self._current_ply_file_path = None
+        self._current_ply_file_paths = [None] * 16
         self._device = torch.device("cuda")
         self._pinned_bufs = dict()  # {(shape, dtype): torch.Tensor, ...}
         self._is_timing = False
@@ -24,7 +23,7 @@ class Renderer:
         self._end_event = torch.cuda.Event(enable_timing=True)
         self._net_layers = dict()
         self._last_model_input = None
-        self.gaussian_model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
+        self.gaussian_models = []
         self.bg_color = torch.tensor([1, 1, 1], dtype=torch.float32).to("cuda")
 
     def render(self, **args):

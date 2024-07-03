@@ -18,6 +18,7 @@ from tqdm import tqdm
 from pathlib import Path
 from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
+from scene import GaussianModel
 from scene.cameras import CustomCam
 from viz.base_renderer import Renderer
 from viz_utils.dict import EasyDict
@@ -34,9 +35,9 @@ class GaussianRenderer(Renderer):
         edit_text,
         eval_text,
         size,
-        ply_file_path,
+        ply_file_paths,
         cam_params,
-        current_ply_name,
+        current_ply_names,
         video_cams=[],
         render_depth=False,
         render_alpha=False,
@@ -44,25 +45,38 @@ class GaussianRenderer(Renderer):
         **slider,
     ):
         slider = EasyDict(slider)
-        if ply_file_path != self._current_ply_file_path:
-            if ply_file_path.endswith(".ply"):
-                self.gaussian_model.load_ply(ply_file_path)
-            elif ply_file_path.endswith("compression_config.yml"):
-                self.gaussian_model = run_single_decompression(Path(ply_file_path).parent.absolute())
-            self._current_ply_file_path = ply_file_path
         width = size
         height = size
-        gaussian = copy.deepcopy(self.gaussian_model)
-        command = re.sub(";+", ";", edit_text.replace("\n", ";"))
-        exec(command)
+        images = []
 
-        if len(video_cams) > 0:
-            self.render_video("./_videos", video_cams, gaussian)
+        for scene_index, ply_file_path in enumerate(ply_file_paths):
+            if ply_file_path != self._current_ply_file_paths[scene_index]:
+                if scene_index + 1 > len(self.gaussian_models):
+                    self.gaussian_models.append(GaussianModel(sh_degree=0, disable_xyz_log_activation=True))
+                if ply_file_path.endswith(".ply"):
+                    self.gaussian_models[scene_index].load_ply(ply_file_path)
+                elif ply_file_path.endswith("compression_config.yml"):
+                    self.gaussian_models[scene_index] = run_single_decompression(Path(ply_file_path).parent.absolute())
+                self._current_ply_file_paths[scene_index] = ply_file_path
 
-        fov_rad = fov / 360 * 2 * np.pi
-        render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
-        render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
-        img = render["render"]
+            gaussian = copy.deepcopy(self.gaussian_models[scene_index])
+            command = re.sub(";+", ";", edit_text.replace("\n", ";"))
+            exec(command)
+
+            if len(video_cams) > 0:
+                self.render_video("./_videos", video_cams, gaussian)
+
+            fov_rad = fov / 360 * 2 * np.pi
+            render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
+            render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
+            if render_alpha:
+                images.append(render["alpha"])
+            elif render_depth:
+                images.append( render["depth"] / render["depth"].max())
+            else:
+                images.append(render["render"])
+
+        img = torch.concatenate(images, dim=2)
         res.stats = torch.stack(
             [
                 img.mean(),
@@ -73,10 +87,7 @@ class GaussianRenderer(Renderer):
                 img.norm(float("inf")),
             ]
         )
-        if render_alpha:
-            img = render["alpha"]
-        if render_depth:
-            img = render["depth"] / render["depth"].max()
+
         # Scale and convert to uint8.
         if img_normalize:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)

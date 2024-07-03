@@ -1,3 +1,4 @@
+import copy
 import multiprocessing
 import numpy as np
 
@@ -53,7 +54,7 @@ class AsyncRenderer:
                 self._set_args_async(**args)
             else:
                 self._set_args_sync(**args)
-            self._cur_args = args
+            self._cur_args = copy.deepcopy(args)
 
     def _set_args_async(self, **args):
         if self._process is None:

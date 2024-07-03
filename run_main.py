@@ -5,8 +5,6 @@ import torch
 import sys
 
 sys.path.append("./gaussian-splatting")
-
-
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
 
@@ -15,11 +13,10 @@ from gui_utils import imgui_utils
 from gui_utils import gl_utils
 from gui_utils import text_utils
 from viz_utils.dict import EasyDict
-from widgets import edit_widget, eval_widget, performance_widget, load_widget, video_widget, cam_widget, capture_widget, latent_widget
+from widgets import edit_widget, eval_widget, performance_widget, load_widget_pkl, load_widget_ply, video_widget, cam_widget, capture_widget, latent_widget
 from viz.async_renderer import AsyncRenderer
 from viz.gaussian_renderer import GaussianRenderer
 from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
-
 
 
 class Visualizer(imgui_window.ImguiWindow):
@@ -43,7 +40,10 @@ class Visualizer(imgui_window.ImguiWindow):
         self.result = EasyDict()
 
         # Widgets.
-        self.load_widget = load_widget.LoadWidget(self, data_path)
+        if self.use_gan_decoder:
+            self.load_widget = load_widget_pkl.LoadWidget(self, data_path)
+        else:
+            self.load_widget = load_widget_ply.LoadWidget(self, data_path)
         self.cam_widget = cam_widget.CamWidget(self)
         self.latent_widget = latent_widget.LatentWidget(self)
         self.edit_widget = edit_widget.EditWidget(self)
