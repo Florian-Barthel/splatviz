@@ -21,6 +21,8 @@ class LoadWidget:
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
         self.plys: list[str] = [self.items[-1]]
+        self.use_splitscreen = False
+        self.highlight_border = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -44,6 +46,12 @@ class LoadWidget:
 
             if imgui_utils.button("Add Scene", width=viz.button_w):
                 self.plys.append(self.plys[-1])
+
+            use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
+            highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
+
+        viz.args.highlight_border = self.highlight_border
+        viz.args.use_splitscreen = self.use_splitscreen
         viz.args.ply_file_paths = self.plys
         viz.args.current_ply_names = [ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys]
 

@@ -1,6 +1,5 @@
 import copy
 import multiprocessing
-import numpy as np
 
 from viz.render_utils import CapturedException
 from viz_utils.compare_dict import equal_dicts
@@ -36,15 +35,6 @@ class AsyncRenderer:
 
     def set_async(self, is_async):
         self._is_async = is_async
-
-    @staticmethod
-    def equal_dict(dict_1, dict_2):
-        if dict_1 == None or dict_2 == None:
-            return False
-        for key, value in dict_1.items():
-            if not np.array_equal(value, dict_2[key]):
-                return False
-        return True
 
     def set_args(self, **args):
         assert not self._closed

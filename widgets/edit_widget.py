@@ -43,7 +43,6 @@ self.bg_color[:] = 0
             if self.render_depth and depth_changed:
                 self.render_alpha = False
 
-
             self.render_sliders()
             imgui.new_line()
 

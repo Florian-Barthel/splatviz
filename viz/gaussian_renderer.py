@@ -42,6 +42,8 @@ class GaussianRenderer(Renderer):
         render_depth=False,
         render_alpha=False,
         img_normalize=False,
+        use_splitscreen=False,
+        highlight_border=False,
         **slider,
     ):
         slider = EasyDict(slider)
@@ -76,7 +78,18 @@ class GaussianRenderer(Renderer):
             else:
                 images.append(render["render"])
 
-        img = torch.concatenate(images, dim=2)
+        if use_splitscreen:
+            img = torch.zeros_like(images[0])
+            split_size = size // len(images)
+            offset = 0
+            for i in range(len(images)):
+                img[..., offset:offset+split_size] = images[i][..., offset:offset+split_size]
+                offset += split_size
+                if highlight_border and i != len(images) - 1:
+                    img[..., offset-1:offset] = 1
+
+        else:
+            img = torch.concatenate(images, dim=2)
         res.stats = torch.stack(
             [
                 img.mean(),
