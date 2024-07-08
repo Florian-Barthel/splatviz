@@ -74,7 +74,7 @@ class EvalWidget:
             stats_text = f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().mean().item():.2f}, std:{result.float().std().item():.2f}"
             imgui.text(pprint.pformat(stats_text, compact=True))
 
-        var_name += self.viz.args.ply_file_path
+        var_name += self.viz.args.ply_file_paths[0]
         if var_name not in self.use_cache_dict.keys():
             self.use_cache_dict[var_name] = True
         imgui.new_line()

@@ -11,7 +11,7 @@
 import os
 import imgui
 import imgui.integrations.glfw
-from imgui_bundle import implot
+# from imgui_bundle import implot
 
 from . import glfw_window
 from . import imgui_utils
@@ -30,7 +30,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
 
         # Init fields.
         self._imgui_context = None
-        self._implot_context = None
+        # self._implot_context = None
         self._imgui_renderer = None
         self._imgui_fonts = None
         self._cur_font_size = max(font_sizes)
@@ -41,7 +41,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
 
         # Init ImGui.
         self._imgui_context = imgui.create_context()
-        self._implot_context = implot.create_context()
+        # self._implot_context = implot.create_context()
         self._imgui_renderer = _GlfwRenderer(self._glfw_window)
         self._attach_glfw_callbacks()
         imgui.get_io().ini_saving_rate = 0  # Disable creating imgui.ini at runtime.
@@ -58,9 +58,9 @@ class ImguiWindow(glfw_window.GlfwWindow):
         if self._imgui_context is not None:
             # imgui.destroy_context(self._imgui_context) # Commented out to avoid creating imgui.ini at the end.
             self._imgui_context = None
-        if self._implot_context is not None:
+        #if self._implot_context is not None:
             # implot.destroy_context(self._implot_context) # Commented out to avoid creating imgui.ini at the end.
-            self._implot_context = None
+            # self._implot_context = None
         super().close()
 
     def _glfw_key_callback(self, *args):
