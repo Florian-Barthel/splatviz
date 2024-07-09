@@ -44,7 +44,7 @@ class LoadWidget:
                 imgui.same_line()
                 imgui.text(f"Scene {i + 1}: " + ply[len(self.root):])
 
-            if imgui_utils.button("Add Scene", width=viz.button_w):
+            if imgui_utils.button("Add Scene"):
                 self.plys.append(self.plys[-1])
 
             use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)

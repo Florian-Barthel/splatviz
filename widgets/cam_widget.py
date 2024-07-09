@@ -23,7 +23,7 @@ class CamWidget:
     def __init__(self, viz):
         self.viz = viz
         self.fov = 45
-        self.size = 1024
+        self.size = 512
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
         self.cam_pos = torch.tensor([0.0, 0.0, 1.0], device="cuda")
@@ -102,11 +102,13 @@ class CamWidget:
             imgui.same_line()
             _changed, self.size = imgui.input_int("##size", self.size, 128)
 
+            imgui.text("Camera Mode")
+            imgui.same_line()
             _clicked, self.current_control_mode = imgui.combo(
-                "Camera Modes", self.current_control_mode, self.control_modes
+                "##Camera Modes", self.current_control_mode, self.control_modes
             )
 
-            imgui.push_item_width(150)
+            imgui.push_item_width(200)
             imgui.text("Up Vector")
             imgui.same_line()
             _changed, up_vector_tuple = imgui.input_float3("##up_vector", *self.up_vector, format="%.1f")
@@ -136,7 +138,7 @@ class CamWidget:
                 imgui.same_line()
                 if imgui.button("Set to xyz mean") and "mean_xyz" in viz.result.keys():
                     self.lookat_point = viz.result.mean_xyz
-                imgui.pop_item_width()
+            imgui.pop_item_width()
 
             _, self.invert_x = imgui.checkbox("invert x", self.invert_x)
             _, self.invert_y = imgui.checkbox("invert y", self.invert_y)

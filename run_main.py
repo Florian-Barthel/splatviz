@@ -105,22 +105,46 @@ class Visualizer(imgui_window.ImguiWindow):
         )
 
         # Widgets.
-        self.load_widget(True)
+        expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
+        imgui.indent()
+        self.load_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
+        imgui.indent()
         self.perf_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
+        imgui.indent()
         self.cam_widget(expanded)
+        imgui.unindent()
+
         if self.use_gan_decoder:
             expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
+            imgui.indent()
             self.latent_widget(expanded)
+            imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
+        imgui.indent()
         self.video_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Save", default=False)
+        imgui.indent()
         self.capture_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Edit", default=True)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Edit", default=False)
+        imgui.indent()
         self.edit_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Eval", default=True)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Eval", default=False)
+        imgui.indent()
         self.eval_widget(expanded)
+        imgui.unindent()
 
         # Render.
         if self.is_skipping_frames():
