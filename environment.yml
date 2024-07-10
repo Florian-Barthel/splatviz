@@ -27,3 +27,4 @@ dependencies:
     - gaussian-splatting/submodules/simple-knn
     - numpy==1.23.1
     - imagecodecs[all]
+    - scikit-image
