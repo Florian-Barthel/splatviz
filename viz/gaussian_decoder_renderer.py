@@ -17,6 +17,7 @@ import torch
 import torch.nn
 from tqdm import tqdm
 from gaussian_renderer import render_simple
+from scene import GaussianModel
 from scene.cameras import CustomCam
 from viz.base_renderer import Renderer
 from viz_utils.camera_utils import fov_to_intrinsics
@@ -32,6 +33,8 @@ class GaussianDecoderRenderer(Renderer):
         self.last_command = ""
         self.latent_map = torch.randn([1, 512, 10, 10], device=self._device, dtype=torch.float)
         self.reload_model = True
+        self._current_ply_file_path = ""
+        self.gaussian_model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
 
     def _render_impl(
         self,
@@ -40,7 +43,7 @@ class GaussianDecoderRenderer(Renderer):
         edit_text,
         eval_text,
         size,
-        ply_file_path,
+        ply_file_paths,
         cam_params,
         current_ply_name,
         video_cams=[],
@@ -56,7 +59,7 @@ class GaussianDecoderRenderer(Renderer):
     ):
         if not fast_render_mode:
             slider = EasyDict(slider)
-            self.load_decoder(ply_file_path)
+            self.load_decoder(ply_file_paths[0])
 
         # create videos
         if len(video_cams) > 0:

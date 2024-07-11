@@ -1,4 +1,4 @@
-# Gaussian Viewer
+# splatviz
 This interactive viewer allows to display 3D Gaussian Splatting objects
 stored as .ply files or as compressed objects from 
 <a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">Compact 3D Scene Representation via Self-Organizing Gaussian Grids</a>.
@@ -9,7 +9,7 @@ The viewer is fully written in python, which makes development and debugging ver
 ## Install
 Clone repository **recursively** in order to install glm from the diff_gaussian_rasterization package.
 ```
-git clone https://github.com/Florian-Barthel/gaussian_viewer --recursive
+git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 ```
 
 Create conda environment:
