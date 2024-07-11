@@ -1,4 +1,4 @@
-import imgui
+from imgui_bundle import imgui
 import numpy as np
 import torch
 import pprint
@@ -84,7 +84,7 @@ class EvalWidget:
             hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=50)
             self.hist_cache[var_name] = hist
         imgui.same_line()
-        imgui.core.plot_histogram("", self.hist_cache[var_name][0].astype(np.float32))
+        # imgui.core.plot_histogram("", self.hist_cache[var_name][0].astype(np.float32))
 
     @staticmethod
     def get_short_info(key, value):

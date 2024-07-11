@@ -10,17 +10,18 @@
 
 import array
 import numpy as np
-import imgui
+from imgui_bundle import imgui
 from gui_utils import imgui_utils
+from gui_utils.constants import *
 
 
 class PerformanceWidget:
     def __init__(self, viz):
         self.viz = viz
-        self.gui_times = [float("nan")] * 60
-        self.render_times = [float("nan")] * 30
+        self.gui_times = [float("nan")] * 100
+        self.render_times = [float("nan")] * 100
         self.render_times_smooth = 0
-        self.fps_limit = 60
+        self.fps_limit = 180
         self.use_vsync = False
         self.fast_render_mode = False
 
@@ -36,7 +37,7 @@ class PerformanceWidget:
             imgui.text("GUI")
             imgui.same_line(viz.label_w)
             with imgui_utils.item_width(viz.font_size * 8):
-                imgui.plot_lines("##gui_times", array.array("f", self.gui_times), scale_min=0)
+                imgui.plot_lines("##gui_times", np.array(array.array("f", self.gui_times)), scale_min=0)
             imgui.same_line(viz.label_w + viz.font_size * 9)
             t = [x for x in self.gui_times if x > 0]
             t = np.mean(t) if len(t) > 0 else 0
@@ -44,9 +45,7 @@ class PerformanceWidget:
             imgui.same_line(viz.label_w + viz.font_size * 14)
             imgui.text(f"{1 / t:.1f} FPS" if t > 0 else "N/A")
             with imgui_utils.item_width(viz.font_size * 6):
-                _changed, self.fps_limit = imgui.input_int(
-                    "FPS limit", self.fps_limit, flags=imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
-                )
+                _changed, self.fps_limit = imgui.input_int("FPS limit", self.fps_limit)
                 self.fps_limit = min(max(self.fps_limit, 5), 1000)
             imgui.same_line(viz.label_w + viz.font_size * 9)
             _clicked, self.use_vsync = imgui.checkbox("Vertical sync", self.use_vsync)
@@ -54,7 +53,7 @@ class PerformanceWidget:
             imgui.text("Render")
             imgui.same_line(viz.label_w)
             with imgui_utils.item_width(viz.font_size * 8):
-                imgui.plot_lines("##render_times", array.array("f", self.render_times), scale_min=0)
+                imgui.plot_lines("##render_times", np.array(array.array("f", self.render_times)), scale_min=0)
             imgui.same_line(viz.label_w + viz.font_size * 9)
             t = [x for x in self.render_times if x > 0]
             t = np.mean(t) if len(t) > 0 else 0

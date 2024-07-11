@@ -1,8 +1,10 @@
 import os.path
 
-import imgui
 from gui_utils import imgui_utils
 import json
+
+from imgui_bundle import imgui, imgui_color_text_edit as edit
+
 
 default_preset = """gaussian._xyz = gaussian._xyz
 gaussian._rotation = gaussian._rotation
@@ -37,6 +39,10 @@ class EditWidget:
         self.presets = {}
         self.load_presets()
         self.text = self.presets["Default"]
+
+        self.editor = edit.TextEditor()
+        self.editor.set_language_definition(edit.TextEditor.LanguageDefinition.python())
+        self.editor.set_text(self.text)
 
         self.var_names = "xyzijklmnuvwabcdefghopqrst"
         self.var_name_index = 1
@@ -82,15 +88,17 @@ class EditWidget:
 
             if imgui.begin_popup("browse_presets"):
                 for preset in self.all_presets:
-                    clicked, _state = imgui.menu_item(preset)
+                    clicked, _state = imgui.menu_item_simple(preset)
                     if clicked:
                         self.text = self.presets[preset]
                 imgui.end_popup()
 
-            dynamic_height = 10 + viz.font_size * (self.text.count("\n") + 2)
-            _changed, self.text = imgui.input_text_multiline(
-                "##input_text", self.text, width=viz.pane_w, height=dynamic_height
-            )
+            # dynamic_height = 10 + viz.font_size * (self.text.count("\n") + 2)
+            # _changed, self.text = imgui.input_text_multiline(
+            #     "##input_text", self.text, width=viz.pane_w, height=dynamic_height
+            # )
+            self.editor.render("Code")
+            # self.editor.(self.text.count("\n")+ 1)
 
             imgui.text("Preset Name")
             imgui.same_line()
@@ -102,6 +110,7 @@ class EditWidget:
                     json.dump(self.presets, f)
                 self._cur_preset_name = ""
 
+        self.text = self.editor.get_text()
         viz.args.edit_text = self.text
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth

@@ -9,9 +9,8 @@
 # its affiliates is strictly prohibited.
 
 import os
-import imgui
-import imgui.integrations.glfw
-# from imgui_bundle import implot
+from imgui_bundle import imgui
+from imgui_bundle.python_backends.glfw_backend import GlfwRenderer
 
 from . import glfw_window
 from . import imgui_utils
@@ -104,7 +103,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
 # Wrapper class for GlfwRenderer to fix a mouse wheel bug on Linux.
 
 
-class _GlfwRenderer(imgui.integrations.glfw.GlfwRenderer):
+class _GlfwRenderer(GlfwRenderer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mouse_wheel_multiplier = 1

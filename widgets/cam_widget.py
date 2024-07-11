@@ -7,11 +7,12 @@
 # disclosure or distribution of this material and related documentation
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
-import imgui
+from imgui_bundle import imgui
 import torch
 import numpy as np
 
 from gui_utils import imgui_utils
+from gui_utils.constants import *
 from viz_utils.camera_utils import get_forward_vector, create_cam2world_matrix, get_origin, normalize_vecs
 from viz_utils.dict import EasyDict
 
@@ -55,30 +56,29 @@ class CamWidget:
                 up_vector=self.up_vector
             )
 
-            multiply = 1
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_MOD_SHIFT)):
-                multiply = 2
-
             self.sideways = torch.cross(self.forward, self.up_vector)
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 22):  # W
-                self.cam_pos += self.forward * self.move_speed * multiply
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A)):  # A
-                self.cam_pos -= self.sideways * self.move_speed * multiply
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 18):  # S
-                self.cam_pos -= self.forward * self.move_speed * multiply
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 3):  # D
-                self.cam_pos += self.sideways * self.move_speed * multiply
+            if imgui.is_key_down(imgui.Key.w):  # W
+                self.cam_pos += self.forward * self.move_speed
+            if imgui.is_key_down(imgui.Key.a):  # A
+                self.cam_pos -= self.sideways * self.move_speed
+            if imgui.is_key_down(imgui.Key.s):  # S
+                self.cam_pos -= self.forward * self.move_speed
+            if imgui.is_key_down(imgui.Key.d):  # D
+                self.cam_pos += self.sideways * self.move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
             self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 22):  # W
+            if imgui.is_key_down(imgui.Key.w):  # W
+                print("w")
                 self.pose.pitch -= self.move_speed
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A)):  # A
+            if imgui.is_key_down(imgui.Key.a):  # A
+                print(imgui.Key.a, imgui.get_key_name(imgui.Key.a))
+
                 self.pose.yaw -= self.move_speed
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 18):  # S
+            if imgui.is_key_down(imgui.Key.s):  # S
                 self.pose.pitch += self.move_speed
-            if imgui.is_key_down(imgui.get_key_index(imgui.KEY_A) + 3):  # D
+            if imgui.is_key_down(imgui.Key.d):  # D
                 self.pose.yaw += self.move_speed
 
     def handle_mouse(self):
@@ -111,7 +111,7 @@ class CamWidget:
             imgui.push_item_width(200)
             imgui.text("Up Vector")
             imgui.same_line(viz.label_w)
-            _changed, up_vector_tuple = imgui.input_float3("##up_vector", *self.up_vector, format="%.1f")
+            _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
             if _changed:
                 self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
             imgui.same_line()
@@ -133,7 +133,7 @@ class CamWidget:
                     self.radius = viz.result.std_xyz.item()
                 imgui.text("Look at point")
                 imgui.same_line(viz.label_w)
-                _changed, look_at_point_tuple = imgui.input_float3("##lookat", *self.lookat_point, format="%.1f")
+                _changed, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
                 self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
                 imgui.same_line()
                 if imgui.button("Set to xyz mean") and "mean_xyz" in viz.result.keys():

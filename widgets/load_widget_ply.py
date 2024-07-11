@@ -8,7 +8,7 @@
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
 import os
-import imgui
+from imgui_bundle import imgui
 from gui_utils import imgui_utils
 
 
@@ -33,7 +33,7 @@ class LoadWidget:
             for i, ply in enumerate(self.plys):
                 if imgui.begin_popup(f"browse_pkls_popup{i}"):
                     for item in self.items:
-                        clicked, _state = imgui.menu_item(os.path.relpath(item, self.root))
+                        clicked = imgui.menu_item_simple(os.path.relpath(item, self.root))
                         if clicked:
                             self.plys[i] = item
                     imgui.end_popup()
