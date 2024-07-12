@@ -42,7 +42,7 @@ class LoadWidget:
                     imgui.open_popup(f"browse_pkls_popup{i}")
                     self.items = self.list_runs_and_pkls()
                 imgui.same_line()
-                imgui.text(f"Scene {i + 1}: " + ply[len(self.root):])
+                imgui.text(f"Scene {i + 1}: " + ply[len(self.root) :])
 
             if imgui_utils.button("Add Scene"):
                 self.plys.append(self.plys[-1])
@@ -53,7 +53,9 @@ class LoadWidget:
         viz.args.highlight_border = self.highlight_border
         viz.args.use_splitscreen = self.use_splitscreen
         viz.args.ply_file_paths = self.plys
-        viz.args.current_ply_names = [ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys]
+        viz.args.current_ply_names = [
+            ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
+        ]
 
     def list_runs_and_pkls(self) -> list[str]:
         self.items = []

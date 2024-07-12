@@ -62,18 +62,6 @@ class EvalWidget:
                 imgui.text(pprint.pformat(result, compact=True))
 
     def handle_tensor(self, result, depth, var_name):
-        # imgui.new_line()
-        # imgui.same_line(depth)
-        # imgui.text(pprint.pformat(result, compact=True))
-        # if np.prod(list(result.shape)) > 0:
-        #     imgui.new_line()
-        #     imgui.same_line(depth)
-        #     imgui.text(pprint.pformat(list(result.shape), compact=True))
-        #     imgui.new_line()
-        #     imgui.same_line(depth)
-        #     stats_text = f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().mean().item():.2f}, std:{result.float().std().item():.2f}"
-        #     imgui.text(pprint.pformat(stats_text, compact=True))
-
         orig_var_name = var_name
         var_name += self.viz.args.ply_file_paths[0]
         if var_name not in self.use_cache_dict.keys():
@@ -96,12 +84,15 @@ class EvalWidget:
             #     implot.AxisFlags_.no_decorations.value,
             #     implot.AxisFlags_.no_decorations.value,
             # )
-            bar_size = (max(self.hist_cache[var_name][1].astype(np.float32)) - min(self.hist_cache[var_name][1].astype(np.float32))) / (bins + 1)
+            bar_size = (
+                max(self.hist_cache[var_name][1].astype(np.float32))
+                - min(self.hist_cache[var_name][1].astype(np.float32))
+            ) / (bins + 1)
             implot.plot_bars(
                 f"##hist{var_name}",
                 ys=self.hist_cache[var_name][0].astype(np.float32),
                 xs=self.hist_cache[var_name][1].astype(np.float32),
-                bar_size=bar_size
+                bar_size=bar_size,
             )
             implot.end_plot()
 

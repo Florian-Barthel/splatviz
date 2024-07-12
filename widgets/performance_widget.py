@@ -37,7 +37,11 @@ class PerformanceWidget:
             imgui.text("GUI")
             imgui.same_line(viz.label_w)
             with imgui_utils.item_width(viz.font_size * 8):
-                imgui.plot_lines("##gui_times", np.array(array.array("f", self.gui_times)), scale_min=0)
+                imgui.plot_lines(
+                    "##gui_times",
+                    np.array(array.array("f", self.gui_times)),
+                    scale_min=0,
+                )
             imgui.same_line(viz.label_w + viz.font_size * 9)
             t = [x for x in self.gui_times if x > 0]
             t = np.mean(t) if len(t) > 0 else 0
@@ -53,7 +57,11 @@ class PerformanceWidget:
             imgui.text("Render")
             imgui.same_line(viz.label_w)
             with imgui_utils.item_width(viz.font_size * 8):
-                imgui.plot_lines("##render_times", np.array(array.array("f", self.render_times)), scale_min=0)
+                imgui.plot_lines(
+                    "##render_times",
+                    np.array(array.array("f", self.render_times)),
+                    scale_min=0,
+                )
             imgui.same_line(viz.label_w + viz.font_size * 9)
             t = [x for x in self.render_times if x > 0]
             t = np.mean(t) if len(t) > 0 else 0

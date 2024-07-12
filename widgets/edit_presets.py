@@ -14,5 +14,5 @@ gaussian._opacity = gaussian._opacity
 gaussian._features_dc = gaussian._features_dc
 gaussian._features_rest = gaussian._features_rest
 self.bg_color[:] = 0
-"""
+""",
 )

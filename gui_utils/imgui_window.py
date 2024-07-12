@@ -58,7 +58,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
             # imgui.destroy_context(self._imgui_context) # Commented out to avoid creating imgui.ini at the end.
             self._imgui_context = None
         if self._implot_context is not None:
-            implot.destroy_context(self._implot_context) # Commented out to avoid creating imgui.ini at the end.
+            implot.destroy_context(self._implot_context)  # Commented out to avoid creating imgui.ini at the end.
             self._implot_context = None
         super().close()
 

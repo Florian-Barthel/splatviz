@@ -14,31 +14,24 @@ class CaptureWidget:
         self.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_screenshots"))
         self.path_ply = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_ply_files"))
 
-        self.dump_image = False
-        self.dump_gui = False
-        self.defer_frames = 0
-        self.disabled_time = 0
-
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            with imgui_utils.grayed_out(self.disabled_time != 0):
-                imgui.text('Save Screenshot')
-                imgui.same_line(viz.label_w)
-                if imgui.is_item_hovered() and not imgui.is_item_active() and self.path != '':
-                    imgui.set_tooltip(self.path)
-                if imgui_utils.button('Save', width=viz.button_w, enabled=(self.disabled_time == 0 and 'image' in viz.result)):
-                    if 'image' in viz.result:
-                        self.save_png(viz.result.image)
+            imgui.text("Save Screenshot")
+            imgui.same_line(viz.label_w)
+            if imgui.is_item_hovered() and not imgui.is_item_active() and self.path != "":
+                imgui.set_tooltip(self.path)
+            if imgui_utils.button("Save", width=viz.button_w):
+                if "image" in viz.result:
+                    self.save_png(viz.result.image)
 
-                imgui.text('Save PLY')
-                imgui.same_line(viz.label_w)
-                if imgui_utils.button('Save', width=viz.button_w):
-                    viz.args.save_ply_path = self.path_ply
-                else:
-                    viz.args.save_ply_path = None
-
+            imgui.text("Save PLY")
+            imgui.same_line(viz.label_w)
+            if imgui_utils.button("Save", width=viz.button_w):
+                viz.args.save_ply_path = self.path_ply
+            else:
+                viz.args.save_ply_path = None
 
     def save_png(self, image):
         viz = self.viz

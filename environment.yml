@@ -21,7 +21,7 @@ dependencies:
   - plyfile=1.0.3
   - pip:
     - imgui==2.0.0
-    - imgui_bundle
+    - imgui_bundle==1.5.2
     - imageio-ffmpeg
     - gaussian-splatting/submodules/diff-gaussian-rasterization
     - gaussian-splatting/submodules/simple-knn

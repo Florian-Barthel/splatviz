@@ -14,7 +14,7 @@ from gui_utils import gl_utils
 from gui_utils import text_utils
 from gui_utils.constants import *
 from viz_utils.dict import EasyDict
-from widgets import edit_widget, eval_widget, performance_widget, load_widget_pkl, load_widget_ply, video_widget, cam_widget, capture_widget, latent_widget
+from widgets import edit_widget, eval_widget, performance_widget, load_widget_pkl, load_widget_ply, video_widget, cam_widget, capture_widget, latent_widget, render_widget
 from viz.async_renderer import AsyncRenderer
 from viz.gaussian_renderer import GaussianRenderer
 from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
@@ -52,6 +52,8 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget = performance_widget.PerformanceWidget(self)
         self.video_widget = video_widget.VideoWidget(self)
         self.capture_widget = capture_widget.CaptureWidget(self)
+        self.rener_widget = render_widget.RenderWidget(self)
+
 
         # Initialize window.
         self.set_position(0, 0)
@@ -112,6 +114,11 @@ class Visualizer(imgui_window.ImguiWindow):
         expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
         imgui.indent()
         self.perf_widget(expanded)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Render", default=False)
+        imgui.indent()
+        self.rener_widget(expanded, decoder=self.use_gan_decoder)
         imgui.unindent()
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)

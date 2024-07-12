@@ -12,7 +12,6 @@ import torch
 import numpy as np
 
 from gui_utils import imgui_utils
-from gui_utils.constants import *
 from viz_utils.camera_utils import get_forward_vector, create_cam2world_matrix, get_origin, normalize_vecs
 from viz_utils.dict import EasyDict
 
@@ -24,7 +23,6 @@ class CamWidget:
     def __init__(self, viz):
         self.viz = viz
         self.fov = 45
-        self.size = 512
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
         self.cam_pos = torch.tensor([0.0, 0.0, 1.0], device="cuda")
@@ -89,15 +87,10 @@ class CamWidget:
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
-
         self.handle_mouse()
         self.handle_wasd()
 
         if show:
-            imgui.text("Resolution")
-            imgui.same_line(viz.label_w)
-            _changed, self.size = imgui.input_int("##size", self.size, 128)
-
             imgui.text("Camera Mode")
             imgui.same_line(viz.label_w)
             _clicked, self.current_control_mode = imgui.combo(
@@ -149,5 +142,4 @@ class CamWidget:
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
         viz.args.fov = self.fov
-        viz.args.size = self.size
         viz.args.cam_params = self.cam_params

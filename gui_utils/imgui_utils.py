@@ -15,7 +15,8 @@ from gui_utils.constants import *
 
 # ----------------------------------------------------------------------------
 
-def set_default_style(color_scheme='dark', spacing=5, indent=20, scrollbar=10):
+
+def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s = imgui.get_style()
     s.window_padding = [spacing, spacing]
     s.item_spacing = [spacing, spacing]
@@ -31,11 +32,11 @@ def set_default_style(color_scheme='dark', spacing=5, indent=20, scrollbar=10):
     # s.window_rounding       = 0
     # s.child_rounding        = 0
     # s.popup_rounding        = 1
-    s.frame_rounding        = 5
+    s.frame_rounding = 5
     # s.scrollbar_rounding    = 1
     # s.grab_rounding         = 1
 
-    getattr(imgui, f'style_colors_{color_scheme}')(s)
+    getattr(imgui, f"style_colors_{color_scheme}")(s)
 
     # c0 = colors[COLOR_MENUBAR_BACKGROUND]
     # c1 = colors[COLOR_FRAME_BACKGROUND]
@@ -92,6 +93,7 @@ def set_default_style(color_scheme='dark', spacing=5, indent=20, scrollbar=10):
 
 # ----------------------------------------------------------------------------
 
+
 @contextlib.contextmanager
 def grayed_out(cond=True):
     if cond:
@@ -121,6 +123,7 @@ def grayed_out(cond=True):
 
 # ----------------------------------------------------------------------------
 
+
 @contextlib.contextmanager
 def item_width(width=None):
     if width is not None:
@@ -132,6 +135,7 @@ def item_width(width=None):
 
 
 # ----------------------------------------------------------------------------
+
 
 def scoped_by_object_id(method):
     def decorator(self, *args, **kwargs):
@@ -145,6 +149,7 @@ def scoped_by_object_id(method):
 
 # ----------------------------------------------------------------------------
 
+
 def button(label, width=0, enabled=True):
     with grayed_out(not enabled):
         clicked = imgui.button(label)
@@ -153,6 +158,7 @@ def button(label, width=0, enabled=True):
 
 
 # ----------------------------------------------------------------------------
+
 
 def collapsing_header(text, visible=None, flags=0, default=False, enabled=True, show=True):
     expanded = False
@@ -169,6 +175,7 @@ def collapsing_header(text, visible=None, flags=0, default=False, enabled=True, 
 
 # ----------------------------------------------------------------------------
 
+
 def popup_button(label, width=0, enabled=True):
     if button(label, width, enabled):
         imgui.open_popup(label)
@@ -178,23 +185,25 @@ def popup_button(label, width=0, enabled=True):
 
 # ----------------------------------------------------------------------------
 
-def input_text(label, value, buffer_length, flags, width=None, help_text=''):
+
+def input_text(label, value, buffer_length, flags, width=None, help_text=""):
     old_value = value
     color = list(imgui.get_style().colors[COLOR_TEXT])
-    if value == '':
+    if value == "":
         color[-1] *= 0.5
     with item_width(width):
         # imgui.push_style_color(imgui.COLOR_TEXT, *color)
-        value = value if value != '' else help_text
+        value = value if value != "" else help_text
         changed, value = imgui.input_text(label, value, buffer_length, flags)
-        value = value if value != help_text else ''
+        value = value if value != help_text else ""
         # imgui.pop_style_color(1)
     if not flags & imgui.InputTextFlags_.enter_returns_true:
-        changed = (value != old_value)
+        changed = value != old_value
     return changed, value
 
 
 # ----------------------------------------------------------------------------
+
 
 def drag_previous_control(enabled=True):
     dragging = False
@@ -211,6 +220,7 @@ def drag_previous_control(enabled=True):
 
 # ----------------------------------------------------------------------------
 
+
 def drag_button(label, width=0, enabled=True):
     clicked = button(label, width=width, enabled=enabled)
     dragging, dx, dy = drag_previous_control(enabled=enabled)
@@ -218,6 +228,7 @@ def drag_button(label, width=0, enabled=True):
 
 
 # ----------------------------------------------------------------------------
+
 
 def drag_hidden_window(label, x, y, width, height, enabled=True):
     imgui.push_style_color(COLOR_WINDOW_BACKGROUND, 0)
@@ -229,5 +240,6 @@ def drag_hidden_window(label, x, y, width, height, enabled=True):
     imgui.end()
     imgui.pop_style_color(2)
     return dragging, dx, dy
+
 
 # ----------------------------------------------------------------------------

@@ -51,33 +51,12 @@ class EditWidget:
         self._cur_name_slider = self.var_names[self.var_name_index]
         self._cur_preset_name = ""
 
-        self.sliders: list[Slider] = [
-            Slider(
-                key=self.var_names[0],
-                value=5,
-                min_value=0,
-                max_value=10
-            )
-        ]
-
-        self.render_alpha = False
-        self.render_depth = False
-        self.render_gan_image = False
+        self.sliders: list[Slider] = [Slider(key=self.var_names[0], value=5, min_value=0, max_value=10)]
 
     @imgui_utils.scoped_by_object_id
-    def __call__(self, show=True, decoder=False):
+    def __call__(self, show=True):
         viz = self.viz
         if show:
-            alpha_changed, self.render_alpha = imgui.checkbox("Render alpha", self.render_alpha)
-            depth_changed, self.render_depth = imgui.checkbox("Render depth", self.render_depth)
-            if decoder:
-                _, self.render_gan_image = imgui.checkbox("Render GAN", self.render_gan_image)
-
-            if self.render_alpha and alpha_changed:
-                self.render_depth = False
-            if self.render_depth and depth_changed:
-                self.render_alpha = False
-
             self.render_sliders()
             imgui.new_line()
 
@@ -92,12 +71,7 @@ class EditWidget:
                         self.editor.set_text(self.presets[preset])
                 imgui.end_popup()
 
-            # dynamic_height = 10 + viz.font_size * (self.text.count("\n") + 2)
-            # _changed, self.text = imgui.input_text_multiline(
-            #     "##input_text", self.text, width=viz.pane_w, height=dynamic_height
-            # )
             self.editor.render("Code")
-            # self.editor.(self.text.count("\n")+ 1)
 
             imgui.text("Preset Name")
             imgui.same_line()
@@ -105,22 +79,19 @@ class EditWidget:
             imgui.same_line()
             if imgui.button("Save as Preset"):
                 self.presets[self._cur_preset_name] = self.editor.get_text()
-                with open("./presets.json", "w", encoding='utf-8') as f:
+                with open("./presets.json", "w", encoding="utf-8") as f:
                     json.dump(self.presets, f)
                 self._cur_preset_name = ""
 
         viz.args.edit_text = self.editor.get_text()
-        viz.args.render_alpha = self.render_alpha
-        viz.args.render_depth = self.render_depth
-        viz.args.render_gan_image = self.render_gan_image
         viz.args.update({slider.key: slider.value for slider in self.sliders})
 
     def load_presets(self):
         if not os.path.exists("./presets.json"):
-            with open("./presets.json", "w", encoding='utf-8') as f:
+            with open("./presets.json", "w", encoding="utf-8") as f:
                 json.dump(dict(default=default_preset), f)
 
-        with open("./presets.json", "r", encoding='utf-8') as f:
+        with open("./presets.json", "r", encoding="utf-8") as f:
             self.presets = json.load(f)
 
     def render_sliders(self):
@@ -162,7 +133,7 @@ class EditWidget:
                     key=self._cur_name_slider,
                     value=self._cur_val_slider,
                     min_value=self._cur_min_slider,
-                    max_value=self._cur_max_slider
+                    max_value=self._cur_max_slider,
                 )
             )
             self.var_name_index += 1
