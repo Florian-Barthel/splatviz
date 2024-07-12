@@ -106,7 +106,7 @@ class Visualizer(imgui_window.ImguiWindow):
         # Widgets.
         expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
         imgui.indent()
-        self.load_widget(True)
+        self.load_widget(expanded)
         imgui.unindent()
 
         expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)

@@ -19,7 +19,7 @@ class EvalWidget:
         viz = self.viz
 
         if show:
-            _changed, self.text = imgui.input_text("", self.text)
+            _changed, self.text = imgui.input_text("##input_text", self.text)
             self.format()
         viz.args.eval_text = self.text
 
