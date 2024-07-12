@@ -22,13 +22,13 @@ class CaptureWidget:
             imgui.same_line(viz.label_w)
             if imgui.is_item_hovered() and not imgui.is_item_active() and self.path != "":
                 imgui.set_tooltip(self.path)
-            if imgui_utils.button("Save", width=viz.button_w):
+            if imgui_utils.button("Save img", width=viz.button_w):
                 if "image" in viz.result:
                     self.save_png(viz.result.image)
 
             imgui.text("Save PLY")
             imgui.same_line(viz.label_w)
-            if imgui_utils.button("Save", width=viz.button_w):
+            if imgui_utils.button("Save ply", width=viz.button_w):
                 viz.args.save_ply_path = self.path_ply
             else:
                 viz.args.save_ply_path = None
