@@ -25,7 +25,6 @@ def log_transform(x):
     return torch.sign(x) * torch.log1p(torch.abs(x))
 
 def inverse_log_transform(y):
-    assert y.max() < 20, "Probably mixed up linear and log values for xyz. These going in here are supposed to be quite small (log scale)"
     return torch.sign(y) * (torch.expm1(torch.abs(y)))
 
 

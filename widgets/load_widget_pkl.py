@@ -8,7 +8,7 @@
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
 import os
-import imgui
+from imgui_bundle import imgui
 from gui_utils import imgui_utils
 
 

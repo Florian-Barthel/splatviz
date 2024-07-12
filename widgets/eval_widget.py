@@ -1,4 +1,4 @@
-import imgui
+from imgui_bundle import imgui, implot
 import numpy as np
 import torch
 import pprint
@@ -19,7 +19,7 @@ class EvalWidget:
         viz = self.viz
 
         if show:
-            _changed, self.text = imgui.input_text("", self.text)
+            _changed, self.text = imgui.input_text("##input_text", self.text)
             self.format()
         viz.args.eval_text = self.text
 
@@ -62,29 +62,48 @@ class EvalWidget:
                 imgui.text(pprint.pformat(result, compact=True))
 
     def handle_tensor(self, result, depth, var_name):
-        imgui.new_line()
-        imgui.same_line(depth)
-        imgui.text(pprint.pformat(result, compact=True))
-        if np.prod(list(result.shape)) > 0:
-            imgui.new_line()
-            imgui.same_line(depth)
-            imgui.text(pprint.pformat(list(result.shape), compact=True))
-            imgui.new_line()
-            imgui.same_line(depth)
-            stats_text = f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().mean().item():.2f}, std:{result.float().std().item():.2f}"
-            imgui.text(pprint.pformat(stats_text, compact=True))
+        # imgui.new_line()
+        # imgui.same_line(depth)
+        # imgui.text(pprint.pformat(result, compact=True))
+        # if np.prod(list(result.shape)) > 0:
+        #     imgui.new_line()
+        #     imgui.same_line(depth)
+        #     imgui.text(pprint.pformat(list(result.shape), compact=True))
+        #     imgui.new_line()
+        #     imgui.same_line(depth)
+        #     stats_text = f"min: {result.min().item():.2f}, max: {result.max().item():.2f}, mean:{result.float().mean().item():.2f}, std:{result.float().std().item():.2f}"
+        #     imgui.text(pprint.pformat(stats_text, compact=True))
 
+        orig_var_name = var_name
         var_name += self.viz.args.ply_file_paths[0]
         if var_name not in self.use_cache_dict.keys():
             self.use_cache_dict[var_name] = True
         imgui.new_line()
         imgui.same_line(depth)
         _, self.use_cache_dict[var_name] = imgui.checkbox("Use Cache", self.use_cache_dict[var_name])
+        bins = 50
         if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:
-            hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=50)
+            hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=bins)
             self.hist_cache[var_name] = hist
-        imgui.same_line()
-        imgui.core.plot_histogram("", self.hist_cache[var_name][0].astype(np.float32))
+
+        imgui.new_line()
+        imgui.same_line(depth)
+        plot_size = imgui.ImVec2(self.viz.pane_w - 100, 200)
+        if implot.begin_plot(f"{orig_var_name}", plot_size):
+            # implot.setup_axes(
+            #     "",
+            #     "",
+            #     implot.AxisFlags_.no_decorations.value,
+            #     implot.AxisFlags_.no_decorations.value,
+            # )
+            bar_size = (max(self.hist_cache[var_name][1].astype(np.float32)) - min(self.hist_cache[var_name][1].astype(np.float32))) / (bins + 1)
+            implot.plot_bars(
+                f"##hist{var_name}",
+                ys=self.hist_cache[var_name][0].astype(np.float32),
+                xs=self.hist_cache[var_name][1].astype(np.float32),
+                bar_size=bar_size
+            )
+            implot.end_plot()
 
     @staticmethod
     def get_short_info(key, value):

@@ -1,5 +1,5 @@
 import click
-import imgui
+from imgui_bundle import imgui
 import numpy as np
 import torch
 import sys
@@ -12,6 +12,7 @@ from gui_utils import imgui_window
 from gui_utils import imgui_utils
 from gui_utils import gl_utils
 from gui_utils import text_utils
+from gui_utils.constants import *
 from viz_utils.dict import EasyDict
 from widgets import edit_widget, eval_widget, performance_widget, load_widget_pkl, load_widget_ply, video_widget, cam_widget, capture_widget, latent_widget
 from viz.async_renderer import AsyncRenderer
@@ -22,7 +23,7 @@ from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
 class Visualizer(imgui_window.ImguiWindow):
     def __init__(self, data_path=None, use_gan_decoder=False):
         super().__init__(
-            title="Gaussian Machine", window_width=1920, window_height=1080, font="fonts/JetBrainsMono-Regular.ttf"
+            title="splatviz", window_width=1920, window_height=1080, font="fonts/JetBrainsMono-Regular.ttf"
         )
 
         # Internals.
@@ -84,9 +85,9 @@ class Visualizer(imgui_window.ImguiWindow):
     def draw_frame(self):
         self.begin_frame()
         self.args = EasyDict()
-        self.pane_w = self.font_size * 50
+        self.pane_w = self.content_width - self.content_height
         self.button_w = self.font_size * 5
-        self.label_w = round(self.font_size * 5.5)
+        self.label_w = round(self.font_size * 5.5) + 100
 
         # Detect mouse dragging in the result area.
         dragging, dx, dy = imgui_utils.drag_hidden_window(
@@ -96,31 +97,53 @@ class Visualizer(imgui_window.ImguiWindow):
             self.cam_widget.drag(dx, dy)
 
         # Begin control pane.
-        imgui.set_next_window_position(0, 0)
-        imgui.set_next_window_size(self.pane_w, self.content_height)
-        imgui.begin(
-            "##control_pane",
-            closable=False,
-            flags=(imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE),
+        imgui.set_next_window_pos(imgui.ImVec2(0, 0))
+        imgui.set_next_window_size(imgui.ImVec2(self.pane_w, self.content_height))
+        imgui.begin( "##control_pane", p_open=True,
+            flags=(WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE),
         )
 
         # Widgets.
-        self.load_widget(True)
+        expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
+        imgui.indent()
+        self.load_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
+        imgui.indent()
         self.perf_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
+        imgui.indent()
         self.cam_widget(expanded)
+        imgui.unindent()
+
         if self.use_gan_decoder:
             expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
+            imgui.indent()
             self.latent_widget(expanded)
+            imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
+        imgui.indent()
         self.video_widget(expanded)
+        imgui.unindent()
+
         expanded, _visible = imgui_utils.collapsing_header("Save", default=False)
+        imgui.indent()
         self.capture_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Edit", default=True)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Edit", default=False)
+        imgui.indent()
         self.edit_widget(expanded)
-        expanded, _visible = imgui_utils.collapsing_header("Eval", default=True)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Eval", default=False)
+        imgui.indent()
         self.eval_widget(expanded)
+        imgui.unindent()
 
         # Render.
         if self.is_skipping_frames():

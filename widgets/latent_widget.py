@@ -1,4 +1,4 @@
-import imgui
+from imgui_bundle import imgui
 import dnnlib
 from gui_utils import imgui_utils
 

@@ -1,4 +1,4 @@
-import imgui
+from imgui_bundle import imgui
 import numpy as np
 
 from gui_utils import imgui_utils
@@ -20,11 +20,25 @@ class VideoWidget:
         viz = self.viz
         viz.args.video_cams = []
         if show:
-            _changed, self.num_frames = imgui.input_int("num frames", self.num_frames)
-            _changed, self.cam_height = imgui.input_float("camera height", self.cam_height)
-            _changed, self.radius = imgui.input_float("radius", self.radius)
-            _changed, self.resolution = imgui.input_int("resolution", self.resolution)
-            _changed, self.fov = imgui.input_int("fov", self.fov)
+            imgui.text("Num Frames")
+            imgui.same_line(viz.label_w)
+            _changed, self.num_frames = imgui.input_int("##num_frames", self.num_frames)
+
+            imgui.text("Camera Height")
+            imgui.same_line(viz.label_w)
+            _changed, self.cam_height = imgui.input_float("##camera_height", self.cam_height)
+
+            imgui.text("Radius")
+            imgui.same_line(viz.label_w)
+            _changed, self.radius = imgui.input_float("##radius", self.radius)
+
+            imgui.text("Resolution")
+            imgui.same_line(viz.label_w)
+            _changed, self.resolution = imgui.input_int("##resolution", self.resolution)
+
+            imgui.text("FOV")
+            imgui.same_line(viz.label_w)
+            _changed, self.fov = imgui.input_int("##fov", self.fov)
 
             if imgui.button("Render"):
                 xs = np.linspace(0, 2 * np.pi, self.num_frames, endpoint=False)
