@@ -55,30 +55,26 @@ class CamWidget:
                 radius=0.01,
                 up_vector=self.up_vector
             )
-
             self.sideways = torch.cross(self.forward, self.up_vector)
-            if imgui.is_key_down(imgui.Key.w):  # W
+            if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.cam_pos += self.forward * self.move_speed
-            if imgui.is_key_down(imgui.Key.a):  # A
+            if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
                 self.cam_pos -= self.sideways * self.move_speed
-            if imgui.is_key_down(imgui.Key.s):  # S
+            if imgui.is_key_down(imgui.Key.down_arrow) or "s" in self.viz.current_pressed_keys:
                 self.cam_pos -= self.forward * self.move_speed
-            if imgui.is_key_down(imgui.Key.d):  # D
+            if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
                 self.cam_pos += self.sideways * self.move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
             self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
-            if imgui.is_key_down(imgui.Key.w):  # W
-                print("w")
-                self.pose.pitch -= self.move_speed
-            if imgui.is_key_down(imgui.Key.a):  # A
-                print(imgui.Key.a, imgui.get_key_name(imgui.Key.a))
-
-                self.pose.yaw += self.move_speed
-            if imgui.is_key_down(imgui.Key.s):  # S
+            if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.pose.pitch += self.move_speed
-            if imgui.is_key_down(imgui.Key.d):  # D
+            if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
+                self.pose.yaw += self.move_speed
+            if imgui.is_key_down(imgui.Key.down_arrow) or "s" in self.viz.current_pressed_keys:
+                self.pose.pitch -= self.move_speed
+            if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
                 self.pose.yaw -= self.move_speed
 
     def handle_mouse(self):
@@ -149,7 +145,6 @@ class CamWidget:
             _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
 
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
-
 
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
