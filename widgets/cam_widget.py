@@ -75,11 +75,11 @@ class CamWidget:
             if imgui.is_key_down(imgui.Key.a):  # A
                 print(imgui.Key.a, imgui.get_key_name(imgui.Key.a))
 
-                self.pose.yaw -= self.move_speed
+                self.pose.yaw += self.move_speed
             if imgui.is_key_down(imgui.Key.s):  # S
                 self.pose.pitch += self.move_speed
             if imgui.is_key_down(imgui.Key.d):  # D
-                self.pose.yaw += self.move_speed
+                self.pose.yaw -= self.move_speed
 
     def handle_mouse(self):
         mouse_pos = imgui.get_io().mouse_pos

@@ -38,11 +38,10 @@ class EditWidget:
 
         self.presets = {}
         self.load_presets()
-        self.text = self.presets["Default"]
 
         self.editor = edit.TextEditor()
         self.editor.set_language_definition(edit.TextEditor.LanguageDefinition.python())
-        self.editor.set_text(self.text)
+        self.editor.set_text(self.presets["Default"])
 
         self.var_names = "xyzijklmnuvwabcdefghopqrst"
         self.var_name_index = 1
@@ -88,9 +87,9 @@ class EditWidget:
 
             if imgui.begin_popup("browse_presets"):
                 for preset in self.all_presets:
-                    clicked, _state = imgui.menu_item_simple(preset)
+                    clicked = imgui.menu_item_simple(preset)
                     if clicked:
-                        self.text = self.presets[preset]
+                        self.editor.set_text(self.presets[preset])
                 imgui.end_popup()
 
             # dynamic_height = 10 + viz.font_size * (self.text.count("\n") + 2)
@@ -105,13 +104,12 @@ class EditWidget:
             _changed, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
             imgui.same_line()
             if imgui.button("Save as Preset"):
-                self.presets[self._cur_preset_name] = self.text
+                self.presets[self._cur_preset_name] = self.editor.get_text()
                 with open("./presets.json", "w", encoding='utf-8') as f:
                     json.dump(self.presets, f)
                 self._cur_preset_name = ""
 
-        self.text = self.editor.get_text()
-        viz.args.edit_text = self.text
+        viz.args.edit_text = self.editor.get_text()
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
         viz.args.render_gan_image = self.render_gan_image
