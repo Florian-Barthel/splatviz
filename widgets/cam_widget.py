@@ -7,6 +7,7 @@
 # disclosure or distribution of this material and related documentation
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
+import glfw
 from imgui_bundle import imgui
 import torch
 import numpy as np
@@ -36,7 +37,7 @@ class CamWidget:
         self.invert_x = False
         self.invert_y = False
         self.move_speed = 0.02
-        self.control_modes = ["Orbit", "WASD"]
+        self.control_modes = ["Orbit", "Arrow Keys"]
         self.current_control_mode = 0
 
     def drag(self, dx, dy):
@@ -47,7 +48,7 @@ class CamWidget:
         self.pose.pitch = np.clip(self.pose.pitch + y_dir * dy / viz.font_size * 3e-2, -np.pi / 2, np.pi / 2)
 
     def handle_wasd(self):
-        if self.control_modes[self.current_control_mode] == "WASD":
+        if self.control_modes[self.current_control_mode] == "Arrow Keys":
             self.forward = get_forward_vector(
                 lookat_position=self.cam_pos,
                 horizontal_mean=self.pose.yaw + np.pi / 2,
@@ -55,37 +56,33 @@ class CamWidget:
                 radius=0.01,
                 up_vector=self.up_vector
             )
-
             self.sideways = torch.cross(self.forward, self.up_vector)
-            if imgui.is_key_down(imgui.Key.w):  # W
+            if imgui.is_key_down(imgui.Key.up_arrow):
                 self.cam_pos += self.forward * self.move_speed
-            if imgui.is_key_down(imgui.Key.a):  # A
+            if imgui.is_key_down(imgui.Key.left_arrow):
                 self.cam_pos -= self.sideways * self.move_speed
-            if imgui.is_key_down(imgui.Key.s):  # S
+            if imgui.is_key_down(imgui.Key.down_arrow):
                 self.cam_pos -= self.forward * self.move_speed
-            if imgui.is_key_down(imgui.Key.d):  # D
+            if imgui.is_key_down(imgui.Key.right_arrow):
                 self.cam_pos += self.sideways * self.move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
             self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
-            if imgui.is_key_down(imgui.Key.w):  # W
-                print("w")
-                self.pose.pitch -= self.move_speed
-            if imgui.is_key_down(imgui.Key.a):  # A
-                print(imgui.Key.a, imgui.get_key_name(imgui.Key.a))
-
-                self.pose.yaw += self.move_speed
-            if imgui.is_key_down(imgui.Key.s):  # S
+            if imgui.is_key_down(imgui.Key.up_arrow):
                 self.pose.pitch += self.move_speed
-            if imgui.is_key_down(imgui.Key.d):  # D
+            if imgui.is_key_down(imgui.Key.left_arrow):
+                self.pose.yaw += self.move_speed
+            if imgui.is_key_down(imgui.Key.down_arrow):
+                self.pose.pitch -= self.move_speed
+            if imgui.is_key_down(imgui.Key.right_arrow):
                 self.pose.yaw -= self.move_speed
 
     def handle_mouse(self):
         mouse_pos = imgui.get_io().mouse_pos
         if mouse_pos.x >= self.viz.pane_w:
             wheel = imgui.get_io().mouse_wheel
-            if self.control_modes[self.current_control_mode] == "WASD":
+            if self.control_modes[self.current_control_mode] == "Arrow Keys":
                 self.cam_pos += self.forward * self.move_speed * wheel
             elif self.control_modes[self.current_control_mode] == "Orbit":
                 self.radius -= wheel / 10
@@ -149,7 +146,6 @@ class CamWidget:
             _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
 
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
-
 
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
