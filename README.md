@@ -36,9 +36,9 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
 
 ### Load Widget
 Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
-directory you have specified. You can change the scene by clicking the <b>Browse</b>> button. You will be displayed a list
-of available .ply files or .yml files that correspond to compressed gaussian scenes using 
-<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method. Additionally, you can also view
+directory you have specified. You can change the scene by clicking the <b>Browse</b>button. You will be displayed a list
+of available .ply files (or .yml files that correspond to compressed gaussian scenes using 
+<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method). Additionally, you can also view
 multiple 3D scenes at once. Simply click <b>Add Scene</b>, which loads the same scene as before and then change the scene.
 The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
 
