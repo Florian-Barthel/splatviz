@@ -34,141 +34,79 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
 ## Widgets
 
 
+<h3>Load Widget</h3>
+<p>
+Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
+directory you have specified. You can change the scene by clicking the <b>Browse</b>> button. You will be displayed a list
+of available .ply files or .yml files that correspond to compressed gaussian scenes using 
+<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method. Additionally, you can also view
+multiple 3D scenes at once. Simply click <b>Add Scene</b>, which loads the same scene as before and then change the scene.
+The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
+</p>
+<img src="images/load.png">
 
-<table cellspacing="0" cellpadding="0" style="border: none;">
-  <tr>
-    <td style="vertical-align: top; width: 415px; padding:0">
-      <h3>Load Widget</h3>
-      <p>
-      Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
-      directory you have specified. You can change the scene by clicking the <b>Browse</b>> button. You will be displayed a list
-      of available .ply files or .yml files that correspond to compressed gaussian scenes using 
-      <a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method. Additionally, you can also view
-      multiple 3D scenes at once. Simply click <b>Add Scene</b>, which loads the same scene as before and then change the scene.
-      The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/load.png">
-    </td>
-  </tr>
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Edit Widget</h3>
-      <p>
-      The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian 
-      python object during runtime. The code that you type in this text area executed just before the gaussian object is
-      forwarded to the cuda renderer. This means, the editing capabilities are unlimited. As long as the provided code
-      is executable, you can type any kind of python code.<br>
-      To enable smooth editing transitions, you can create sliders (press <b>Add Slider</b>) which you can access in the
-      editor text by typing slider.name (eg. slider.x).<br>
-      Lastly, you can save and load presets of code snippets so that you don't have to type the same code again after 
-      closing the application. Those presets are stored in a .json file (presets.json).
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/edit.png">
-    </td>
-  </tr>
+### Edit Widget
+The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian 
+python object during runtime. The code that you type in this text area executed just before the gaussian object is
+forwarded to the cuda renderer. This means, the editing capabilities are unlimited. As long as the provided code
+is executable, you can type any kind of python code.<br>
+To enable smooth editing transitions, you can create sliders (press <b>Add Slider</b>) which you can access in the
+editor text by typing slider.name (eg. slider.x).<br>
+Lastly, you can save and load presets of code snippets so that you don't have to type the same code again after 
+closing the application. Those presets are stored in a .json file (presets.json).
+<img src="images/edit.png">
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Eval Widget</h3>
-      <p>
-      The evaluate widget can be used to debug the gaussian splatting object. By typing
-      python code, which is executed after the rendering, you can access any variable 
-      from the rendering context and visualize them in a histogram. Some useful variables might be:
-      <ul>
-      <li>gaussian</li>      
-      <li>render</li>   
-      <li>render_cam</li>
-      </ul>
-      You can also access variables that you have defined in the editor of the Edit Widget.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/eval_new.png">
-    </td>
-  </tr>
+### Eval Widget
+The evaluate widget can be used to debug the gaussian splatting object. By typing
+python code, which is executed after the rendering, you can access any variable 
+from the rendering context and visualize them in a histogram. Some useful variables might be:
+- gaussian
+- render</li>   
+- render_cam
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Camera Widget</h3>
-      <p>
-      In the camera widget you can define the type and parameters of the camera. Here, you can choose between the modes
-      <b>Orbit</b> and <b>WASD</b>.<br>
-      In the orbit mode, the camera is looking at a specific point in the 3D space, and you can control the pitch and yaw.
-      <b>If the scene is rotated</b>, you can correct that by steering the camera so that it is looking straight up or down.
-      Then set the up-vector to the current viewing direction by pressing <b>Set Current Direction</b>. You might have to press
-      the <b>Flip</b> button if the scene is now upside down.<br>
-      In the WASD mode, you can fly through the scene using the mouse and the WASD / arrow keys.<br>
-      Generally, you can control the camera either by dragging the mouse over the rendered image or by using the WASD or
-      the arrow keys.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/camera.png">
-    </td>
-  </tr>
+You can also access variables that you have defined in the editor of the Edit Widget.
+<img src="images/eval_new.png">
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Video Widget</h3>
-      <p>
-      The video widget creates a video sequence of a full rotation around the current object.
-      Simply define the height of the camera and the rendering resolution. While the video is
-      rendering, the UI is frozen. A loading screen is shown in the terminal output. <br>
-      🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
-      position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/video.png">
-    </td>
-  </tr>
+### Camera Widget
+In the camera widget you can define the type and parameters of the camera. Here, you can choose between the modes
+<b>Orbit</b> and <b>WASD</b>.<br>
+In the orbit mode, the camera is looking at a specific point in the 3D space, and you can control the pitch and yaw.
+<b>If the scene is rotated</b>, you can correct that by steering the camera so that it is looking straight up or down.
+Then set the up-vector to the current viewing direction by pressing <b>Set Current Direction</b>. You might have to press
+the <b>Flip</b> button if the scene is now upside down.<br>
+In the WASD mode, you can fly through the scene using the mouse and the WASD / arrow keys.<br>
+Generally, you can control the camera either by dragging the mouse over the rendered image or by using the WASD or
+the arrow keys.
+<img src="images/camera.png">
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Performance Widget</h3>
-      <p>
-      In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
-      limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
-      skips some editing and evaluation calculations.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/performance.png">
-    </td>
-  </tr>
 
-  <tr>
-    <td style="vertical-align: top; padding:0">
-      <h3>Render Widget</h3>
-      <p>
-      In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering mode.
-      Next to RGB, you can also render the image 3D depth and the alpha values.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/render.png">
-    </td>
-  </tr>
+### Video Widget
+The video widget creates a video sequence of a full rotation around the current object.
+Simply define the height of the camera and the rendering resolution. While the video is
+rendering, the UI is frozen. A loading screen is shown in the terminal output. <br>
+🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
+position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
+<img src="images/video.png">
 
-  <tr>
-    <td style="vertical-align: top; padding:0;">
-      <h3>Save Widget</h3>
-      <p>
-      To save the .ply file or a rendering of the current (edited) 3D scene simply press the respective button in the 
-      save widget. Those files will be saved under: _screenshots or _ply_files. The viewer might be frozen for a short 
-      while, after saving a ply file.
-      </p>
-    </td>
-    <td style="vertical-align: top; padding:0;">
-      <img src="images/save.png">
-    </td>
-  </tr>
-</table>
+
+### Performance Widget
+In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
+limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
+skips some editing and evaluation calculations.
+<img src="images/performance.png">
+
+
+### Render Widget
+In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering mode.
+Next to RGB, you can also render the image 3D depth and the alpha values.
+<img src="images/render.png">
+
+### Save Widget
+To save the .ply file or a rendering of the current (edited) 3D scene simply press the respective button in the 
+save widget. Those files will be saved under: _screenshots or _ply_files. The viewer might be frozen for a short 
+while, after saving a ply file.
+<img src="images/save.png">
 
 
 ## Future Plans
