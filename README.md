@@ -37,7 +37,7 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
 
 <table cellspacing="0" cellpadding="0" style="border: none;">
   <tr>
-    <td style="vertical-align: top; width: 38.2%; padding:0">
+    <td style="vertical-align: top; width: 415px; padding:0">
       <h3>Load Widget</h3>
       <p>
       Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
