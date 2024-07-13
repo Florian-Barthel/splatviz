@@ -1,4 +1,4 @@
-# <img src="images/icon.png" width="30"> splatviz
+# <img src="images/icon.png" width="35"> splatviz
 This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By directly using a 
 native python GUI library (imgui) we can directly manipulate the Gaussian python object just before the rendering it.
 This enables endless editing and visualization possibilities. You can also evaluate python expression just after the 
@@ -68,7 +68,7 @@ from the rendering context and visualize them in a histogram. Some useful variab
 
 You can also access variables that you have defined in the editor of the Edit Widget.
 
-<img src="images/eval_new.png">
+<img src="images/eval.png">
 <hr>
 
 ### Camera Widget

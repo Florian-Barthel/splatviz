@@ -51,7 +51,7 @@ class EditWidget:
         self._cur_name_slider = self.var_names[self.var_name_index]
         self._cur_preset_name = ""
 
-        self.sliders: list[Slider] = [Slider(key=self.var_names[0], value=5, min_value=0, max_value=10)]
+        self.sliders: list[Slider] = [Slider(key=self.var_names[0], value=1, min_value=-10, max_value=10)]
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -65,7 +65,7 @@ class EditWidget:
                 self.all_presets = self.presets.keys()
 
             if imgui.begin_popup("browse_presets"):
-                for preset in self.all_presets:
+                for preset in sorted(self.all_presets):
                     clicked = imgui.menu_item_simple(preset)
                     if clicked:
                         self.editor.set_text(self.presets[preset])
