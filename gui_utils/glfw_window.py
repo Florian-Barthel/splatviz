@@ -12,13 +12,10 @@ import time
 import glfw
 import OpenGL.GL as gl
 
-from viz_utils.dict import EasyDict
 from . import gl_utils
 
-# ----------------------------------------------------------------------------
 
-
-class GlfwWindow:  # pylint: disable=too-many-public-methods
+class GlfwWindow:
     def __init__(
         self, *, title="GlfwWindow", window_width=1920, window_height=1080, deferred_show=True, close_on_esc=True
     ):
@@ -238,11 +235,9 @@ class GlfwWindow:  # pylint: disable=too-many-public-methods
         if key is not None:
             if action == glfw.PRESS:
                 self.current_pressed_keys.add(glfw.get_key_name(key, glfw.get_key_scancode(key)))
-            if action == glfw.RELEASE:
+            if action == glfw.RELEASE and action in self.current_pressed_keys:
                 self.current_pressed_keys.remove(glfw.get_key_name(key, glfw.get_key_scancode(key)))
 
     def _glfw_drop_callback(self, _window, paths):
         self._drag_and_drop_paths = paths
 
-
-# ----------------------------------------------------------------------------

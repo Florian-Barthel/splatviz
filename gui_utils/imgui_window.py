@@ -47,7 +47,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
         self._attach_glfw_callbacks()
         imgui.get_io().ini_saving_rate = 0  # Disable creating imgui.ini at runtime.
         imgui.get_io().mouse_drag_threshold = 0  # Improve behavior with imgui_utils.drag_custom().
-        self._imgui_fonts = {size: imgui.get_io().fonts.add_font_from_file_ttf(font, size + 2) for size in font_sizes}
+        self._imgui_fonts = {size: imgui.get_io().fonts.add_font_from_file_ttf(font, size + 3) for size in font_sizes}
         self._imgui_fonts_code = {size: imgui.get_io().fonts.add_font_from_file_ttf(code_font, size) for size in font_sizes}
 
         self._imgui_renderer.refresh_font_texture()
