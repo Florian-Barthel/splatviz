@@ -22,6 +22,7 @@ class EvalWidget:
             imgui.text("Eval code:")
             imgui.same_line()
             _changed, self.text = imgui.input_text("##input_text", self.text)
+            imgui.new_line()
             with imgui_utils.eval_color():
                 with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
                     self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
@@ -65,6 +66,7 @@ class EvalWidget:
                 imgui.text(pprint.pformat(result, compact=True))
 
     def handle_tensor(self, result, depth, var_name):
+        imgui.text(pprint.pformat(result, compact=True))
         orig_var_name = var_name
         var_name += self.viz.args.ply_file_paths[0]
         if var_name not in self.use_cache_dict.keys():
