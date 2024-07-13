@@ -35,9 +35,9 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
 
 
 
-<table>
+<table cellspacing="0" cellpadding="0" style="border: none;">
   <tr>
-    <td style="vertical-align: top; width: 38.2%">
+    <td style="vertical-align: top; width: 38.2%; padding:0">
       <h3>Load Widget</h3>
       <p>
       Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
@@ -48,13 +48,13 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/load.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Edit Widget</h3>
       <p>
       The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian 
@@ -67,13 +67,13 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       closing the application. Those presets are stored in a .json file (presets.json).
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/edit.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Eval Widget</h3>
       <p>
       The evaluate widget can be used to debug the gaussian splatting object. By typing
@@ -87,13 +87,13 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       You can also access variables that you have defined in the editor of the Edit Widget.
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/eval_new.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Camera Widget</h3>
       <p>
       In the camera widget you can define the type and parameters of the camera. Here, you can choose between the modes
@@ -107,13 +107,13 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       the arrow keys.
       </p>
     </td>
-    <td style="text-align: center;">
+    <td style="vertical-align: top; padding:0;">
       <img src="images/camera.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Video Widget</h3>
       <p>
       The video widget creates a video sequence of a full rotation around the current object.
@@ -123,13 +123,13 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
       </p>
     </td>
-    <td style="text-align: center;">
+    <td style="vertical-align: top; padding:0;">
       <img src="images/video.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Performance Widget</h3>
       <p>
       In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
@@ -137,26 +137,26 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       skips some editing and evaluation calculations.
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/performance.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0">
       <h3>Render Widget</h3>
       <p>
       In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering mode.
       Next to RGB, you can also render the image 3D depth and the alpha values.
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/render.png">
     </td>
   </tr>
 
   <tr>
-    <td style="vertical-align: top;">
+    <td style="vertical-align: top; padding:0;">
       <h3>Save Widget</h3>
       <p>
       To save the .ply file or a rendering of the current (edited) 3D scene simply press the respective button in the 
@@ -164,7 +164,7 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       while, after saving a ply file.
       </p>
     </td>
-    <td>
+    <td style="vertical-align: top; padding:0;">
       <img src="images/save.png">
     </td>
   </tr>
