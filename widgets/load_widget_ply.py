@@ -20,7 +20,7 @@ class LoadWidget:
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
-        self.plys: list[str] = [self.items[-1]]
+        self.plys: list[str] = [self.items[0]]
         self.use_splitscreen = False
         self.highlight_border = False
 
@@ -42,9 +42,9 @@ class LoadWidget:
                     imgui.open_popup(f"browse_pkls_popup{i}")
                     self.items = self.list_runs_and_pkls()
                 imgui.same_line()
-                imgui.text(f"Scene {i + 1}: " + ply[len(self.root):])
+                imgui.text(f"Scene {i + 1}: " + ply[len(self.root) :])
 
-            if imgui_utils.button("Add Scene"):
+            if imgui_utils.button("Add Scene", width=viz.button_w):
                 self.plys.append(self.plys[-1])
 
             use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
@@ -53,7 +53,9 @@ class LoadWidget:
         viz.args.highlight_border = self.highlight_border
         viz.args.use_splitscreen = self.use_splitscreen
         viz.args.ply_file_paths = self.plys
-        viz.args.current_ply_names = [ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys]
+        viz.args.current_ply_names = [
+            ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
+        ]
 
     def list_runs_and_pkls(self) -> list[str]:
         self.items = []
@@ -63,4 +65,4 @@ class LoadWidget:
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(str(current_path))
-        return self.items
+        return sorted(self.items)

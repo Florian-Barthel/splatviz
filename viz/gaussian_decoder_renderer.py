@@ -42,7 +42,7 @@ class GaussianDecoderRenderer(Renderer):
         fov,
         edit_text,
         eval_text,
-        size,
+        resolution,
         ply_file_paths,
         cam_params,
         current_ply_name,
@@ -66,8 +66,8 @@ class GaussianDecoderRenderer(Renderer):
             self.render_video("./_videos", video_cams)
 
         # create camera
-        width = size
-        height = size
+        width = resolution
+        height = resolution
 
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
         fov_rad = fov / 360 * 2 * np.pi

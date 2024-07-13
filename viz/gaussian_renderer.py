@@ -34,7 +34,7 @@ class GaussianRenderer(Renderer):
         fov,
         edit_text,
         eval_text,
-        size,
+        resolution,
         ply_file_paths,
         cam_params,
         current_ply_names,
@@ -47,8 +47,8 @@ class GaussianRenderer(Renderer):
         **slider,
     ):
         slider = EasyDict(slider)
-        width = size
-        height = size
+        width = resolution
+        height = resolution
         images = []
 
         for scene_index, ply_file_path in enumerate(ply_file_paths):
@@ -63,6 +63,8 @@ class GaussianRenderer(Renderer):
 
             gaussian = copy.deepcopy(self.gaussian_models[scene_index])
             command = re.sub(";+", ";", edit_text.replace("\n", ";"))
+            while command.startswith(";"):
+                command = command[1:]
             exec(command)
 
             if len(video_cams) > 0:
@@ -74,19 +76,19 @@ class GaussianRenderer(Renderer):
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:
-                images.append( render["depth"] / render["depth"].max())
+                images.append(render["depth"] / render["depth"].max())
             else:
                 images.append(render["render"])
 
         if use_splitscreen:
             img = torch.zeros_like(images[0])
-            split_size = size // len(images)
+            split_size = resolution // len(images)
             offset = 0
             for i in range(len(images)):
-                img[..., offset:offset+split_size] = images[i][..., offset:offset+split_size]
+                img[..., offset : offset + split_size] = images[i][..., offset : offset + split_size]
                 offset += split_size
                 if highlight_border and i != len(images) - 1:
-                    img[..., offset-1:offset] = 1
+                    img[..., offset - 1 : offset] = 1
 
         else:
             img = torch.concatenate(images, dim=2)

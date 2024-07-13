@@ -14,7 +14,18 @@ from gui_utils import gl_utils
 from gui_utils import text_utils
 from gui_utils.constants import *
 from viz_utils.dict import EasyDict
-from widgets import edit_widget, eval_widget, performance_widget, load_widget_pkl, load_widget_ply, video_widget, cam_widget, capture_widget, latent_widget
+from widgets import (
+    edit_widget,
+    eval_widget,
+    performance_widget,
+    load_widget_pkl,
+    load_widget_ply,
+    video_widget,
+    cam_widget,
+    capture_widget,
+    latent_widget,
+    render_widget,
+)
 from viz.async_renderer import AsyncRenderer
 from viz.gaussian_renderer import GaussianRenderer
 from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
@@ -22,9 +33,14 @@ from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
 
 class Visualizer(imgui_window.ImguiWindow):
     def __init__(self, data_path=None, use_gan_decoder=False):
-        super().__init__(
-            title="splatviz", window_width=1920, window_height=1080, font="fonts/JetBrainsMono-Regular.ttf"
-        )
+        self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
+        self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
+
+        super().__init__(title="splatviz", window_width=1920, window_height=1080, font=self.regular_font_path, code_font=self.code_font_path)
+
+        self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
+        self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
+        self._imgui_renderer.refresh_font_texture()
 
         # Internals.
         self._last_error_print = None
@@ -52,6 +68,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget = performance_widget.PerformanceWidget(self)
         self.video_widget = video_widget.VideoWidget(self)
         self.capture_widget = capture_widget.CaptureWidget(self)
+        self.rener_widget = render_widget.RenderWidget(self)
 
         # Initialize window.
         self.set_position(0, 0)
@@ -85,8 +102,9 @@ class Visualizer(imgui_window.ImguiWindow):
     def draw_frame(self):
         self.begin_frame()
         self.args = EasyDict()
-        self.pane_w = self.content_width - self.content_height
+        self.pane_w = max(self.content_width - self.content_height, 500)
         self.button_w = self.font_size * 5
+        self.button_large_w = self.font_size * 10
         self.label_w = round(self.font_size * 5.5) + 100
 
         # Detect mouse dragging in the result area.
@@ -99,11 +117,14 @@ class Visualizer(imgui_window.ImguiWindow):
         # Begin control pane.
         imgui.set_next_window_pos(imgui.ImVec2(0, 0))
         imgui.set_next_window_size(imgui.ImVec2(self.pane_w, self.content_height))
-        imgui.begin( "##control_pane", p_open=True,
+        imgui.begin(
+            "##control_pane",
+            p_open=True,
             flags=(WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE),
         )
 
         # Widgets.
+
         expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
         imgui.indent()
         self.load_widget(expanded)
@@ -112,6 +133,11 @@ class Visualizer(imgui_window.ImguiWindow):
         expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
         imgui.indent()
         self.perf_widget(expanded)
+        imgui.unindent()
+
+        expanded, _visible = imgui_utils.collapsing_header("Render", default=False)
+        imgui.indent()
+        self.rener_widget(expanded, decoder=self.use_gan_decoder)
         imgui.unindent()
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
@@ -135,6 +161,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.capture_widget(expanded)
         imgui.unindent()
 
+        # with imgui_utils.change_font(self.code_font):
         expanded, _visible = imgui_utils.collapsing_header("Edit", default=False)
         imgui.indent()
         self.edit_widget(expanded)
@@ -144,6 +171,8 @@ class Visualizer(imgui_window.ImguiWindow):
         imgui.indent()
         self.eval_widget(expanded)
         imgui.unindent()
+
+        # imgui.show_style_editor()
 
         # Render.
         if self.is_skipping_frames():

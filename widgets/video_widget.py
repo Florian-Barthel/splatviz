@@ -40,7 +40,7 @@ class VideoWidget:
             imgui.same_line(viz.label_w)
             _changed, self.fov = imgui.input_int("##fov", self.fov)
 
-            if imgui.button("Render"):
+            if imgui_utils.button("Render", viz.button_w):
                 xs = np.linspace(0, 2 * np.pi, self.num_frames, endpoint=False)
                 for x in xs:
                     extrinsic = LookAtPoseSampler.sample(

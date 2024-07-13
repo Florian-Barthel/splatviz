@@ -17,12 +17,20 @@ import torch
 
 class LookAtPoseSampler:
     @staticmethod
-    def sample(horizontal_mean, vertical_mean, lookat_position, radius, up_vector, forward_vector=None,
-               device=torch.device("cuda")):
+    def sample(
+        horizontal_mean,
+        vertical_mean,
+        lookat_position,
+        radius,
+        up_vector,
+        forward_vector=None,
+        device=torch.device("cuda"),
+    ):
         camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector)
         if forward_vector is None:
-            forward_vector = get_forward_vector(lookat_position, horizontal_mean, vertical_mean, radius, up_vector,
-                                                camera_origins)
+            forward_vector = get_forward_vector(
+                lookat_position, horizontal_mean, vertical_mean, radius, up_vector, camera_origins
+            )
         return create_cam2world_matrix(forward_vector, camera_origins, up_vector).to(device)
 
 
@@ -46,23 +54,20 @@ def rotate_coordinates(coordinates, vector):
         return coordinates
     unit_vector = normalize_vecs(vector)
 
-    base_vector = torch.tensor([0, -1, 0.], device=coordinates.device)
+    base_vector = torch.tensor([0, -1, 0.0], device=coordinates.device)
     theta = torch.arccos(torch.dot(unit_vector, base_vector))  # Angle of rotation
     if theta == 0:
         rotation_matrix = torch.eye(3, device=coordinates.device)
     elif theta == torch.pi:
-        rotation_matrix = -1 * torch.eye(3, device=coordinates.device)#
+        rotation_matrix = -1 * torch.eye(3, device=coordinates.device)  #
         rotation_matrix[0, 0] = 1
     else:
         k = torch.cross(base_vector, unit_vector)
         k /= torch.linalg.norm(k)
-        K = torch.tensor([
-            [0, -k[2], k[1]],
-            [k[2], 0, -k[0]],
-            [-k[1], k[0], 0]
-        ], device=coordinates.device)
-        rotation_matrix = torch.eye(3, device=coordinates.device) + torch.sin(theta) * K + (
-                    1 - torch.cos(theta)) * torch.matmul(K, K)
+        K = torch.tensor([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]], device=coordinates.device)
+        rotation_matrix = (
+            torch.eye(3, device=coordinates.device) + torch.sin(theta) * K + (1 - torch.cos(theta)) * torch.matmul(K, K)
+        )
 
     rotated_coordinates = torch.matmul(rotation_matrix, coordinates[..., None])[..., 0]
     return rotated_coordinates
