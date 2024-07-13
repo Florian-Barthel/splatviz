@@ -41,7 +41,7 @@ class LoadWidget:
             imgui.same_line()
             imgui.text(self.ply)
         viz.args.ply_file_paths = [self.ply]
-        viz.args.current_ply_name = self.ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_")
+        viz.args.current_ply_names = self.ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_")
 
     def list_runs_and_pkls(self):
         self.items = []

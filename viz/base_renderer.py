@@ -71,7 +71,7 @@ class Renderer:
         size,
         ply_file_path,
         cam_params,
-        current_ply_name,
+        current_ply_names,
         video_cams=[],
         render_depth=False,
         render_alpha=False,
