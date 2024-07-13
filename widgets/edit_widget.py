@@ -75,8 +75,9 @@ class EditWidget:
                 line_height = self.editor.get_total_lines() * viz._cur_font_size
                 max_height = viz._cur_font_size * 30
                 editor_height = min(line_height, max_height)
-                self.editor.render("Python Edit Code", a_size=imgui.ImVec2(viz.pane_w - 100, editor_height))
+                self.editor.render("Python Edit Code", a_size=imgui.ImVec2(viz.pane_w - 50, editor_height))
 
+            imgui.new_line()
             imgui.text("Preset Name")
             imgui.same_line()
             _changed, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)

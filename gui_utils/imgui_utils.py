@@ -133,7 +133,7 @@ def scoped_by_object_id(method):
 
 
 def button(label, width=0, enabled=True):
-    clicked = imgui.button(label)
+    clicked = imgui.button(label, size=imgui.ImVec2(width, 0))
     clicked = clicked and enabled
     return clicked
 

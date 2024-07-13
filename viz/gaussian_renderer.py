@@ -63,6 +63,8 @@ class GaussianRenderer(Renderer):
 
             gaussian = copy.deepcopy(self.gaussian_models[scene_index])
             command = re.sub(";+", ";", edit_text.replace("\n", ";"))
+            while command.startswith(";"):
+                command = command[1:]
             exec(command)
 
             if len(video_cams) > 0:

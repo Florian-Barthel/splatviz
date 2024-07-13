@@ -104,6 +104,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.args = EasyDict()
         self.pane_w = max(self.content_width - self.content_height, 500)
         self.button_w = self.font_size * 5
+        self.button_large_w = self.font_size * 10
         self.label_w = round(self.font_size * 5.5) + 100
 
         # Detect mouse dragging in the result area.
