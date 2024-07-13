@@ -34,17 +34,16 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
 ## Widgets
 
 
-<h3>Load Widget</h3>
-<p>
+### Load Widget
 Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
 directory you have specified. You can change the scene by clicking the <b>Browse</b>> button. You will be displayed a list
 of available .ply files or .yml files that correspond to compressed gaussian scenes using 
 <a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method. Additionally, you can also view
 multiple 3D scenes at once. Simply click <b>Add Scene</b>, which loads the same scene as before and then change the scene.
 The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
-</p>
-<img src="images/load.png">
 
+<img src="images/load.png">
+<hr>
 
 ### Edit Widget
 The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian 
@@ -55,7 +54,9 @@ To enable smooth editing transitions, you can create sliders (press <b>Add Slide
 editor text by typing slider.name (eg. slider.x).<br>
 Lastly, you can save and load presets of code snippets so that you don't have to type the same code again after 
 closing the application. Those presets are stored in a .json file (presets.json).
+
 <img src="images/edit.png">
+<hr>
 
 ### Eval Widget
 The evaluate widget can be used to debug the gaussian splatting object. By typing
@@ -66,7 +67,9 @@ from the rendering context and visualize them in a histogram. Some useful variab
 - render_cam
 
 You can also access variables that you have defined in the editor of the Edit Widget.
+
 <img src="images/eval_new.png">
+<hr>
 
 ### Camera Widget
 In the camera widget you can define the type and parameters of the camera. Here, you can choose between the modes
@@ -78,8 +81,9 @@ the <b>Flip</b> button if the scene is now upside down.<br>
 In the WASD mode, you can fly through the scene using the mouse and the WASD / arrow keys.<br>
 Generally, you can control the camera either by dragging the mouse over the rendered image or by using the WASD or
 the arrow keys.
-<img src="images/camera.png">
 
+<img src="images/camera.png">
+<hr>
 
 ### Video Widget
 The video widget creates a video sequence of a full rotation around the current object.
@@ -87,25 +91,30 @@ Simply define the height of the camera and the rendering resolution. While the v
 rendering, the UI is frozen. A loading screen is shown in the terminal output. <br>
 🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
 position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
-<img src="images/video.png">
 
+<img src="images/video.png">
+<hr>
 
 ### Performance Widget
 In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
 limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
 skips some editing and evaluation calculations.
-<img src="images/performance.png">
 
+<img src="images/performance.png">
+<hr>
 
 ### Render Widget
 In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering mode.
 Next to RGB, you can also render the image 3D depth and the alpha values.
+
 <img src="images/render.png">
+<hr>
 
 ### Save Widget
 To save the .ply file or a rendering of the current (edited) 3D scene simply press the respective button in the 
 save widget. Those files will be saved under: _screenshots or _ply_files. The viewer might be frozen for a short 
 while, after saving a ply file.
+
 <img src="images/save.png">
 
 
