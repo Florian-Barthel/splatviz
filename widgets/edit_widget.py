@@ -60,7 +60,7 @@ class EditWidget:
             self.render_sliders()
             imgui.new_line()
 
-            if imgui_utils.button("Browse Presets", enabled=True):
+            if imgui_utils.button("Browse Presets", width=self.viz.button_large_w):
                 imgui.open_popup("browse_presets")
                 self.all_presets = self.presets.keys()
 
@@ -82,7 +82,7 @@ class EditWidget:
             imgui.same_line()
             _changed, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
             imgui.same_line()
-            if imgui.button("Save as Preset"):
+            if imgui_utils.button("Save as Preset", width=self.viz.button_large_w):
                 self.presets[self._cur_preset_name] = self.editor.get_text()
                 with open("./presets.json", "w", encoding="utf-8") as f:
                     json.dump(self.presets, f)
@@ -104,7 +104,7 @@ class EditWidget:
         for i, slider in enumerate(self.sliders):
             slider.render()
             imgui.same_line()
-            if imgui.button("Remove " + slider.key):
+            if imgui_utils.button("Remove " + slider.key, width=self.viz.button_w):
                 delete_keys.append(i)
 
         for i in delete_keys[::-1]:
@@ -132,7 +132,7 @@ class EditWidget:
         imgui.pop_item_width()
 
         imgui.same_line()
-        if imgui.button("Add Slider"):
+        if imgui_utils.button("Add Slider", width=self.viz.button_w):
             self.sliders.append(
                 Slider(
                     key=self._cur_name_slider,

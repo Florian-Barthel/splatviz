@@ -232,11 +232,11 @@ class GlfwWindow:
         if action == glfw.PRESS and key == glfw.KEY_ESCAPE:
             self._esc_pressed = True
 
-        if key is not None:
-            if action == glfw.PRESS:
-                self.current_pressed_keys.add(glfw.get_key_name(key, glfw.get_key_scancode(key)))
-            if action == glfw.RELEASE and action in self.current_pressed_keys:
-                self.current_pressed_keys.remove(glfw.get_key_name(key, glfw.get_key_scancode(key)))
+        key_char = glfw.get_key_name(key, glfw.get_key_scancode(key))
+        if action == glfw.PRESS:
+            self.current_pressed_keys.add(key_char)
+        if action == glfw.RELEASE and key_char in self.current_pressed_keys:
+            self.current_pressed_keys.remove(key_char)
 
     def _glfw_drop_callback(self, _window, paths):
         self._drag_and_drop_paths = paths

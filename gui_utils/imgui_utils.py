@@ -13,8 +13,6 @@ from imgui_bundle import imgui
 from gui_utils.constants import *
 
 
-# ----------------------------------------------------------------------------
-
 
 def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s = imgui.get_style()
@@ -44,10 +42,13 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s.set_color_(COLOR_CHILD_BACKGROUND,            imgui.ImVec4(0.20, 0.20, 0.20, 1.00))
     s.set_color_(COLOR_POPUP_BACKGROUND,            imgui.ImVec4(0.19, 0.19, 0.19, 0.92))
     s.set_color_(COLOR_BORDER,                      imgui.ImVec4(0.19, 0.19, 0.19, 0.29))
-    s.set_color_(COLOR_BORDER_SHADOW,               imgui.ImVec4(0.00, 0.00, 0.00, 0.0))
-    s.set_color_(COLOR_FRAME_BACKGROUND,            imgui.ImVec4(0.05, 0.05, 0.05, 0.54))
-    s.set_color_(COLOR_FRAME_BACKGROUND_HOVERED,    imgui.ImVec4(0.19, 0.19, 0.19, 0.54))
-    s.set_color_(COLOR_FRAME_BACKGROUND_ACTIVE,     imgui.ImVec4(0.20, 0.22, 0.23, 1.00))
+    s.set_color_(COLOR_BORDER_SHADOW,               imgui.ImVec4(0.00, 0.00, 0.00, 0.00))
+
+    # background of all text areas and checkboxes
+    s.set_color_(COLOR_FRAME_BACKGROUND,            imgui.ImVec4(0.15, 0.15, 0.15, 0.50))
+    s.set_color_(COLOR_FRAME_BACKGROUND_HOVERED,    imgui.ImVec4(0.25, 0.25, 0.25, 0.50))
+    s.set_color_(COLOR_FRAME_BACKGROUND_ACTIVE,     imgui.ImVec4(0.25, 0.25, 0.25, 1.00))
+
     s.set_color_(COLOR_TITLE_BACKGROUND,            imgui.ImVec4(0.00, 0.00, 0.00, 1.00))
     s.set_color_(COLOR_TITLE_BACKGROUND_ACTIVE,     imgui.ImVec4(0.06, 0.06, 0.06, 1.00))
     s.set_color_(COLOR_TITLE_BACKGROUND_COLLAPSED,  imgui.ImVec4(0.00, 0.00, 0.00, 1.00))
@@ -82,10 +83,11 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s.set_color_(COLOR_PLOT_HISTOGRAM_HOVERED,      imgui.ImVec4(1.00, 0.80, 0.00, 1.00))
     s.set_color_(COLOR_TEXT_SELECTED_BACKGROUND,    imgui.ImVec4(0.20, 0.22, 0.23, 1.00))
     s.set_color_(COLOR_NAV_HIGHLIGHT,               imgui.ImVec4(1.00, 0.00, 0.00, 1.00))
-    s.set_color_(COLOR_NAV_WINDOWING_HIGHLIGHT,     imgui.ImVec4(1.00, 0.00, 0.00, 0.70))
-    s.set_color_(COLOR_NAV_WINDOWING_HIGHLIGHT,     imgui.ImVec4(1.00, 0.00, 0.00, 0.20))
-    s.set_color_(COLOR_NAV_WINDOWING_DIM_BACKGROUND,imgui.ImVec4(1.00, 0.00, 0.00, 0.35))
 
+    # color of selected text
+    s.set_color_(COLOR_NAV_WINDOWING_HIGHLIGHT,     imgui.ImVec4(0.90, 0.60, 0.00, 0.70))
+    s.set_color_(COLOR_NAV_WINDOWING_HIGHLIGHT,     imgui.ImVec4(0.90, 0.60, 0.00, 0.20))
+    s.set_color_(COLOR_NAV_WINDOWING_DIM_BACKGROUND,imgui.ImVec4(0.90, 0.60, 0.00, 0.35))
 
 
 @contextlib.contextmanager
@@ -103,8 +105,6 @@ def change_font(font):
     yield
     imgui.pop_font()
 
-# ----------------------------------------------------------------------------
-
 
 @contextlib.contextmanager
 def item_width(width=None):
@@ -114,9 +114,6 @@ def item_width(width=None):
         imgui.pop_item_width()
     else:
         yield
-
-
-# ----------------------------------------------------------------------------
 
 
 def scoped_by_object_id(method):
@@ -129,16 +126,10 @@ def scoped_by_object_id(method):
     return decorator
 
 
-# ----------------------------------------------------------------------------
-
-
 def button(label, width=0, enabled=True):
     clicked = imgui.button(label, size=imgui.ImVec2(width, 0))
     clicked = clicked and enabled
     return clicked
-
-
-# ----------------------------------------------------------------------------
 
 
 def collapsing_header(text, visible=None, flags=0, default=False, enabled=True, show=True):
@@ -153,17 +144,11 @@ def collapsing_header(text, visible=None, flags=0, default=False, enabled=True, 
     return expanded, visible
 
 
-# ----------------------------------------------------------------------------
-
-
 def popup_button(label, width=0, enabled=True):
     if button(label, width, enabled):
         imgui.open_popup(label)
     opened = imgui.begin_popup(label)
     return opened
-
-
-# ----------------------------------------------------------------------------
 
 
 def drag_previous_control(enabled=True):
@@ -179,16 +164,10 @@ def drag_previous_control(enabled=True):
     return dragging, dx, dy
 
 
-# ----------------------------------------------------------------------------
-
-
 def drag_button(label, width=0, enabled=True):
     clicked = button(label, width=width, enabled=enabled)
     dragging, dx, dy = drag_previous_control(enabled=enabled)
     return clicked, dragging, dx, dy
-
-
-# ----------------------------------------------------------------------------
 
 
 def drag_hidden_window(label, x, y, width, height, enabled=True):
@@ -201,6 +180,3 @@ def drag_hidden_window(label, x, y, width, height, enabled=True):
     imgui.end()
     imgui.pop_style_color(2)
     return dragging, dx, dy
-
-
-# ----------------------------------------------------------------------------
