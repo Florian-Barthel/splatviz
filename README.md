@@ -88,7 +88,7 @@ python run_main.py --data_path=path/to/directory/with/gaussian/objects
       </p>
     </td>
     <td>
-      <img src="images/eval.png">
+      <img src="images/eval_new.png">
     </td>
   </tr>
 
