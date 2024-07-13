@@ -234,10 +234,12 @@ class GlfwWindow:  # pylint: disable=too-many-public-methods
     def _glfw_key_callback(self, _window, key, _scancode, action, _mods):
         if action == glfw.PRESS and key == glfw.KEY_ESCAPE:
             self._esc_pressed = True
-        if action == glfw.PRESS:
-            self.current_pressed_keys.add(glfw.get_key_name(key, glfw.get_key_scancode(key)))
-        if action == glfw.RELEASE:
-            self.current_pressed_keys.remove(glfw.get_key_name(key, glfw.get_key_scancode(key)))
+
+        if key is not None:
+            if action == glfw.PRESS:
+                self.current_pressed_keys.add(glfw.get_key_name(key, glfw.get_key_scancode(key)))
+            if action == glfw.RELEASE:
+                self.current_pressed_keys.remove(glfw.get_key_name(key, glfw.get_key_scancode(key)))
 
     def _glfw_drop_callback(self, _window, paths):
         self._drag_and_drop_paths = paths

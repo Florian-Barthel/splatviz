@@ -71,7 +71,8 @@ class EditWidget:
                         self.editor.set_text(self.presets[preset])
                 imgui.end_popup()
 
-            self.editor.render("Code")
+            with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
+                self.editor.render("Code")
 
             imgui.text("Preset Name")
             imgui.same_line()

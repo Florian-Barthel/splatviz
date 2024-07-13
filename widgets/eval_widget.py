@@ -19,12 +19,14 @@ class EvalWidget:
         viz = self.viz
 
         if show:
+            imgui.text("Eval code:")
+            imgui.same_line()
             _changed, self.text = imgui.input_text("##input_text", self.text)
-            self.format()
-        viz.args.eval_text = self.text
+            with imgui_utils.eval_color():
+                with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
+                    self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
 
-    def format(self):
-        self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
+        viz.args.eval_text = self.text
 
     def handle_type_rec(self, result, depth, obj_name):
         if (
@@ -47,6 +49,7 @@ class EvalWidget:
                     imgui.new_line()
                     imgui.same_line(depth)
                     imgui.text(info)
+                    # expanded, _visible = imgui_utils.collapsing_header(info, default=False, visible=False)
                 else:
                     expanded, _visible = imgui_utils.collapsing_header(info, default=False)
                     if expanded:
@@ -68,7 +71,9 @@ class EvalWidget:
             self.use_cache_dict[var_name] = True
         imgui.new_line()
         imgui.same_line(depth)
-        _, self.use_cache_dict[var_name] = imgui.checkbox("Use Cache", self.use_cache_dict[var_name])
+        imgui.text("Cache")
+        imgui.same_line()
+        _, self.use_cache_dict[var_name] = imgui.checkbox(f"##cache{var_name}", self.use_cache_dict[var_name])
         bins = 50
         if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:
             hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=bins)
@@ -78,12 +83,6 @@ class EvalWidget:
         imgui.same_line(depth)
         plot_size = imgui.ImVec2(self.viz.pane_w - 100, 200)
         if implot.begin_plot(f"{orig_var_name}", plot_size):
-            # implot.setup_axes(
-            #     "",
-            #     "",
-            #     implot.AxisFlags_.no_decorations.value,
-            #     implot.AxisFlags_.no_decorations.value,
-            # )
             bar_size = (
                 max(self.hist_cache[var_name][1].astype(np.float32))
                 - min(self.hist_cache[var_name][1].astype(np.float32))
@@ -104,13 +103,13 @@ class EvalWidget:
         spacing_name = 30
 
         if isinstance(value, primitives):
-            return f"{readable_type:<{spacing_type}} {key:<{spacing_name}} {value}", True
+            return f"   {readable_type:<{spacing_type}} {key:<{spacing_name}} {value}", True
         elif isinstance(value, torch.Tensor):
             return f"{readable_type:<{spacing_type}} {key:<{spacing_name}} shape={list(value.shape)}", False
         elif isinstance(value, dict) and len(value.keys()) == 0:
             return f"{readable_type:<{spacing_type}} {key:<{spacing_name}} {value}", True
         elif callable(value):
             readable_type = "function"
-            return f"{readable_type:<{spacing_type}} {key:<{spacing_name}} {value}", True
+            return f"   {readable_type:<{spacing_type}} {key:<{spacing_name}} {value}", True
         else:
-            return f"{readable_type:<{spacing_type}} {key:<{spacing_name}}", False
+            return f"   {readable_type:<{spacing_type}} {key:<{spacing_name}}", False

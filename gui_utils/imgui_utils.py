@@ -32,15 +32,11 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     # s.window_rounding       = 0
     # s.child_rounding        = 0
     # s.popup_rounding        = 1
-    s.frame_rounding = 5
+    s.frame_rounding = 2
     # s.scrollbar_rounding    = 1
     # s.grab_rounding         = 1
 
     getattr(imgui, f"style_colors_{color_scheme}")(s)
-
-    # c0 = colors[COLOR_MENUBAR_BACKGROUND]
-    # c1 = colors[COLOR_FRAME_BACKGROUND]
-    # s.set_color_(COLOR_POPUP_BACKGROUND] = [x * 0.7 + y * 0.3 for x, y in zip(c0, c1)][:3] + [1]
 
     s.set_color_(COLOR_TEXT, imgui.ImVec4(1.00, 1.00, 1.00, 1.00))
     s.set_color_(COLOR_TEXT_DISABLED, imgui.ImVec4(0.50, 0.50, 0.50, 1.00))
@@ -48,7 +44,7 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s.set_color_(COLOR_CHILD_BACKGROUND, imgui.ImVec4(0.20, 0.20, 0.20, 1.00))
     s.set_color_(COLOR_POPUP_BACKGROUND, imgui.ImVec4(0.19, 0.19, 0.19, 0.92))
     s.set_color_(COLOR_BORDER, imgui.ImVec4(0.19, 0.19, 0.19, 0.29))
-    s.set_color_(COLOR_BORDER_SHADOW, imgui.ImVec4(0.00, 0.00, 0.00, 0.24))
+    s.set_color_(COLOR_BORDER_SHADOW, imgui.ImVec4(0.00, 0.00, 0.00, 0.0))
     s.set_color_(COLOR_FRAME_BACKGROUND, imgui.ImVec4(0.05, 0.05, 0.05, 0.54))
     s.set_color_(COLOR_FRAME_BACKGROUND_HOVERED, imgui.ImVec4(0.19, 0.19, 0.19, 0.54))
     s.set_color_(COLOR_FRAME_BACKGROUND_ACTIVE, imgui.ImVec4(0.20, 0.22, 0.23, 1.00))
@@ -61,8 +57,8 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s.set_color_(COLOR_SCROLLBAR_GRAB_HOVERED, imgui.ImVec4(0.40, 0.40, 0.40, 0.54))
     s.set_color_(COLOR_SCROLLBAR_GRAB_ACTIVE, imgui.ImVec4(0.56, 0.56, 0.56, 0.54))
     s.set_color_(COLOR_CHECK_MARK, imgui.ImVec4(0.33, 0.67, 0.86, 1.00))
-    s.set_color_(COLOR_SLIDER_GRAB, imgui.ImVec4(0.34, 0.34, 0.34, 0.74))
-    s.set_color_(COLOR_SLIDER_GRAB_ACTIVE, imgui.ImVec4(0.56, 0.56, 0.56, 0.74))
+    s.set_color_(COLOR_SLIDER_GRAB, imgui.ImVec4(0.90, 0.70, 0.00, 0.75))
+    s.set_color_(COLOR_SLIDER_GRAB_ACTIVE, imgui.ImVec4(0.90, 0.70, 0.00, 0.90))
     s.set_color_(COLOR_BUTTON, imgui.ImVec4(0.90, 0.70, 0.00, 0.75))
     s.set_color_(COLOR_BUTTON_HOVERED, imgui.ImVec4(0.90, 0.70, 0.00, 0.90))
     s.set_color_(COLOR_BUTTON_ACTIVE, imgui.ImVec4(0.90, 0.70, 0.00, 1.00))
@@ -75,7 +71,7 @@ def set_default_style(color_scheme="dark", spacing=5, indent=20, scrollbar=10):
     s.set_color_(COLOR_RESIZE_GRIP, imgui.ImVec4(0.28, 0.28, 0.28, 0.29))
     s.set_color_(COLOR_RESIZE_GRIP_HOVERED, imgui.ImVec4(0.44, 0.44, 0.44, 0.29))
     s.set_color_(COLOR_RESIZE_GRIP_ACTIVE, imgui.ImVec4(0.40, 0.44, 0.47, 1.00))
-    s.set_color_(COLOR_TAB, imgui.ImVec4(1.00, 0.00, 0.00, 0.52))
+    s.set_color_(COLOR_TAB, imgui.ImVec4(0.10, 0.00, 0.00, 0.52))
     s.set_color_(COLOR_TAB_HOVERED, imgui.ImVec4(0.14, 0.14, 0.14, 1.00))
     s.set_color_(COLOR_TAB_ACTIVE, imgui.ImVec4(0.20, 0.20, 0.20, 0.36))
     s.set_color_(COLOR_TAB_UNFOCUSED, imgui.ImVec4(0.00, 0.00, 0.00, 0.52))
@@ -120,6 +116,21 @@ def grayed_out(cond=True):
     else:
         yield
 
+
+@contextlib.contextmanager
+def eval_color():
+    imgui.push_style_color(COLOR_HEADER, imgui.ImVec4(0.90, 0.70, 0.00, 0.5))
+    imgui.push_style_color(COLOR_HEADER_HOVERED, imgui.ImVec4(0.90, 0.70, 0.00, 0.75))
+    imgui.push_style_color(COLOR_HEADER_ACTIVE, imgui.ImVec4(0.90, 0.70, 0.00, 0.75))
+    yield
+    imgui.pop_style_color(3)
+
+
+@contextlib.contextmanager
+def change_font(font):
+    imgui.push_font(font)
+    yield
+    imgui.pop_font()
 
 # ----------------------------------------------------------------------------
 
@@ -192,11 +203,11 @@ def input_text(label, value, buffer_length, flags, width=None, help_text=""):
     if value == "":
         color[-1] *= 0.5
     with item_width(width):
-        # imgui.push_style_color(imgui.COLOR_TEXT, *color)
+        imgui.push_style_color(COLOR_TEXT, *color)
         value = value if value != "" else help_text
         changed, value = imgui.input_text(label, value, buffer_length, flags)
         value = value if value != help_text else ""
-        # imgui.pop_style_color(1)
+        imgui.pop_style_color(1)
     if not flags & imgui.InputTextFlags_.enter_returns_true:
         changed = value != old_value
     return changed, value

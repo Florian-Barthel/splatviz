@@ -20,7 +20,7 @@ class LoadWidget:
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .ply or compression_config.yml found in '{root}' with filter 'f{self.filter}'")
-        self.plys: list[str] = [self.items[-1]]
+        self.plys: list[str] = [self.items[0]]
         self.use_splitscreen = False
         self.highlight_border = False
 
@@ -65,4 +65,4 @@ class LoadWidget:
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(str(current_path))
-        return self.items
+        return sorted(self.items)
