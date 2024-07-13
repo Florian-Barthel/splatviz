@@ -108,6 +108,9 @@ class CamWidget:
                 self.up_vector = self.forward
                 self.pose.yaw = 0
                 self.pose.pitch = 0
+            imgui.same_line()
+            if imgui_utils.button("Flip", width=viz.button_w):
+                self.up_vector = -self.up_vector
 
             imgui.text("FOV")
             imgui.same_line(viz.label_w)

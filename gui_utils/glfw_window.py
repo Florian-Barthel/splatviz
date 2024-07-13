@@ -11,6 +11,7 @@
 import time
 import glfw
 import OpenGL.GL as gl
+from PIL import Image
 
 from . import gl_utils
 
@@ -48,6 +49,9 @@ class GlfwWindow:
         self.set_window_size(window_width, window_height)
         if not self._deferred_show:
             glfw.show_window(self._glfw_window)
+
+        icon = Image.open("images/icon.png")
+        glfw.set_window_icon(self._glfw_window, count=1, images=icon)
 
     def close(self):
         if self._drawing_frame:

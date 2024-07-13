@@ -62,7 +62,7 @@ def rotate_coordinates(coordinates, vector):
         rotation_matrix = -1 * torch.eye(3, device=coordinates.device)  #
         rotation_matrix[0, 0] = 1
     else:
-        k = torch.cross(base_vector, unit_vector)
+        k = torch.cross(base_vector, unit_vector, dim=0)
         k /= torch.linalg.norm(k)
         K = torch.tensor([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]], device=coordinates.device)
         rotation_matrix = (

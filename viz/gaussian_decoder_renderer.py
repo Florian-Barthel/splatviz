@@ -45,7 +45,7 @@ class GaussianDecoderRenderer(Renderer):
         resolution,
         ply_file_paths,
         cam_params,
-        current_ply_name,
+        current_ply_names,
         video_cams=[],
         render_depth=False,
         render_alpha=False,

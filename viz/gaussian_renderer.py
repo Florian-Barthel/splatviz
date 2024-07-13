@@ -44,6 +44,7 @@ class GaussianRenderer(Renderer):
         img_normalize=False,
         use_splitscreen=False,
         highlight_border=False,
+        save_ply_path=None,
         **slider,
     ):
         slider = EasyDict(slider)
@@ -79,6 +80,12 @@ class GaussianRenderer(Renderer):
                 images.append(render["depth"] / render["depth"].max())
             else:
                 images.append(render["render"])
+
+            if save_ply_path is not None:
+                os.makedirs(save_ply_path, exist_ok=True)
+                save_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
+                print("Model saved in", save_path)
+                gaussian.save_ply(save_path)
 
         if use_splitscreen:
             img = torch.zeros_like(images[0])
@@ -116,7 +123,7 @@ class GaussianRenderer(Renderer):
     def render_video(self, save_path, video_cams, gaussian):
         os.makedirs(save_path, exist_ok=True)
         filename = f"{save_path}/rotate_{len(os.listdir(save_path))}.mp4"
-        video = imageio.get_writer(filename, mode="I", fps=30, codec="libx264", bitrate="16M", quality=10)
+        video = imageio.get_writer(filename, mode="I", fps=30, codec="libx264", bitrate="16M", quality=7)
         for render_cam in tqdm(video_cams):
             img = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)["render"]
             img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()

@@ -1,12 +1,3 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-#
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
 import os
 from imgui_bundle import imgui
 from gui_utils import imgui_utils
@@ -28,7 +19,10 @@ class LoadWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            _changed, self.filter = imgui.input_text("Filter", self.filter)
+            imgui.text("Search Filters (comma separated)")
+            imgui.same_line()
+            _changed, self.filter = imgui.input_text("##Filter", self.filter)
+            plys_to_remove = []
 
             for i, ply in enumerate(self.plys):
                 if imgui.begin_popup(f"browse_pkls_popup{i}"):
@@ -42,8 +36,14 @@ class LoadWidget:
                     imgui.open_popup(f"browse_pkls_popup{i}")
                     self.items = self.list_runs_and_pkls()
                 imgui.same_line()
+                if i > 0:
+                    if imgui_utils.button(f"Remove {i + 1}", width=viz.button_w):
+                        plys_to_remove.append(i)
+                    imgui.same_line()
                 imgui.text(f"Scene {i + 1}: " + ply[len(self.root) :])
 
+            for i in plys_to_remove[::-1]:
+                self.plys.pop(i)
             if imgui_utils.button("Add Scene", width=viz.button_w):
                 self.plys.append(self.plys[-1])
 
@@ -54,7 +54,7 @@ class LoadWidget:
         viz.args.use_splitscreen = self.use_splitscreen
         viz.args.ply_file_paths = self.plys
         viz.args.current_ply_names = [
-            ply[0].replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
+            ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
         ]
 
     def list_runs_and_pkls(self) -> list[str]:

@@ -104,7 +104,7 @@ class EditWidget:
         for i, slider in enumerate(self.sliders):
             slider.render()
             imgui.same_line()
-            if imgui_utils.button("Remove " + slider.key, width=self.viz.button_w):
+            if imgui_utils.button("Remove " + slider.key):
                 delete_keys.append(i)
 
         for i in delete_keys[::-1]:
