@@ -1,8 +1,12 @@
-# <img src="images/icon.png" width="35"> splatviz
+<div align="center">
+  
+  <h1><img src="images/icon.png" width="35"> splatviz</h1>
 
 ![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz)
 
+</div>
 
+<div align="justify"> 
 This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By directly using a 
 native python GUI library (imgui) we can directly manipulate the Gaussian python object just before the rendering it.
 This enables endless editing and visualization possibilities. You can also evaluate python expression just after the 
@@ -10,6 +14,7 @@ rendering, allowing you to access and debug the 3D scene just in time. Additiona
 at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
 of the current scene and even videos of a 360° rotation around the scene.
 
+</div>
 <img src="images/teaser.png">
 
 ## Install
@@ -33,7 +38,8 @@ Launch with a specified path to look for .ply or .yml files:
 
 ## Widgets
 
-
+<div align="justify"> 
+  
 ### Load Widget
 Once you run the `run_main.py` file, the viewer will directly load the first scene that is found in the data
 directory you have specified. You can change the scene by clicking the **Browse** button. You will be displayed a list
@@ -149,7 +155,7 @@ save widget. Those files will be saved under: _screenshots or _ply_files. The vi
 while, after saving a ply file.
 
 <img src="images/save.png">
-
+</div>
 
 ## Future Plans
 - Attach to Gaussian Splatting training for live tracking
