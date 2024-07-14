@@ -1,4 +1,10 @@
+
+
 # <img src="images/icon.png" width="35"> splatviz
+
+![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz)
+
+
 This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By directly using a 
 native python GUI library (imgui) we can directly manipulate the Gaussian python object just before the rendering it.
 This enables endless editing and visualization possibilities. You can also evaluate python expression just after the 
