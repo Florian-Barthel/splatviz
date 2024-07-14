@@ -16,42 +16,64 @@ git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 
 Create conda environment:
 
-```
+```bash
 conda env create -f environment.yml
 conda activate gs-view
 ```
 
 Launch:
-`
-python run_main.py
-`
+`python run_main.py`
 
 Launch with a specified path to look for .ply or .yml files:
-`
-python run_main.py --data_path=path/to/directory/with/gaussian/objects
-`
+`python run_main.py --data_path=path/with/plys`
 
 ## Widgets
 
 
 ### Load Widget
-Once you run the run_main.py file, the viewer will directly load the first scene that is found in the data
-directory you have specified. You can change the scene by clicking the <b>Browse</b>button. You will be displayed a list
-of available .ply files (or .yml files that correspond to compressed gaussian scenes using 
-<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method). Additionally, you can also view
-multiple 3D scenes at once. Simply click <b>Add Scene</b>, which loads the same scene as before and then change the scene.
-The scenes are either rendered next to each other or in a split screen mode when activating the <b>Splitscreen</b> checkbox.
+Once you run the `run_main.py` file, the viewer will directly load the first scene that is found in the data
+directory you have specified. You can change the scene by clicking the **Browse** button. You will be displayed a list
+of available _.ply_ files (or _.yml_ files that correspond to compressed gaussian scenes using 
+<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method). If you have a lot of
+scenes to chose from, you can also use the **Filter** textfield providing comma separated keywords (eg. _lego,30000,baseline_).
+You will then only see those scenes that contain all keywords.
+
+Additionally, you can also view multiple 3D scenes at once. Simply click **Add Scene**, which loads the same scene as 
+before and then change the respective scene to another .ply file using the new browse button. The scenes are either 
+rendered next to each other or in a split screen mode when activating the **Splitscreen** checkbox.
 
 <img src="images/load.png">
 <hr>
 
 ### Edit Widget
 The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian 
-python object during runtime. The code that you type in this text area executed just before the gaussian object is
+python object during runtime. The code that you type in this text area will be executed just before the gaussian object is
 forwarded to the cuda renderer. This means, the editing capabilities are unlimited. As long as the provided code
-is executable, you can type any kind of python code.<br>
-To enable smooth editing transitions, you can create sliders (press <b>Add Slider</b>) which you can access in the
-editor text by typing slider.name (eg. slider.x).<br>
+is executable, you can type any kind of python code and also import new libraries. An example could look like this, where
+all scales are set to -8 (before activating with _exp()_) and all opacity values are set to 10 (before activating with
+_sigmoid()_), while also the background is set to 1, which corresponds to white.
+
+```python
+gaussian._scaling = gaussian._scaling * 0 - 8
+gaussian._opacity = gaussian._opacity * 0 + 10
+self.bg_color[:] = 1
+```
+
+To enable smooth editing transitions, you can create sliders (press **Add Slider**) which you can access in the
+editor text by typing slider.name (eg. slider.x). An example could look as follows. Here, we create a boolean mask
+that filters all gaussians that are smaller than the value stored in **slider.x**.
+
+```python
+mask = torch.linalg.norm(gaussian._scaling, dim=-1) < slider.x
+
+gaussian._xyz = gaussian._xyz[mask]
+gaussian._rotation = gaussian._rotation[mask]
+gaussian._scaling = gaussian._scaling[mask]
+gaussian._opacity = gaussian._opacity[mask]
+gaussian._features_dc = gaussian._features_dc[mask]
+gaussian._features_rest = gaussian._features_rest[mask]
+```
+
 Lastly, you can save and load presets of code snippets so that you don't have to type the same code again after 
 closing the application. Those presets are stored in a .json file (presets.json).
 
@@ -65,6 +87,7 @@ from the rendering context and visualize them in a histogram. Some useful variab
 - gaussian
 - render</li>   
 - render_cam
+- self
 
 You can also access variables that you have defined in the editor of the Edit Widget.
 
@@ -72,15 +95,17 @@ You can also access variables that you have defined in the editor of the Edit Wi
 <hr>
 
 ### Camera Widget
-In the camera widget you can define the type and parameters of the camera. Here, you can choose between the modes
-<b>Orbit</b> and <b>WASD</b>.<br>
-In the orbit mode, the camera is looking at a specific point in the 3D space, and you can control the pitch and yaw.
-<b>If the scene is rotated</b>, you can correct that by steering the camera so that it is looking straight up or down.
-Then set the up-vector to the current viewing direction by pressing <b>Set Current Direction</b>. You might have to press
-the <b>Flip</b> button if the scene is now upside down.<br>
-In the WASD mode, you can fly through the scene using the mouse and the WASD / arrow keys.<br>
-Generally, you can control the camera either by dragging the mouse over the rendered image or by using the WASD or
-the arrow keys.
+In the camera widget you can define the type and parameters of the camera. Most importantly, you can choose between the 
+two modes **Orbit** and **WASD**.
+
+In **Orbit** mode, the camera is looking at a specific point in 3D space, and you control the pitch and yaw of the camera 
+rotating on a sphere around that point by dragging with the mouse over the rendered view.
+
+In **WASD** mode, you fly through the scene using the mouse and the WASD keys similar to the camera controls in Unity.
+
+**Important**: If the loaded scene is rotated incorrectly, you can adjust that by steering the camera so that it is 
+looking straight up or down. Then set the up-vector to the current viewing direction by pressing **Set Current Direction**. 
+If you were looking down, you will have to press the **Flip** button, since the scene is now upside down.
 
 <img src="images/camera.png">
 <hr>
@@ -88,7 +113,8 @@ the arrow keys.
 ### Video Widget
 The video widget creates a video sequence of a full rotation around the current object.
 Simply define the height of the camera and the rendering resolution. While the video is
-rendering, the UI is frozen. A loading screen is shown in the terminal output. <br>
+rendering, the UI is frozen. A loading screen is shown in the terminal output.
+
 🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
 position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
 
