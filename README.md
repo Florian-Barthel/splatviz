@@ -7,9 +7,10 @@
 </div>
 
 <div align="justify"> 
-This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By directly using a 
+This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By using a 
 native python GUI library (imgui) we can directly manipulate the Gaussian python object just before the rendering it.
-This enables endless editing and visualization possibilities. You can also evaluate python expression just after the 
+This enables endless editing and visualization possibilities, given that python is turing complete. 
+You can also evaluate python expression just after the 
 rendering, allowing you to access and debug the 3D scene just in time. Additionally, you can visualize multiple scenes
 at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
 of the current scene and even videos of a 360° rotation around the scene.
