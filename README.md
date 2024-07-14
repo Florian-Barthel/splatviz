@@ -1,5 +1,3 @@
-
-
 # <img src="images/icon.png" width="35"> splatviz
 
 ![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz)
@@ -47,6 +45,9 @@ You will then only see those scenes that contain all keywords.
 Additionally, you can also view multiple 3D scenes at once. Simply click **Add Scene**, which loads the same scene as 
 before and then change the respective scene to another .ply file using the new browse button. The scenes are either 
 rendered next to each other or in a split screen mode when activating the **Splitscreen** checkbox.
+
+You can download some example scenes [here](https://drive.google.com/drive/folders/1RNMis5ibSrl2a87ZX614ZPsHKaY6ams6?usp=sharing).
+They were created using the gaussian splatting compression method from: https://fraunhoferhhi.github.io/Self-Organizing-Gaussians.
 
 <img src="images/load.png">
 <hr>
