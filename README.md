@@ -24,11 +24,16 @@ Clone repository **recursively** in order to install glm from the diff_gaussian_
 git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 ```
 
-Create conda environment:
+Create conda environment with **conda**:
 
 ```bash
 conda env create -f environment.yml
 conda activate gs-view
+```
+Alternatively, create the environment with **micromamba**:
+```bash
+micromamba env create --file environment.yml --channel-priority flexible -y
+micromamba activate gs-view
 ```
 
 Launch:
