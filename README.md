@@ -14,9 +14,9 @@ You can also evaluate python expression just after the
 rendering, allowing you to access and debug the 3D scene just in time. Additionally, you can visualize multiple scenes
 at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
 of the current scene and even videos of a 360° rotation around the scene.
-</div>
-See some example editings in this video: https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel
 
+See some example editings in this  <a href="https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel">video</a>.
+</div>
 <img src="images/teaser.png">
 
 ## Install
