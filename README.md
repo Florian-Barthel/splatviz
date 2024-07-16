@@ -2,7 +2,7 @@
   
   <h1><img src="images/icon.png" width="35"> splatviz</h1>
 
-![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz)
+![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green)
 
 </div>
 
@@ -24,11 +24,16 @@ Clone repository **recursively** in order to install glm from the diff_gaussian_
 git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 ```
 
-Create conda environment:
+Create conda environment with **conda**:
 
 ```bash
 conda env create -f environment.yml
 conda activate gs-view
+```
+Alternatively, create the environment with **micromamba**:
+```bash
+micromamba env create --file environment.yml --channel-priority flexible -y
+micromamba activate gs-view
 ```
 
 Launch:
