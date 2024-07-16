@@ -19,7 +19,7 @@ class LatentWidget:
             imgui.text("Latent")
             imgui.same_line()
             with imgui_utils.item_width(viz.font_size * 8):
-                changed, (x_man, y_man) = imgui.input_float2("##xy", self.latent.x, self.latent.y)
+                changed, (x_man, y_man) = imgui.input_float2("##xy", v=[self.latent.x, self.latent.y])
                 if changed:
                     self.latent.x = x_man
                     self.latent.y = y_man

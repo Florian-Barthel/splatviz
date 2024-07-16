@@ -66,7 +66,10 @@ class GaussianRenderer(Renderer):
             command = re.sub(";+", ";", edit_text.replace("\n", ";"))
             while command.startswith(";"):
                 command = command[1:]
-            exec(command)
+            try:
+                exec(command)
+            except Exception as e:
+                res.error = e
 
             if len(video_cams) > 0:
                 self.render_video("./_videos", video_cams, gaussian)
