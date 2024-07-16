@@ -15,6 +15,9 @@ rendering, allowing you to access and debug the 3D scene just in time. Additiona
 at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
 of the current scene and even videos of a 360° rotation around the scene.
 
+See some example editings in this video: https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel
+
+
 </div>
 <img src="images/teaser.png">
 
