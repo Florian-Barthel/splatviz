@@ -7,9 +7,6 @@ from viz_utils.camera_utils import get_forward_vector, create_cam2world_matrix, 
 from viz_utils.dict import EasyDict
 
 
-# ----------------------------------------------------------------------------
-
-
 class CamWidget:
     def __init__(self, viz):
         self.viz = viz
