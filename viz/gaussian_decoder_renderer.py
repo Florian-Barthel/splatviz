@@ -74,7 +74,7 @@ class GaussianDecoderRenderer(Renderer):
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
         fov_rad = fov / 360 * 2 * np.pi
         render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
-        gan_camera_params = torch.concatenate([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+        gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
         # generate latent vector todo optimize
         if not fast_render_mode or self.last_z is None:
@@ -129,7 +129,7 @@ class GaussianDecoderRenderer(Renderer):
 
         if render_gan_image:
             gan_image = torch.nn.functional.interpolate(result.img, size=[img.shape[1], img.shape[2]])[0]
-            img = torch.concatenate([img, gan_image], dim=2)
+            img = torch.concat([img, gan_image], dim=2)
         # Scale and convert to uint8.
         if img_normalize:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)

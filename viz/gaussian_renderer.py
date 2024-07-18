@@ -105,7 +105,7 @@ class GaussianRenderer(Renderer):
                     img[..., offset - 1 : offset] = 1
 
         else:
-            img = torch.concatenate(images, dim=2)
+            img = torch.concat(images, dim=2)
         res.stats = torch.stack(
             [
                 img.mean(),
