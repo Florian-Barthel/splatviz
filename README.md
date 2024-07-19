@@ -7,9 +7,9 @@
 </div>
 
 <div align="justify"> 
-This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By using a 
-native python GUI library (imgui) we can directly manipulate the Gaussian python object just before rendering it.
-This enables endless editing and visualization possibilities, given that python is turing complete. 
+This interactive viewer allows you to display and edit 3D Gaussian Splatting scenes in real time. By using the python GUI 
+library (<a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a>) we can directly manipulate
+the Gaussian python object just before rendering it. This enables endless editing and visualization possibilities. 
 You can also evaluate python expression just after the 
 rendering, allowing you to access and debug the 3D scene just in time. Additionally, you can visualize multiple scenes
 at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
@@ -198,7 +198,9 @@ If you find this viewer useful, please consider citing our work:
 This viewer is inspired by the visualizer from Efficient Geometry-aware 3D Generative Adversarial 
 Networks (EG3D).
 
-GUI: <a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a> and <a href="https://github.com/pthom/imgui_bundle">imgui_bundle</a>
+GUI: <a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a> and 
+<a href="https://github.com/pthom/imgui_bundle">imgui_bundle</a> which are python wrappers for the c++ library 
+<a href="https://github.com/ocornut/imgui">ImGUI</a>
 
 Original code base: <a href="https://github.com/NVlabs/eg3d">EG3D</a>
 
