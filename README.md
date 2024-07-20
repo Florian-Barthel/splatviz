@@ -12,7 +12,7 @@ library (<a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.htm
 the Gaussian python object just before rendering it. This enables endless editing and visualization possibilities. 
 You can also evaluate python expressions just after the 
 rendering, allowing you to access and debug the 3D scene just in time. Additionally, you can visualize multiple scenes
-at the same time comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
+at the same time by comparing them side by side or in a splitscreen view. Lastly, you can also save renderings, ply files
 of the current scene and even videos of a 360° rotation around the scene.
 
 See some example editings in this  <a href="https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel">video</a>.
@@ -157,8 +157,8 @@ Next to RGB, you can also render the image 3D depth and the alpha values.
 <hr>
 
 ### Save Widget
-To save the .ply file or a rendering of the current (edited) 3D scene simply press the respective button in the 
-save widget. Those files will be saved under: _screenshots or _ply_files. The viewer might be frozen for a short 
+To save the .ply file or a rendering of the current (edited) 3D scene press the respective button in the 
+save widget. Those files will be saved under _screenshots or _ply_files. The viewer might be frozen for a short 
 while, after saving a ply file.
 
 <img src="images/save.png">
