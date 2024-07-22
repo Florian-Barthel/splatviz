@@ -24,7 +24,7 @@ class LoadWidget:
 
             if imgui.begin_popup("browse_pkls_popup"):
                 for item in self.items:
-                    clicked, _state = imgui.menu_item(os.path.relpath(item, self.root))
+                    clicked = imgui.menu_item_simple(os.path.relpath(item, self.root))
                     if clicked:
                         self.ply = item
                 imgui.end_popup()
@@ -34,12 +34,12 @@ class LoadWidget:
         viz.args.ply_file_paths = [self.ply]
         viz.args.current_ply_names = self.ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_")
 
-    def list_runs_and_pkls(self):
+    def list_runs_and_pkls(self) -> list[str]:
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
                 if file.endswith(".pkl"):
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
-                        self.items.append(current_path)
-        return self.items
+                        self.items.append(str(current_path))
+        return sorted(self.items)
