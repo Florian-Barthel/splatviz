@@ -169,6 +169,7 @@ while, after saving a ply file.
 - Test other 3DGS render for OSX support
 
 ## Recent Updates ⚡ 
+- New Performance Widget
 - New Design
 - Compare two or more Gaussian Splatting scenes side by side
 - Improved camera controls
