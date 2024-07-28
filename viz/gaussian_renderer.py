@@ -55,6 +55,9 @@ class GaussianRenderer(Renderer):
         width = resolution
         height = resolution
         images = []
+        if len(ply_file_paths) == 0:
+            res.error = "Select a .ply file"
+            return
 
         for scene_index, ply_file_path in enumerate(ply_file_paths):
             if ply_file_path != self._current_ply_file_paths[scene_index]:
