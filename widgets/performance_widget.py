@@ -122,9 +122,9 @@ class PerformanceWidget:
             imgui.same_line(viz.label_w)
             imgui.progress_bar(self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
 
-            imgui.text(f"Memory Free:")
-            imgui.same_line(viz.label_w)
-            imgui.progress_bar(self.gpu_monitor.gpu.memoryFree / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryFree / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
+            # imgui.text(f"Memory Free:")
+            # imgui.same_line(viz.label_w)
+            # imgui.progress_bar(self.gpu_monitor.gpu.memoryFree / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryFree / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
 
             if imgui.button("Empty Cache"):
                 torch.cuda.empty_cache()
