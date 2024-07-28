@@ -1,9 +1,13 @@
 import os.path
-
+from dnnlib import EasyDict
 from gui_utils import imgui_utils
 import json
-
 from imgui_bundle import imgui, imgui_color_text_edit as edit
+import inspect
+
+from scene.cameras import CustomCam
+from viz.gaussian_renderer import GaussianRenderer
+from scene.gaussian_model import GaussianModel
 
 
 default_preset = """gaussian._xyz = gaussian._xyz
@@ -14,6 +18,16 @@ gaussian._features_dc = gaussian._features_dc
 gaussian._features_rest = gaussian._features_rest
 self.bg_color[:] = 0
 """
+
+
+def get_description(obj):
+    attr_list = sorted(inspect.getmembers(obj), key=lambda x: x[0])
+    res_string = str(obj.__name__) + "\n"
+    for attr in attr_list:
+        if attr[0].startswith("__"):
+            continue
+        res_string += "\t" + attr[0] + "\n"
+    return res_string
 
 
 class Slider:
@@ -40,7 +54,20 @@ class EditWidget:
         self.load_presets()
 
         self.editor = edit.TextEditor()
-        self.editor.set_language_definition(edit.TextEditor.LanguageDefinition.python())
+        language = edit.TextEditor.LanguageDefinition.python()
+
+        custom_identifiers = {
+            "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
+            "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
+            "render_cam": edit.TextEditor.Identifier(m_declaration=get_description(CustomCam)),
+            "render": edit.TextEditor.Identifier(m_declaration=get_description(EasyDict(render=0, viewspace_points=0, visibility_filter=0, radii=0, alpha=0, depth=0))),
+            "slider": edit.TextEditor.Identifier(m_declaration=get_description(Slider)),
+        }
+
+        copy_identifiers = language.m_identifiers.copy()
+        copy_identifiers.update(custom_identifiers)
+        language.m_identifiers = copy_identifiers
+        self.editor.set_language_definition(language)
         self.editor.set_text(self.presets["Default"])
 
         self.var_names = "xyzijklmnuvwabcdefghopqrst"
