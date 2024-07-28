@@ -75,7 +75,7 @@ class PerformanceWidget:
                 implot.end_plot()
 
             with imgui_utils.item_width(viz.font_size * 6):
-                imgui.text(f"FPS Limit:")
+                imgui.text(f"GUI FPS Limit:")
                 imgui.same_line(viz.label_w)
                 _changed, self.fps_limit = imgui.input_int("##FPS_limit", self.fps_limit)
                 self.fps_limit = min(max(self.fps_limit, 5), 1000)
@@ -110,25 +110,21 @@ class PerformanceWidget:
             imgui.same_line(viz.label_w)
             imgui.text(f"{self.cuda_version}")
 
-            imgui.text(f"Memory Used:")
-            imgui.same_line(viz.label_w)
-            imgui.text(f" {self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
-            imgui.same_line(viz.label_w * 2)
-            imgui.text(f" {100 * self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal:.2f} %")
-
-            imgui.text(f"Memory Free:")
-            imgui.same_line(viz.label_w)
-            imgui.text(f" {self.gpu_monitor.gpu.memoryFree / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
-            imgui.same_line(viz.label_w * 2)
-            imgui.text(f" {100 * self.gpu_monitor.gpu.memoryFree / self.gpu_monitor.gpu.memoryTotal:.2f} %")
-
             imgui.text(f"Clock Rate:")
             imgui.same_line(viz.label_w)
             imgui.text(f"{torch.cuda.clock_rate()}")
 
             imgui.text(f"Temperature:")
             imgui.same_line(viz.label_w)
-            imgui.text(f"{self.gpu_monitor.gpu.temperature}")
+            imgui.text(f"{self.gpu_monitor.gpu.temperature}° C")
+
+            imgui.text(f"Memory Used:")
+            imgui.same_line(viz.label_w)
+            imgui.progress_bar(self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
+
+            imgui.text(f"Memory Free:")
+            imgui.same_line(viz.label_w)
+            imgui.progress_bar(self.gpu_monitor.gpu.memoryFree / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryFree / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
 
             if imgui.button("Empty Cache"):
                 torch.cuda.empty_cache()
