@@ -1,4 +1,5 @@
 import os.path
+import uuid
 from dnnlib import EasyDict
 from gui_utils import imgui_utils
 import json
@@ -32,6 +33,7 @@ def get_description(obj):
 
 class Slider:
     def __init__(self, key, value, min_value, max_value):
+        self._id = uuid.uuid4()
         self.key = key
         self.value = value
         self.min_value = min_value
@@ -39,7 +41,7 @@ class Slider:
 
     def render(self):
         _changed, self.value = imgui.slider_float(
-            self.key,
+            self.key + f"##{self._id}",
             self.value,
             self.min_value,
             self.max_value,
@@ -131,7 +133,7 @@ class EditWidget:
         for i, slider in enumerate(self.sliders):
             slider.render()
             imgui.same_line()
-            if imgui_utils.button("Remove " + slider.key):
+            if imgui_utils.button("Remove " + slider.key + f"##{slider._id}"):
                 delete_keys.append(i)
 
         for i in delete_keys[::-1]:
