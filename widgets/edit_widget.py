@@ -32,13 +32,15 @@ def get_description(obj):
     return res_string
 
 
-class Slider:
-    def __init__(self, key, value, min_value, max_value):
-        self._id = uuid.uuid4()
+class Slider(object):
+    def __init__(self, key, value, min_value, max_value, _id=None):
+        if _id is None:
+            _id = str(uuid.uuid4())
         self.key = key
         self.value = value
         self.min_value = min_value
         self.max_value = max_value
+        self._id = _id
 
     def render(self):
         _changed, self.value = imgui.slider_float(
@@ -59,7 +61,7 @@ class EditWidget:
         self.history = {}
         self.history_size = 5
         self.load_presets()
-        self.load_safe = False
+        self.safe_load = False
 
         self.editor = edit.TextEditor()
         language = edit.TextEditor.LanguageDefinition.python()
@@ -69,7 +71,11 @@ class EditWidget:
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
             "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
             "render_cam": edit.TextEditor.Identifier(m_declaration=get_description(CustomCam)),
-            "render": edit.TextEditor.Identifier(m_declaration=get_description(EasyDict(render=0, viewspace_points=0, visibility_filter=0, radii=0, alpha=0, depth=0))),
+            "render": edit.TextEditor.Identifier(
+                m_declaration=get_description(
+                    EasyDict(render=0, viewspace_points=0, visibility_filter=0, radii=0, alpha=0, depth=0)
+                )
+            ),
             "slider": edit.TextEditor.Identifier(m_declaration=get_description(Slider)),
         }
 
@@ -77,7 +83,8 @@ class EditWidget:
         copy_identifiers.update(custom_identifiers)
         language.m_identifiers = copy_identifiers
         self.editor.set_language_definition(language)
-        self.editor.set_text(self.presets["Default"])
+        self.editor.set_text(self.presets["Default"]["edit_text"])
+        self.sliders = [Slider(**dict_values) for dict_values in self.presets["Default"]["slider"]]
 
         self.var_names = "xyzijklmnuvwabcdefghopqrst"
         self.var_name_index = 1
@@ -87,8 +94,6 @@ class EditWidget:
         self._cur_name_slider = self.var_names[self.var_name_index]
         self._cur_preset_name = ""
 
-        self.sliders: list[Slider] = [Slider(key=self.var_names[0], value=1, min_value=-10, max_value=10)]
-
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
@@ -96,7 +101,7 @@ class EditWidget:
             self.render_sliders()
             imgui.new_line()
 
-            _changed, self.load_safe = imgui.checkbox("Load Safe", self.load_safe)
+            _changed, self.safe_load = imgui.checkbox("Safe Load", self.safe_load)
 
             if imgui_utils.button("Browse Presets", width=self.viz.button_large_w):
                 imgui.open_popup("browse_presets")
@@ -104,8 +109,10 @@ class EditWidget:
                 for preset_key in sorted(self.presets.keys()):
                     clicked = imgui.menu_item_simple(preset_key)
                     if clicked:
-                        edit_text = self.presets[preset_key]
-                        if self.load_safe:
+                        edit_text = self.presets[preset_key]["edit_text"]
+                        self.sliders = [Slider(**dict_values) for dict_values in self.presets[preset_key]["slider"]]
+
+                        if self.safe_load:
                             edit_text = f"''' # REMOVE THIS LINE\n{edit_text}\n''' # REMOVE THIS LINE"
                         self.editor.set_text(edit_text)
                 imgui.end_popup()
@@ -118,8 +125,9 @@ class EditWidget:
                     name = "Current Session" if history_key == self.current_session_name else history_key
                     clicked = imgui.menu_item_simple(name)
                     if clicked:
-                        edit_text = self.history[history_key]
-                        if self.load_safe:
+                        edit_text = self.history[history_key]["edit_text"]
+                        self.sliders = [Slider(**dict_values) for dict_values in self.history[history_key]["slider"]]
+                        if self.safe_load:
                             edit_text = f"''' # REMOVE THIS LINE\n{edit_text}\n''' # REMOVE THIS LINE"
                         self.editor.set_text(edit_text)
                 imgui.end_popup()
@@ -136,14 +144,18 @@ class EditWidget:
             _changed, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
             imgui.same_line()
             if imgui_utils.button("Save as Preset", width=self.viz.button_large_w):
-                self.presets[self._cur_preset_name] = self.editor.get_text()
+                self.presets[self._cur_preset_name] = dict(
+                    edit_text=self.editor.get_text(), slider=[vars(slider) for slider in self.sliders]
+                )
                 with open("./presets.json", "w", encoding="utf-8") as f:
                     json.dump(self.presets, f)
                 self._cur_preset_name = ""
 
             edit_text = self.editor.get_text()
             if self.last_text != edit_text:
-                self.history[self.current_session_name] = self.editor.get_text()
+                self.history[self.current_session_name] = dict(
+                    edit_text=self.editor.get_text(), slider=[vars(slider) for slider in self.sliders]
+                )
                 with open("./history.json", "w", encoding="utf-8") as f:
                     json.dump(self.history, f)
             self.last_text = edit_text
@@ -154,7 +166,7 @@ class EditWidget:
     def load_presets(self):
         if not os.path.exists("./presets.json"):
             with open("./presets.json", "w", encoding="utf-8") as f:
-                json.dump(dict(default=default_preset), f)
+                json.dump(dict(Default=dict(edit_text=default_preset, slider=[vars(Slider("x", 1, 0, 10))])), f)
 
         with open("./presets.json", "r", encoding="utf-8") as f:
             self.presets = json.load(f)
