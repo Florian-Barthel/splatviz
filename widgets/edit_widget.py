@@ -57,6 +57,7 @@ class EditWidget:
         self.current_session_name = f"Restore Session {cur_time}"
         self.presets = {}
         self.history = {}
+        self.history_size = 5
         self.load_presets()
         self.load_safe = False
 
@@ -160,7 +161,11 @@ class EditWidget:
 
         if os.path.exists("./history.json"):
             with open("./history.json", "r", encoding="utf-8") as f:
-                self.history = json.load(f)
+                history_all = json.load(f)
+                keys = sorted(history_all.keys())
+                num_keep = min(len(keys), self.history_size)
+                keys = keys[-num_keep:]
+                self.history = {key: history_all[key] for key in keys}
 
     def render_sliders(self):
         delete_keys = []
