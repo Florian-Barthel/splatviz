@@ -26,7 +26,7 @@ class Renderer:
         self._net_layers = dict()
         self._last_model_input = None
         self.gaussian_models = []
-        self.bg_color = torch.tensor([1, 1, 1], dtype=torch.float32).to("cuda")
+        self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
 
     def render(self, **args):
         self._is_timing = True
