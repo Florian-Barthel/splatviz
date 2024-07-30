@@ -36,3 +36,4 @@ dependencies:
     - imgui==2.0.0
     - imagecodecs[all]==2024.6
     - pynvml
+    - GPUtil
