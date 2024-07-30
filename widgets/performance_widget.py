@@ -45,6 +45,9 @@ class PerformanceWidget:
         self.gpu_monitor = Monitor(1)
         self.cuda_version = torch.version.cuda
 
+    def close(self):
+        self.gpu_monitor.stop()
+
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz

@@ -76,6 +76,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.skip_frame()  # Layout may change after first frame.
 
     def close(self):
+        self.perf_widget.close()
         super().close()
         if self._async_renderer is not None:
             self._async_renderer.close()
