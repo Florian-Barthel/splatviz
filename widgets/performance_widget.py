@@ -43,7 +43,7 @@ class PerformanceWidget:
         self.device_name = self.device_properties.name
         self.device_memory = self.device_properties.total_memory
         self.gpu_monitor = Monitor(1)
-        self.cuda_version = torch.cuda_version
+        self.cuda_version = torch.version.cuda
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
