@@ -1,4 +1,5 @@
 import os.path
+import time
 import uuid
 from dnnlib import EasyDict
 from gui_utils import imgui_utils
@@ -52,11 +53,16 @@ class EditWidget:
     def __init__(self, viz):
         self.viz = viz
 
+        cur_time = time.strftime("%Y.%m.%d %H:%M:%S", time.localtime())
+        self.current_session_name = f"Restore Session {cur_time}"
         self.presets = {}
+        self.history = {}
         self.load_presets()
+        self.load_safe = False
 
         self.editor = edit.TextEditor()
         language = edit.TextEditor.LanguageDefinition.python()
+        self.last_text = ""
 
         custom_identifiers = {
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
@@ -89,15 +95,32 @@ class EditWidget:
             self.render_sliders()
             imgui.new_line()
 
+            _changed, self.load_safe = imgui.checkbox("Load Safe", self.load_safe)
+
             if imgui_utils.button("Browse Presets", width=self.viz.button_large_w):
                 imgui.open_popup("browse_presets")
-                self.all_presets = self.presets.keys()
-
             if imgui.begin_popup("browse_presets"):
-                for preset in sorted(self.all_presets):
-                    clicked = imgui.menu_item_simple(preset)
+                for preset_key in sorted(self.presets.keys()):
+                    clicked = imgui.menu_item_simple(preset_key)
                     if clicked:
-                        self.editor.set_text(self.presets[preset])
+                        edit_text = self.presets[preset_key]
+                        if self.load_safe:
+                            edit_text = f"''' # REMOVE THIS LINE\n{edit_text}\n''' # REMOVE THIS LINE"
+                        self.editor.set_text(edit_text)
+                imgui.end_popup()
+
+            imgui.same_line(viz.button_large_w * 2)
+            if imgui_utils.button("Browse History", width=self.viz.button_large_w):
+                imgui.open_popup("browse_history")
+            if imgui.begin_popup("browse_history"):
+                for history_key in sorted(self.history.keys()):
+                    name = "Current Session" if history_key == self.current_session_name else history_key
+                    clicked = imgui.menu_item_simple(name)
+                    if clicked:
+                        edit_text = self.history[history_key]
+                        if self.load_safe:
+                            edit_text = f"''' # REMOVE THIS LINE\n{edit_text}\n''' # REMOVE THIS LINE"
+                        self.editor.set_text(edit_text)
                 imgui.end_popup()
 
             with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
@@ -117,7 +140,14 @@ class EditWidget:
                     json.dump(self.presets, f)
                 self._cur_preset_name = ""
 
-        viz.args.edit_text = self.editor.get_text()
+            edit_text = self.editor.get_text()
+            if self.last_text != edit_text:
+                self.history[self.current_session_name] = self.editor.get_text()
+                with open("./history.json", "w", encoding="utf-8") as f:
+                    json.dump(self.history, f)
+            self.last_text = edit_text
+
+        viz.args.edit_text = self.last_text
         viz.args.update({slider.key: slider.value for slider in self.sliders})
 
     def load_presets(self):
@@ -127,6 +157,10 @@ class EditWidget:
 
         with open("./presets.json", "r", encoding="utf-8") as f:
             self.presets = json.load(f)
+
+        if os.path.exists("./history.json"):
+            with open("./history.json", "r", encoding="utf-8") as f:
+                self.history = json.load(f)
 
     def render_sliders(self):
         delete_keys = []
