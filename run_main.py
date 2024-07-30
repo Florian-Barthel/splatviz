@@ -68,7 +68,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.perf_widget = performance_widget.PerformanceWidget(self)
         self.video_widget = video_widget.VideoWidget(self)
         self.capture_widget = capture_widget.CaptureWidget(self)
-        self.rener_widget = render_widget.RenderWidget(self)
+        self.render_widget = render_widget.RenderWidget(self)
 
         # Initialize window.
         self.set_position(0, 0)
@@ -137,7 +137,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
         expanded, _visible = imgui_utils.collapsing_header("Render", default=False)
         imgui.indent()
-        self.rener_widget(expanded, decoder=self.use_gan_decoder)
+        self.render_widget(expanded, decoder=self.use_gan_decoder)
         imgui.unindent()
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
