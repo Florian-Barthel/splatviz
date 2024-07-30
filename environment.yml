@@ -25,7 +25,6 @@ dependencies:
   - pydantic=2.8
   - pyopengl=3.1
   - requests=2.31
-  - scikit-image=0.24
   - scipy=1.13
   - tqdm=4.66
 
@@ -34,6 +33,7 @@ dependencies:
     - gaussian-splatting/submodules/simple-knn
     - imgui_bundle==1.5.2
     - imgui==2.0.0
-    - imagecodecs[all]==2024.6
+    - scikit-image==0.24
+    - imagecodecs[all]==2024.6.1
     - pynvml
     - GPUtil
