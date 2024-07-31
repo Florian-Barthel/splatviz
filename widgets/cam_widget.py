@@ -22,6 +22,7 @@ class CamWidget:
         self.invert_x = False
         self.invert_y = False
         self.move_speed = 0.02
+        self.wasd_move_speed = np.exp(-2.5)
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
 
@@ -43,13 +44,13 @@ class CamWidget:
             )
             self.sideways = torch.cross(self.forward, self.up_vector)
             if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
-                self.cam_pos += self.forward * self.move_speed
+                self.cam_pos += self.forward * self.wasd_move_speed
             if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
-                self.cam_pos -= self.sideways * self.move_speed
+                self.cam_pos -= self.sideways * self.wasd_move_speed
             if imgui.is_key_down(imgui.Key.down_arrow) or "s" in self.viz.current_pressed_keys:
-                self.cam_pos -= self.forward * self.move_speed
+                self.cam_pos -= self.forward * self.wasd_move_speed
             if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
-                self.cam_pos += self.sideways * self.move_speed
+                self.cam_pos += self.sideways * self.wasd_move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
             self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
@@ -84,6 +85,11 @@ class CamWidget:
             _clicked, self.current_control_mode = imgui.combo(
                 "##Camera Modes", self.current_control_mode, self.control_modes
             )
+
+            if self.control_modes[self.current_control_mode] == "WASD":
+                speed_changed, log_wasd_move_speed = imgui.slider_float("WASD Move Speed", v=np.log(self.wasd_move_speed), v_min=-5, v_max=0, format="%.2f")
+                if speed_changed:
+                    self.wasd_move_speed = np.exp(log_wasd_move_speed)
 
             imgui.push_item_width(200)
             imgui.text("Up Vector")
