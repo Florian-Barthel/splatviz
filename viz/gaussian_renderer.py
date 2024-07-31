@@ -49,6 +49,8 @@ class GaussianRenderer(Renderer):
         use_splitscreen=False,
         highlight_border=False,
         save_ply_path=None,
+        prune_grid=False,
+        grid_attr=None,
         **slider,
     ):
         slider = EasyDict(slider)
@@ -58,7 +60,7 @@ class GaussianRenderer(Renderer):
         if len(ply_file_paths) == 0:
             res.error = "Select a .ply file"
             return
-
+        
         for scene_index, ply_file_path in enumerate(ply_file_paths):
             if ply_file_path != self._current_ply_file_paths[scene_index]:
                 if scene_index + 1 > len(self.gaussian_models):
@@ -70,6 +72,7 @@ class GaussianRenderer(Renderer):
                 self._current_ply_file_paths[scene_index] = ply_file_path
 
             gaussian = copy.deepcopy(self.gaussian_models[scene_index])
+
             command = re.sub(";+", ";", edit_text.replace("\n", ";"))
             while command.startswith(";"):
                 command = command[1:]
@@ -77,6 +80,20 @@ class GaussianRenderer(Renderer):
                 exec(command)
             except Exception as e:
                 res.error = e
+
+            if prune_grid:
+                gaussian.prune_to_square_shape()
+            
+            try:
+                gaussian_grid = gaussian.attr_as_grid_img(grid_attr)
+                # normalize
+                gaussian_grid = (gaussian_grid - gaussian_grid.min()) / (gaussian_grid.max() - gaussian_grid.min())
+                # as uint8
+                gaussian_grid = (gaussian_grid * 255).clamp(0, 255).to(torch.uint8)
+                res["2D Grid"] = gaussian_grid.contiguous().cpu().numpy()
+            except Exception as e:
+                pass
+
 
             if len(video_cams) > 0:
                 self.render_video("./_videos", video_cams, gaussian)

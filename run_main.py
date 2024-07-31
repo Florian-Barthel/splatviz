@@ -25,6 +25,7 @@ from widgets import (
     capture_widget,
     latent_widget,
     render_widget,
+    grid_widget,
 )
 from viz.async_renderer import AsyncRenderer
 from viz.gaussian_renderer import GaussianRenderer
@@ -36,7 +37,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
-        super().__init__(title="splatviz", window_width=1920, window_height=1080, font=self.regular_font_path, code_font=self.code_font_path)
+        super().__init__(title="splatviz", window_width=1920, window_height=1080, font=self.regular_font_path, code_font=self.code_font_path, close_on_esc=False)
 
         self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
         self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
@@ -69,6 +70,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.video_widget = video_widget.VideoWidget(self)
         self.capture_widget = capture_widget.CaptureWidget(self)
         self.render_widget = render_widget.RenderWidget(self)
+        self.grid_widget = grid_widget.GridWidget(self)
 
         # Initialize window.
         self.set_position(0, 0)
@@ -172,6 +174,19 @@ class Visualizer(imgui_window.ImguiWindow):
         imgui.indent()
         self.eval_widget(expanded)
         imgui.unindent()
+
+        try:
+            # support 2D grid widget only if "PLAS" is installed
+            import plas
+
+            expanded, _visible = imgui_utils.collapsing_header("2D Grid", default=False)
+            imgui.indent()
+            self.grid_widget(expanded)
+            imgui.unindent()
+        except ImportError:
+            pass
+
+
 
         # imgui.show_style_editor()
 

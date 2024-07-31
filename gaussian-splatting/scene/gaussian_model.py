@@ -464,3 +464,62 @@ class GaussianModel:
     def add_densification_stats(self, viewspace_point_tensor, update_filter):
         self.xyz_gradient_accum[update_filter] += torch.norm(viewspace_point_tensor.grad[update_filter,:2], dim=-1, keepdim=True)
         self.denom[update_filter] += 1
+
+    def prune_all_but_these_indices(self, indices):
+
+        if self.optimizer is not None:
+
+            optimizable_tensors = self._prune_optimizer(indices)
+
+            self._xyz = optimizable_tensors["xyz"]
+            self._features_dc = optimizable_tensors["f_dc"]
+            self._features_rest = optimizable_tensors["f_rest"]
+            self._opacity = optimizable_tensors["opacity"]
+            self._scaling = optimizable_tensors["scaling"]
+            self._rotation = optimizable_tensors["rotation"]
+
+            self.xyz_gradient_accum = self.xyz_gradient_accum[indices]
+            self.denom = self.denom[indices]
+            self.max_radii2D = self.max_radii2D[indices]
+        else:
+            self._xyz = self._xyz[indices]
+            self._features_dc = self._features_dc[indices]
+            self._features_rest = self._features_rest[indices]
+            self._opacity = self._opacity[indices]
+            self._scaling = self._scaling[indices]
+            self._rotation = self._rotation[indices]
+
+
+    def prune_to_square_shape(self, sort_by_opacity=True, verbose=True):
+        num_gaussians = self._xyz.shape[0]
+
+        self.grid_sidelen = int(np.sqrt(num_gaussians))
+        num_removed = num_gaussians - self.grid_sidelen * self.grid_sidelen
+
+        if verbose:
+            print(f"Removing {num_removed}/{num_gaussians} gaussians to fit the grid. ({100 * num_removed / num_gaussians:.4f}%)")
+        if self.grid_sidelen * self.grid_sidelen < num_gaussians:
+            if sort_by_opacity:
+                alpha = self.get_opacity[:, 0]
+                _, keep_indices = torch.topk(alpha, k=self.grid_sidelen * self.grid_sidelen)
+            else:
+                shuffled_indices = torch.randperm(num_gaussians)
+                keep_indices = shuffled_indices[:self.grid_sidelen * self.grid_sidelen]
+            sorted_keep_indices = torch.sort(keep_indices)[0]
+            self.prune_all_but_these_indices(sorted_keep_indices)
+
+    def as_grid_img(self, tensor):
+        if not hasattr(self, "grid_sidelen"):
+            raise "Gaussians not pruned yet!"
+
+        if self.grid_sidelen * self.grid_sidelen != tensor.shape[0]:
+            raise "Tensor shape does not match img sidelen, needs pruning?"
+
+        img = tensor.reshape((self.grid_sidelen, self.grid_sidelen, -1))
+        return img
+
+    def attr_as_grid_img(self, attr_name):
+        tensor = getattr(self, attr_name)
+        return self.as_grid_img(tensor)
+
+
