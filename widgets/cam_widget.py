@@ -22,7 +22,7 @@ class CamWidget:
         self.invert_x = False
         self.invert_y = False
         self.move_speed = 0.02
-        self.wasd_move_speed = np.exp(-2.5)
+        self.wasd_move_speed = 0.1
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
 
@@ -40,7 +40,7 @@ class CamWidget:
                 horizontal_mean=self.pose.yaw + np.pi / 2,
                 vertical_mean=self.pose.pitch + np.pi / 2,
                 radius=0.01,
-                up_vector=self.up_vector
+                up_vector=self.up_vector,
             )
             self.sideways = torch.cross(self.forward, self.up_vector)
             if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
@@ -53,7 +53,14 @@ class CamWidget:
                 self.cam_pos += self.sideways * self.wasd_move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
-            self.cam_pos = get_origin(self.pose.yaw + np.pi / 2, self.pose.pitch + np.pi / 2, self.radius, self.lookat_point, device=torch.device("cuda"), up_vector=self.up_vector)
+            self.cam_pos = get_origin(
+                self.pose.yaw + np.pi / 2,
+                self.pose.pitch + np.pi / 2,
+                self.radius,
+                self.lookat_point,
+                device=torch.device("cuda"),
+                up_vector=self.up_vector,
+            )
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
             if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.pose.pitch += self.move_speed
@@ -87,9 +94,16 @@ class CamWidget:
             )
 
             if self.control_modes[self.current_control_mode] == "WASD":
-                speed_changed, log_wasd_move_speed = imgui.slider_float("WASD Move Speed", v=np.log(self.wasd_move_speed), v_min=-5, v_max=0, format="%.2f")
-                if speed_changed:
-                    self.wasd_move_speed = np.exp(log_wasd_move_speed)
+                imgui.text("Move Speed")
+                imgui.same_line(viz.label_w)
+                speed_changed, self.wasd_move_speed = imgui.slider_float(
+                    "##WASD_Move_Speed",
+                    v=self.wasd_move_speed,
+                    v_min=0.001,
+                    v_max=1,
+                    format="%.3f",
+                    flags=imgui.SliderFlags_.logarithmic.value,
+                )
 
             imgui.push_item_width(200)
             imgui.text("Up Vector")
