@@ -1,3 +1,7 @@
+import os
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = "1"
+
 import click
 from imgui_bundle import imgui
 import numpy as np
@@ -25,6 +29,7 @@ from widgets import (
     capture_widget,
     latent_widget,
     render_widget,
+    load_widget_img
 )
 from viz.async_renderer import AsyncRenderer
 # from viz.gaussian_renderer import GaussianRenderer
@@ -61,7 +66,7 @@ class Visualizer(imgui_window.ImguiWindow):
         if self.use_gan_decoder:
             self.load_widget = load_widget_pkl.LoadWidget(self, data_path)
         else:
-            self.load_widget = load_widget_ply.LoadWidget(self, data_path)
+            self.load_widget = load_widget_img.LoadWidget(self, data_path)
         self.cam_widget = cam_widget.CamWidget(self)
         self.latent_widget = latent_widget.LatentWidget(self)
         self.edit_widget = edit_widget.EditWidget(self)

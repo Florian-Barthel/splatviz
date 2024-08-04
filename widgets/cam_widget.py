@@ -13,9 +13,9 @@ class CamWidget:
         self.fov = 45
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
-        self.cam_pos = torch.tensor([0.0, 0.0, 1.0], device="cuda")
+        self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device="cuda")
         self.up_vector = torch.tensor([0.0, -1.0, 0.0], device="cuda")
-        self.forward = torch.tensor([0.0, 0.0, -1.0], device="cuda")
+        self.forward = torch.tensor([0.0, 0.0, 1.0], device="cuda")
 
         # controls
         self.pose = EasyDict(yaw=0, pitch=0)
@@ -25,6 +25,7 @@ class CamWidget:
         self.wasd_move_speed = 0.1
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
+        self.use_flame_cam = True
 
     def drag(self, dx, dy):
         viz = self.viz
@@ -87,6 +88,10 @@ class CamWidget:
         self.handle_wasd()
 
         if show:
+            imgui.text("use_flame_cam")
+            imgui.same_line(viz.label_w)
+            _, self.use_flame_cam = imgui.checkbox("##use_flame_cam", self.use_flame_cam)
+
             imgui.text("Camera Mode")
             imgui.same_line(viz.label_w)
             _clicked, self.current_control_mode = imgui.combo(

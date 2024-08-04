@@ -21,6 +21,8 @@ import torch.nn as nn
 
 import numpy as np
 from skimage.io import imread
+
+from .datasets.datasets import process_single_image
 from .utils.renderer import SRenderY, set_rasterizer
 from .models.encoders import ResnetEncoder
 from .models.FLAME import FLAME, FLAMETex
@@ -154,7 +156,7 @@ class DECA(nn.Module):
         return codedict
 
     # @torch.no_grad()
-    def decode(self, codedict, rendering=True, iddict=None, vis_lmk=True, return_vis=True, use_detail=True,
+    def decode(self, codedict, rendering=False, iddict=None, vis_lmk=False, return_vis=False, use_detail=False,
                 render_orig=False, original_image=None, tform=None):
         images = codedict['images']
         batch_size = images.shape[0]
@@ -168,9 +170,15 @@ class DECA(nn.Module):
         landmarks3d_world = landmarks3d.clone()
 
         ## projection
-        landmarks2d = util.batch_orth_proj(landmarks2d, codedict['cam'])[:,:,:2]; landmarks2d[:,:,1:] = -landmarks2d[:,:,1:]#; landmarks2d = landmarks2d*self.image_size/2 + self.image_size/2
-        landmarks3d = util.batch_orth_proj(landmarks3d, codedict['cam']); landmarks3d[:,:,1:] = -landmarks3d[:,:,1:] #; landmarks3d = landmarks3d*self.image_size/2 + self.image_size/2
-        trans_verts = util.batch_orth_proj(verts, codedict['cam']); trans_verts[:,:,1:] = -trans_verts[:,:,1:]
+        landmarks2d = util.batch_orth_proj(landmarks2d, codedict['cam'])[:,:,:2]
+        landmarks2d[:,:,1:] = -landmarks2d[:,:,1:]#; landmarks2d = landmarks2d*self.image_size/2 + self.image_size/2
+
+        landmarks3d = util.batch_orth_proj(landmarks3d, codedict['cam'])
+        landmarks3d[:,:,1:] = -landmarks3d[:,:,1:] #; landmarks3d = landmarks3d*self.image_size/2 + self.image_size/2
+
+        trans_verts = util.batch_orth_proj(verts, codedict['cam'])
+        trans_verts[:,:,1:] = -trans_verts[:,:,1:]
+
         opdict = {
             'verts': verts,
             'trans_verts': trans_verts,
@@ -258,25 +266,25 @@ class DECA(nn.Module):
         else:
             return opdict
 
-    # def visualize(self, visdict, size=224, dim=2):
-    #     '''
-    #     image range should be [0,1]
-    #     dim: 2 for horizontal. 1 for vertical
-    #     '''
-    #     assert dim == 1 or dim==2
-    #     grids = {}
-    #     for key in visdict:
-    #         _,_,h,w = visdict[key].shape
-    #         if dim == 2:
-    #             new_h = size; new_w = int(w*size/h)
-    #         elif dim == 1:
-    #             new_h = int(h*size/w); new_w = size
-    #         grids[key] = torchvision.utils.make_grid(F.interpolate(visdict[key], [new_h, new_w]).detach().cpu())
-    #     grid = torch.cat(list(grids.values()), dim)
-    #     grid_image = (grid.numpy().transpose(1,2,0).copy()*255)[:,:,[2,1,0]]
-    #     grid_image = np.minimum(np.maximum(grid_image, 0), 255).astype(np.uint8)
-    #     return grid_image
-    #
+    def visualize(self, visdict, size=224, dim=2):
+        '''
+        image range should be [0,1]
+        dim: 2 for horizontal. 1 for vertical
+        '''
+        assert dim == 1 or dim==2
+        grids = {}
+        for key in visdict:
+            _,_,h,w = visdict[key].shape
+            if dim == 2:
+                new_h = size; new_w = int(w*size/h)
+            elif dim == 1:
+                new_h = int(h*size/w); new_w = size
+            grids[key] = torchvision.utils.make_grid(F.interpolate(visdict[key], [new_h, new_w]).detach().cpu())
+        grid = torch.cat(list(grids.values()), dim)
+        grid_image = (grid.numpy().transpose(1,2,0).copy()*255)[:,:,[2,1,0]]
+        grid_image = np.minimum(np.maximum(grid_image, 0), 255).astype(np.uint8)
+        return grid_image
+
     def save_obj(self, filename, opdict):
         '''
         vertices: [nv, 3], tensor
@@ -312,8 +320,14 @@ class DECA(nn.Module):
         testdata = datasets.TestData(imagepath)
         images = testdata[0]['image'].to(self.device)[None,...]
         codedict = self.encode(images)
-        opdict, visdict = self.decode(codedict)
-        return codedict, opdict, visdict, images
+        out_dict = self.decode(codedict)
+        return codedict, out_dict, images
+
+    def run_image(self, image_path):
+        image = process_single_image(image_path)
+        codedict = self.encode(image)
+        out_dict = self.decode(codedict)
+        return codedict, out_dict, image
 
     def model_dict(self):
         return {
