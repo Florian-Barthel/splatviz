@@ -42,7 +42,7 @@ class CamWidget:
                 radius=0.01,
                 up_vector=self.up_vector,
             )
-            self.sideways = torch.cross(self.forward, self.up_vector)
+            self.sideways = torch.linalg.cross(self.forward, self.up_vector)
             if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.cam_pos += self.forward * self.wasd_move_speed
             if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
