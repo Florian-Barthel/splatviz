@@ -9,6 +9,8 @@ from tqdm import tqdm
 from pathlib import Path
 
 from compression.compression_exp import run_single_decompression
+from decalib.deca import DECA
+from decalib.models.FLAME import FLAME
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
@@ -16,7 +18,7 @@ from viz.base_renderer import Renderer
 from viz_utils.dict import EasyDict
 
 
-class GaussianRenderer(Renderer):
+class FlameRenderer(Renderer):
     def __init__(self, num_parallel_scenes=16):
         super().__init__()
         self.num_parallel_scenes = num_parallel_scenes
@@ -24,6 +26,7 @@ class GaussianRenderer(Renderer):
         self._current_ply_file_paths: List[str | None] = [None] * num_parallel_scenes
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
         self._last_num_scenes = 0
+        self.deca = DECA()
 
     def _render_impl(
         self,
@@ -44,6 +47,7 @@ class GaussianRenderer(Renderer):
         save_ply_path=None,
         **slider,
     ):
+        codedict, opdict, visdict, input_img = self.deca.run("ffhq_images")
         slider = EasyDict(slider)
         if len(ply_file_paths) == 0:
             res.error = "Select a .ply file"
@@ -100,7 +104,7 @@ class GaussianRenderer(Renderer):
                 gaussian.save_ply(save_path)
 
         self._return_image(
-            images,
+            [input_img],
             res,
             normalize=img_normalize,
             use_splitscreen=use_splitscreen,

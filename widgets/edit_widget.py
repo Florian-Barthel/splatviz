@@ -8,7 +8,7 @@ from imgui_bundle import imgui, imgui_color_text_edit as edit
 import inspect
 
 from scene.cameras import CustomCam
-from viz.gaussian_renderer import GaussianRenderer
+# from viz.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
 
 
@@ -68,7 +68,7 @@ class EditWidget:
         self.last_text = ""
 
         custom_identifiers = {
-            "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
+            # "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
             "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
             "render_cam": edit.TextEditor.Identifier(m_declaration=get_description(CustomCam)),
             "render": edit.TextEditor.Identifier(

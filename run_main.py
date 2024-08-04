@@ -27,8 +27,9 @@ from widgets import (
     render_widget,
 )
 from viz.async_renderer import AsyncRenderer
-from viz.gaussian_renderer import GaussianRenderer
+# from viz.gaussian_renderer import GaussianRenderer
 from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
+from viz.gaussian_renderer_flame import FlameRenderer
 
 
 class Visualizer(imgui_window.ImguiWindow):
@@ -45,7 +46,7 @@ class Visualizer(imgui_window.ImguiWindow):
         # Internals.
         self._last_error_print = None
         self.use_gan_decoder = use_gan_decoder
-        renderer = GaussianDecoderRenderer() if use_gan_decoder else GaussianRenderer()
+        renderer = GaussianDecoderRenderer() if use_gan_decoder else FlameRenderer()
         self._async_renderer = AsyncRenderer(renderer)
         self._defer_rendering = 0
         self._tex_img = None

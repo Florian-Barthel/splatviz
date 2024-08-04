@@ -1,32 +1,21 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-#
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
-
-
+import re
+from typing import List
 import torch
 import torch.nn
+
 from viz.render_utils import CapturedException
 from viz_utils.dict import EasyDict
 
 
 class Renderer:
     def __init__(self):
-        self._current_ply_file_paths = [None] * 16
         self._device = torch.device("cuda")
-        self._pinned_bufs = dict()  # {(shape, dtype): torch.Tensor, ...}
+        self._pinned_bufs = dict()
         self._is_timing = False
         self._start_event = torch.cuda.Event(enable_timing=True)
         self._end_event = torch.cuda.Event(enable_timing=True)
         self._net_layers = dict()
         self._last_model_input = None
-        self.gaussian_models = []
-        self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
 
     def render(self, **args):
         self._is_timing = True
@@ -64,6 +53,13 @@ class Renderer:
     def to_cpu(self, buf):
         return self._get_pinned_buf(buf).copy_(buf).clone()
 
+    @staticmethod
+    def sanitize_command(edit_text):
+        command = re.sub(";+", ";", edit_text.replace("\n", ";"))
+        while command.startswith(";"):
+            command = command[1:]
+        return command
+
     def _render_impl(
         self,
         res,
@@ -81,3 +77,44 @@ class Renderer:
         **slider,
     ):
         raise NotImplementedError
+
+    def _load_model(self, path):
+        raise NotImplementedError
+
+    @staticmethod
+    def _return_image(
+        images: List[torch.Tensor],
+        res: dict,
+        normalize: bool,
+        use_splitscreen: bool,
+        highlight_border: bool,
+    ) -> None:
+        if use_splitscreen:
+            img = torch.zeros_like(images[0])
+            split_size = img.shape[-1] // len(images)
+            offset = 0
+            for i in range(len(images)):
+                img[..., offset : offset + split_size] = images[i][..., offset : offset + split_size]
+                offset += split_size
+                if highlight_border and i != len(images) - 1:
+                    img[..., offset - 1 : offset] = 1
+
+        else:
+            img = torch.concat(images, dim=2)
+
+        res.stats = torch.stack(
+            [
+                img.mean(),
+                img.mean(),
+                img.std(),
+                img.std(),
+                img.norm(float("inf")),
+                img.norm(float("inf")),
+            ]
+        )
+
+        # Scale and convert to uint8.
+        if normalize:
+            img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
+        img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
+        res.image = img
