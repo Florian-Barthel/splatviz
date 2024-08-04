@@ -1,19 +1,19 @@
 import copy
 import os
-from typing import List
 import imageio
 import numpy as np
 import torch
 import torch.nn
 from tqdm import tqdm
-from pathlib import Path
+import json
+import re
 
-from compression.compression_exp import run_single_decompression
+
 from decalib.deca import DECA
-from decalib.models.FLAME import FLAME
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
+from utils.graphics_utils import focal2fov
 from viz.base_renderer import Renderer
 from viz_utils.dict import EasyDict
 
@@ -28,6 +28,8 @@ class FlameRenderer(Renderer):
         self.input_image = None
         self.last_image_path = None
         self.codedict = None
+        with open("decalib/data/dataset-ffhq.json", "r") as f:
+            self.label_dict = json.load(f)
 
     def _render_impl(
         self,
@@ -46,7 +48,7 @@ class FlameRenderer(Renderer):
         use_splitscreen=False,
         highlight_border=False,
         save_ply_path=None,
-        use_flame_cam=True,
+        use_ffhq_cam=True,
         **slider,
     ):
         slider = EasyDict(slider)
@@ -73,18 +75,27 @@ class FlameRenderer(Renderer):
         if len(video_cams) > 0:
             self.render_video("./_videos", video_cams, gaussian)
 
-        if use_flame_cam:
-            pose = self.codedict['pose']
-            rotation_matrices = batch_rodrigues(pose[:, :3])
-            R_deca = rotation_matrices
-            T_deca = R_deca[:, :, -1]
-            cam_params = torch.zeros([4, 4], device="cuda")
-            cam_params[:3, :3] = R_deca
-            cam_params[3:, :3] = T_deca
-            cam_params[3, 3] = 1
+        fov_rad = fov / 360 * 2 * np.pi
+
+        if use_ffhq_cam:
+            index = int(re.findall(r'\d+', ply_file_paths[0])[0])
+            cam = self.label_dict["labels"][index][1]
+            print(self.label_dict["labels"][index][0])
+            cam_params = np.array(cam[:16], dtype=float).reshape(4, 4)
+            cam_params = torch.tensor(cam_params, dtype=torch.float, device="cuda")
+            focal = float(cam[16])
+            fov_rad = focal2fov(focal)
+
+        #     pose = self.codedict['pose']
+        #     rotation_matrices = batch_rodrigues(pose[:, :3])
+        #     R_deca = rotation_matrices
+        #     T_deca = R_deca[:, :, -1]
+        #     cam_params = torch.zeros([4, 4], device="cuda")
+        #     cam_params[:3, :3] = R_deca
+        #     cam_params[3:, :3] = T_deca
+        #     cam_params[3, 3] = 1
 
         # Render current view
-        fov_rad = fov / 360 * 2 * np.pi
         # fov_rad = 2 * np.arctan(112. / 1015) * 180 / np.pi
         # fov_rad = 2 * np.pi * fov_rad / 360
         render_cam = CustomCam(
@@ -127,18 +138,18 @@ class FlameRenderer(Renderer):
     def _load_model(self, out_dict):
         model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
 
-        verts = out_dict["trans_verts"] # (1, 5023, 3)
+        verts = out_dict["verts"] # (1, 5023, 3)
         num_verts = verts.shape[1]
 
         model._xyz = verts[0]
-        model._xyz[:, -1] = - model._xyz[:, -1]
+        # model._xyz[:, -1] = - model._xyz[:, -1]
         # model._xyz[:, -1] *= -1
 
         model._features_dc = torch.ones([num_verts, 1, 3], device="cuda")
         model._features_rest = torch.zeros([num_verts, (model.max_sh_degree + 1) ** 2 - 1, 3], device="cuda")
         model._rotation = torch.zeros([num_verts, 4], device="cuda")
         model._rotation[:, 0] = 1
-        model._scaling = torch.ones([num_verts, 3], device="cuda") * -5
+        model._scaling = torch.ones([num_verts, 3], device="cuda") * -8
         model._opacity = torch.ones([num_verts, 1], device="cuda") * 1
         return model
 

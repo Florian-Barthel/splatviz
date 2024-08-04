@@ -14,7 +14,7 @@ class CamWidget:
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
         self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device="cuda")
-        self.up_vector = torch.tensor([0.0, -1.0, 0.0], device="cuda")
+        self.up_vector = torch.tensor([0.0, 1.0, 0.0], device="cuda")
         self.forward = torch.tensor([0.0, 0.0, 1.0], device="cuda")
 
         # controls
@@ -25,7 +25,7 @@ class CamWidget:
         self.wasd_move_speed = 0.1
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
-        self.use_flame_cam = True
+        self.use_ffhq_cam = False
 
     def drag(self, dx, dy):
         viz = self.viz
@@ -88,9 +88,9 @@ class CamWidget:
         self.handle_wasd()
 
         if show:
-            imgui.text("use_flame_cam")
+            imgui.text("Use FFHQ Cam")
             imgui.same_line(viz.label_w)
-            _, self.use_flame_cam = imgui.checkbox("##use_flame_cam", self.use_flame_cam)
+            _, self.use_ffhq_cam = imgui.checkbox("##use_flame_cam", self.use_ffhq_cam)
 
             imgui.text("Camera Mode")
             imgui.same_line(viz.label_w)
@@ -155,6 +155,7 @@ class CamWidget:
 
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
 
+        viz.args.use_ffhq_cam = self.use_ffhq_cam
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
         viz.args.fov = self.fov

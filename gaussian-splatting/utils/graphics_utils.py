@@ -82,8 +82,8 @@ def getProjectionMatrixCustom(fx, fy, W, H, cx, cy):
     return P
 
 
-def fov2focal(fov, pixels):
+def fov2focal(fov, pixels=1):
     return pixels / (2 * math.tan(fov / 2))
 
-def focal2fov(focal, pixels):
+def focal2fov(focal, pixels=1):
     return 2*math.atan(pixels/(2*focal))
