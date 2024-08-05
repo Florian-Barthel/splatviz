@@ -88,6 +88,7 @@ class Renderer:
         normalize: bool,
         use_splitscreen: bool,
         highlight_border: bool,
+        on_top: bool = False
     ) -> None:
         if use_splitscreen:
             img = torch.zeros_like(images[0])
@@ -99,6 +100,9 @@ class Renderer:
                 if highlight_border and i != len(images) - 1:
                     img[..., offset - 1 : offset] = 1
 
+        elif on_top:
+            mask = torch.mean(images[1], dim=0)
+            img = images[0] * (1 - mask) + images[1] * mask
         else:
             img = torch.concat(images, dim=2)
 

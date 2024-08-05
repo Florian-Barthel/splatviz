@@ -28,7 +28,10 @@ class FlameRenderer(Renderer):
         self.input_image = None
         self.last_image_path = None
         self.codedict = None
-        with open("decalib/data/dataset-ffhq.json", "r") as f:
+        self.cam_params_ffhq = None
+        self.cam_params = None
+        self.fov_rad_ffhq = None
+        with open("/home/barthel/datasets/FFHQ/label/dataset_old.json", "r") as f:
             self.label_dict = json.load(f)
 
     def _render_impl(
@@ -46,6 +49,7 @@ class FlameRenderer(Renderer):
         render_alpha=False,
         img_normalize=False,
         use_splitscreen=False,
+        on_top=False,
         highlight_border=False,
         save_ply_path=None,
         use_ffhq_cam=True,
@@ -59,35 +63,53 @@ class FlameRenderer(Renderer):
             self.codedict, self.input_image = self.deca.encode_image(ply_file_paths[0])
             self.last_image_path = ply_file_paths[0]
 
+            # load ffhq cam
+            index = int(re.findall(r'\d+', ply_file_paths[0])[-1])
+            cam = self.label_dict["labels"][index][1]
+            print(f"Using {self.label_dict['labels'][index][0]}")
+            ffhq_cam_params = np.array(cam[:16], dtype=float).reshape(4, 4)
+            self.cam_params_ffhq = torch.tensor(ffhq_cam_params, dtype=torch.float, device="cuda")
+            self.fov_rad_ffhq = focal2fov(float(cam[16]))
+
         if self.input_image.shape[-1] != resolution:
             self.input_image = torch.nn.functional.interpolate(self.input_image, size=(resolution, resolution))
         images.append(self.input_image[0])
 
+        # remove flame head rotation
+        self.codedict["pose"][0, 0:3] = 0
+
         # Edit
-
+        edit_before_flame = False
         codedict = copy.deepcopy(self.codedict)
-        try:
-            exec(self.sanitize_command(edit_text))
-        except Exception as e:
-            res.error = e
 
+        fov_rad = fov / 360 * 2 * np.pi
+        if use_ffhq_cam:
+            scale = 2
+            fov_rad = self.fov_rad_ffhq / scale
+            self.cam_params = copy.deepcopy(self.cam_params_ffhq)
+            self.cam_params[:3, 3:] = self.cam_params_ffhq[:3, 3:] * scale
+
+        else:
+            self.cam_params = cam_params
+
+        if edit_before_flame:
+            try:
+                exec(self.sanitize_command(edit_text))
+            except Exception as e:
+                res.error = e
         out_dict = self.deca.decode_flame(codedict)
         self.gaussian_model = self._load_model(out_dict)
         gaussian: GaussianModel = copy.deepcopy(self.gaussian_model)
-
+        if not edit_before_flame:
+            try:
+                exec(self.sanitize_command(edit_text))
+            except Exception as e:
+                res.error = e
 
         # Render video
         if len(video_cams) > 0:
             self.render_video("./_videos", video_cams, gaussian)
 
-        fov_rad = fov / 360 * 2 * np.pi
-        if use_ffhq_cam:
-            index = int(re.findall(r'\d+', ply_file_paths[0])[0])
-            cam = self.label_dict["labels"][index][1]
-            cam_params = np.array(cam[:16], dtype=float).reshape(4, 4)
-            cam_params = torch.tensor(cam_params, dtype=torch.float, device="cuda")
-            focal = float(cam[16])
-            fov_rad = focal2fov(focal)
 
         render_cam = CustomCam(
             resolution,
@@ -96,7 +118,7 @@ class FlameRenderer(Renderer):
             fovx=fov_rad,
             znear=0.01,
             zfar=15,
-            extr=cam_params,
+            extr=self.cam_params,
         )
         render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
         if render_alpha:
@@ -119,6 +141,7 @@ class FlameRenderer(Renderer):
             normalize=img_normalize,
             use_splitscreen=use_splitscreen,
             highlight_border=highlight_border,
+            on_top=on_top
         )
 
         res.mean_xyz = torch.mean(gaussian.get_xyz, dim=0)
@@ -132,9 +155,33 @@ class FlameRenderer(Renderer):
         verts = out_dict["verts"] # (1, 5023, 3)
         num_verts = verts.shape[1]
 
-        model._xyz = verts[0]
-        # model._xyz[:, -1] = - model._xyz[:, -1]
-        # model._xyz[:, -1] *= -1
+        if False:
+            cam_coords = self.cam_params_ffhq[:3, 3:]
+            cam_dists = torch.sqrt(torch.sum(torch.square(cam_coords[None, :, 0] - verts[0]), dim=-1))
+
+
+            # scale xy in the camera space with z so that the coords align with the image
+            xyz_h = torch.ones([num_verts, 4], dtype=torch.float32, device="cuda")
+            xyz_h[:, :3] = verts[0]
+            xyz_h_cam = torch.bmm(self.cam_params_ffhq[None, ...].tile([len(xyz_h), 1, 1]), xyz_h[..., None])
+            xyz_h_cam = xyz_h_cam[:, :, :] / xyz_h_cam[:, 3:4, :]
+            xyz_h_cam[:, 0, :] *= cam_dists[:, None] # todo check if its the same as the cam dist
+            xyz_h_cam[:, 1, :] *= cam_dists[:, None]
+
+            # inverse_extr = torch.eye(4, dtype=torch.float32, device="cuda")
+            # inverse_extr[:3, 3:] = - self.cam_params_ffhq[:3, 3:]
+            # inverse_extr[:3, :3] = self.cam_params_ffhq[:3, :3].inverse()
+            # inverse_extr = self.cam_params_ffhq.inverse()
+            inverse_extr = torch.linalg.inv(self.cam_params_ffhq)
+
+            xyz_h = torch.bmm(inverse_extr[None, ...].tile([len(xyz_h), 1, 1]), xyz_h_cam)
+            new_xyz = xyz_h[:, :3, 0] / xyz_h[:, 3:4, 0]
+
+            model._xyz = new_xyz
+            # model._xyz[:, -1] = - model._xyz[:, -1]
+            # model._xyz[:, -1] *= -1
+        else:
+            model._xyz = verts[0]
 
         model._features_dc = torch.ones([num_verts, 1, 3], device="cuda")
         model._features_rest = torch.zeros([num_verts, (model.max_sh_degree + 1) ** 2 - 1, 3], device="cuda")
@@ -154,38 +201,3 @@ class FlameRenderer(Renderer):
             video.append_data(img)
         video.close()
         print(f"Video saved in {filename}.")
-
-
-def batch_rodrigues(rot_vecs, epsilon=1e-8, dtype=torch.float32):
-    '''  same as batch_matrix2axis
-    Calculates the rotation matrices for a batch of rotation vectors
-        Parameters
-        ----------
-        rot_vecs: torch.tensor Nx3
-            array of N axis-angle vectors
-        Returns
-        -------
-        R: torch.tensor Nx3x3
-            The rotation matrices for the given axis-angle parameters
-    '''
-
-    batch_size = rot_vecs.shape[0]
-    device = rot_vecs.device
-
-    angle = torch.norm(rot_vecs + 1e-8, dim=1, keepdim=True)
-    rot_dir = rot_vecs / angle
-
-    cos = torch.unsqueeze(torch.cos(angle), dim=1)
-    sin = torch.unsqueeze(torch.sin(angle), dim=1)
-
-    # Bx1 arrays
-    rx, ry, rz = torch.split(rot_dir, 1, dim=1)
-    K = torch.zeros((batch_size, 3, 3), dtype=dtype, device=device)
-
-    zeros = torch.zeros((batch_size, 1), dtype=dtype, device=device)
-    K = torch.cat([zeros, -rz, ry, rz, zeros, -rx, -ry, rx, zeros], dim=1) \
-        .view((batch_size, 3, 3))
-
-    ident = torch.eye(3, dtype=dtype, device=device).unsqueeze(dim=0)
-    rot_mat = ident + sin * K + (1 - cos) * torch.bmm(K, K)
-    return rot_mat

@@ -14,6 +14,7 @@ class LoadWidget:
         self.ply = self.items[0]
         self.use_splitscreen = False
         self.highlight_border = False
+        self.on_top = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -33,9 +34,11 @@ class LoadWidget:
 
             imgui.same_line()
             imgui.text(self.ply)
-            use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
-            highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
+            _, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
+            _, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
+            _, self.on_top = imgui.checkbox("On Top", self.on_top)
 
+        viz.args.on_top = self.on_top
         viz.args.highlight_border = self.highlight_border
         viz.args.use_splitscreen = self.use_splitscreen
         viz.args.ply_file_paths = [self.ply]

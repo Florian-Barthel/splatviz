@@ -163,17 +163,15 @@ class TestData(Dataset):
 def process_single_image(imagepath, input_resolution=224):
     image = np.array(imread(imagepath))
     if len(image.shape) == 2:
-        image = image[:, :, None].repeat(1, 1, 3)
+        image = image[:, :, None].repeat([1, 1, 3])
     if len(image.shape) == 3 and image.shape[2] > 3:
         image = image[:, :, :3]
 
-    h, w, _ = image.shape
-
-    src_pts = np.array([[0, 0], [0, h - 1], [w - 1, 0]])
-
-    DST_PTS = np.array([[0, 0], [0, input_resolution - 1], [input_resolution - 1, 0]])
-    tform = estimate_transform("similarity", src_pts, DST_PTS)
     image = image / 255.0
-    dst_image = warp(image, tform.inverse, output_shape=(input_resolution, input_resolution))
-    dst_image = dst_image.transpose(2, 0, 1)
-    return torch.tensor(dst_image).float().to("cuda")[None,...]
+    image = torch.tensor(image, dtype=torch.float, device="cuda")
+    image = image.permute(2, 0, 1)
+    image = image[None,...]
+    image = torch.nn.functional.interpolate(image, size=(input_resolution, input_resolution))
+    # TODO flip channels?
+    return image
+

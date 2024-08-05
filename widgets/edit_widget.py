@@ -43,17 +43,19 @@ class Slider(object):
         self._id = _id
 
     def render(self, viz):
+        with imgui_utils.item_width(viz.font_size * 3):
+            min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value, format="%.2f")
+        imgui.same_line()
         _changed, self.value = imgui.slider_float(
             f"##slider-{self._id}",
             self.value,
             self.min_value,
             self.max_value,
+            format="%.2f"
         )
-        with imgui_utils.item_width(viz.font_size * 4):
+        with imgui_utils.item_width(viz.font_size * 3):
             imgui.same_line()
-            min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value, )
-            imgui.same_line()
-            max_changed, self.max_value = imgui.input_float(f"##max-{self._id}", self.max_value)
+            max_changed, self.max_value = imgui.input_float(f"##max-{self._id}", self.max_value, format="%.2f")
             imgui.same_line()
             text_changed, self.key = imgui.input_text(f"##text-{self._id}", self.key)
         if min_changed or max_changed:
