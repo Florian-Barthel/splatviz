@@ -56,8 +56,7 @@ class FlameRenderer(Renderer):
         images = []
         # Load
         if ply_file_paths[0] != self.last_image_path:
-            self.codedict, out_dict, self.input_image = self.deca.run_image(ply_file_paths[0])
-            self.gaussian_model = self._load_model(out_dict)
+            self.codedict, self.input_image = self.deca.encode_image(ply_file_paths[0])
             self.last_image_path = ply_file_paths[0]
 
         if self.input_image.shape[-1] != resolution:
@@ -65,39 +64,31 @@ class FlameRenderer(Renderer):
         images.append(self.input_image[0])
 
         # Edit
-        gaussian: GaussianModel = copy.deepcopy(self.gaussian_model)
+
+        codedict = copy.deepcopy(self.codedict)
         try:
             exec(self.sanitize_command(edit_text))
         except Exception as e:
             res.error = e
+
+        out_dict = self.deca.decode_flame(codedict)
+        self.gaussian_model = self._load_model(out_dict)
+        gaussian: GaussianModel = copy.deepcopy(self.gaussian_model)
+
 
         # Render video
         if len(video_cams) > 0:
             self.render_video("./_videos", video_cams, gaussian)
 
         fov_rad = fov / 360 * 2 * np.pi
-
         if use_ffhq_cam:
             index = int(re.findall(r'\d+', ply_file_paths[0])[0])
             cam = self.label_dict["labels"][index][1]
-            print(self.label_dict["labels"][index][0])
             cam_params = np.array(cam[:16], dtype=float).reshape(4, 4)
             cam_params = torch.tensor(cam_params, dtype=torch.float, device="cuda")
             focal = float(cam[16])
             fov_rad = focal2fov(focal)
 
-        #     pose = self.codedict['pose']
-        #     rotation_matrices = batch_rodrigues(pose[:, :3])
-        #     R_deca = rotation_matrices
-        #     T_deca = R_deca[:, :, -1]
-        #     cam_params = torch.zeros([4, 4], device="cuda")
-        #     cam_params[:3, :3] = R_deca
-        #     cam_params[3:, :3] = T_deca
-        #     cam_params[3, 3] = 1
-
-        # Render current view
-        # fov_rad = 2 * np.arctan(112. / 1015) * 180 / np.pi
-        # fov_rad = 2 * np.pi * fov_rad / 360
         render_cam = CustomCam(
             resolution,
             resolution,

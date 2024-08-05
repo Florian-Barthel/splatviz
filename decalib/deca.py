@@ -329,6 +329,15 @@ class DECA(nn.Module):
         out_dict = self.decode(codedict)
         return codedict, out_dict, image
 
+    def encode_image(self, image_path):
+        image = process_single_image(image_path)
+        codedict = self.encode(image)
+        return codedict, image
+
+    def decode_flame(self, codedict):
+        out_dict = self.decode(codedict)
+        return out_dict
+
     def model_dict(self):
         return {
             'E_flame': self.E_flame.state_dict(),
