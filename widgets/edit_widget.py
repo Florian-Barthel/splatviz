@@ -42,13 +42,23 @@ class Slider(object):
         self.max_value = max_value
         self._id = _id
 
-    def render(self):
+    def render(self, viz):
         _changed, self.value = imgui.slider_float(
-            self.key + f"##{self._id}",
+            f"##slider-{self._id}",
             self.value,
             self.min_value,
             self.max_value,
         )
+        with imgui_utils.item_width(viz.font_size * 4):
+            imgui.same_line()
+            min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value, )
+            imgui.same_line()
+            max_changed, self.max_value = imgui.input_float(f"##max-{self._id}", self.max_value)
+            imgui.same_line()
+            text_changed, self.key = imgui.input_text(f"##text-{self._id}", self.key)
+        if min_changed or max_changed:
+            self.value = min(self.value, self.max_value)
+            self.value = max(self.value, self.min_value)
 
 
 class EditWidget:
@@ -182,9 +192,9 @@ class EditWidget:
     def render_sliders(self):
         delete_keys = []
         for i, slider in enumerate(self.sliders):
-            slider.render()
+            slider.render(self.viz)
             imgui.same_line()
-            if imgui_utils.button("Remove " + slider.key + f"##{slider._id}"):
+            if imgui_utils.button(f"Remove##{slider._id}"):
                 delete_keys.append(i)
 
         for i in delete_keys[::-1]:
