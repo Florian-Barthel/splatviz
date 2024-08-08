@@ -6,3 +6,10 @@ _videos
 _ply_files
 history.json
 sample_scenes
+*.tar
+*.pkl
+*.npy
+*.zip
+*.obj
+*.npz
+*.pdf
