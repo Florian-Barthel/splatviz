@@ -36,10 +36,20 @@ class Visualizer(imgui_window.ImguiWindow):
         self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
-        super().__init__(title="splatviz", window_width=1920, window_height=1080, font=self.regular_font_path, code_font=self.code_font_path)
+        super().__init__(
+            title="splatviz",
+            window_width=1920,
+            window_height=1080,
+            font=self.regular_font_path,
+            code_font=self.code_font_path,
+        )
 
-        self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
-        self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
+        self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(
+            self.code_font_path, 14
+        )
+        self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(
+            self.code_font_path, 14
+        )
         self._imgui_renderer.refresh_font_texture()
 
         # Internals.
@@ -108,14 +118,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.button_large_w = self.font_size * 10
         self.label_w = round(self.font_size * 5.5) + 100
 
-        # Detect mouse dragging in the result area.
-        dragging, dx, dy = imgui_utils.drag_hidden_window(
-            "##result_area", x=self.pane_w, y=0, width=self.content_width - self.pane_w, height=self.content_height
-        )
-        if dragging:
-            self.cam_widget.drag(dx, dy)
-
-        # Begin control pane.
+        ### Begin control pane. ###
         imgui.set_next_window_pos(imgui.ImVec2(0, 0))
         imgui.set_next_window_size(imgui.ImVec2(self.pane_w, self.content_height))
         imgui.begin(
@@ -124,7 +127,7 @@ class Visualizer(imgui_window.ImguiWindow):
             flags=(WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE),
         )
 
-        # Widgets.
+        ### Widgets. ###
 
         expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
         imgui.indent()
@@ -143,7 +146,13 @@ class Visualizer(imgui_window.ImguiWindow):
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         imgui.indent()
-        self.cam_widget(expanded)
+        active_region = EasyDict({
+            "x": self.pane_w,
+            "y": 0,
+            "width": self.content_width - self.pane_w,
+            "height": self.content_height
+        })
+        self.cam_widget(active_region)
         imgui.unindent()
 
         if self.use_gan_decoder:
@@ -175,7 +184,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
         # imgui.show_style_editor()
 
-        # Render.
+        ### Render. ###
         if self.is_skipping_frames():
             pass
         elif self._defer_rendering > 0:
@@ -186,15 +195,19 @@ class Visualizer(imgui_window.ImguiWindow):
             if result is not None:
                 self.result = result
 
-        # Display.
+        ### Display. ###
         max_w = self.content_width - self.pane_w
         max_h = self.content_height
         pos = np.array([self.pane_w + max_w / 2, max_h / 2])
         if "image" in self.result:
             if self._tex_img is not self.result.image:
                 self._tex_img = self.result.image
-                if self._tex_obj is None or not self._tex_obj.is_compatible(image=self._tex_img):
-                    self._tex_obj = gl_utils.Texture(image=self._tex_img, bilinear=False, mipmap=False)
+                if self._tex_obj is None or not self._tex_obj.is_compatible(
+                    image=self._tex_img
+                ):
+                    self._tex_obj = gl_utils.Texture(
+                        image=self._tex_img, bilinear=False, mipmap=False
+                    )
                 else:
                     self._tex_obj.update(self._tex_img)
             zoom = min(max_w / self._tex_obj.width, max_h / self._tex_obj.height)
@@ -205,7 +218,11 @@ class Visualizer(imgui_window.ImguiWindow):
                 self.result.message = str(self.result.error)
         if "message" in self.result:
             tex = text_utils.get_texture(
-                self.result.message, size=self.font_size, max_width=max_w, max_height=max_h, outline=2
+                self.result.message,
+                size=self.font_size,
+                max_width=max_w,
+                max_height=max_h,
+                outline=2,
             )
             tex.draw(pos=pos, align=0.5, rint=True, color=1)
         if "eval" in self.result:
@@ -220,7 +237,12 @@ class Visualizer(imgui_window.ImguiWindow):
 
 
 @click.command()
-@click.option("--data_path", help="Where to search for .ply files", metavar="PATH", default="./sample_scenes")
+@click.option(
+    "--data_path",
+    help="Where to search for .ply files",
+    metavar="PATH",
+    default="./sample_scenes",
+)
 @click.option("--use_decoder", help="Visualizes the results of a decoder", is_flag=True)
 def main(data_path, use_decoder):
     viz = Visualizer(data_path=data_path, use_gan_decoder=use_decoder)

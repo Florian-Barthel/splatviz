@@ -15,6 +15,7 @@ from imgui_bundle.python_backends.glfw_backend import GlfwRenderer
 from . import glfw_window
 from . import imgui_utils
 from . import text_utils
+from gui_utils import style
 
 
 # ----------------------------------------------------------------------------
@@ -94,7 +95,7 @@ class ImguiWindow(glfw_window.GlfwWindow):
         # Begin imgui frame.
         imgui.new_frame()
         imgui.push_font(self._imgui_fonts[self._cur_font_size])
-        imgui_utils.set_default_style(spacing=self.spacing, indent=self.font_size, scrollbar=self.font_size + 4)
+        style.set_default_style(spacing=self.spacing, indent=self.font_size, scrollbar=self.font_size + 4)
 
     def end_frame(self):
         imgui.pop_font()
