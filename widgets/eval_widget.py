@@ -5,6 +5,7 @@ import pprint
 
 from gui_utils import imgui_utils
 from viz_utils.dict import EasyDict
+from gui_utils import style
 
 
 class EvalWidget:
@@ -23,7 +24,7 @@ class EvalWidget:
             imgui.same_line()
             _changed, self.text = imgui.input_text("##input_text", self.text)
             imgui.new_line()
-            with imgui_utils.eval_color():
+            with style.eval_color():
                 with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
                     self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
 
