@@ -158,11 +158,13 @@ class DECA(nn.Module):
     # @torch.no_grad()
     def decode(self, codedict, rendering=False, iddict=None, vis_lmk=False, return_vis=False, use_detail=False,
                 render_orig=False, original_image=None, tform=None):
-        images = codedict['images']
-        batch_size = images.shape[0]
+        if "images" in codedict.keys():
+            images = codedict['images']
+        batch_size = 1 # images.shape[0]
         
         ## decode
         verts, landmarks2d, landmarks3d = self.flame(shape_params=codedict['shape'], expression_params=codedict['exp'], pose_params=codedict['pose'])
+        return verts
         if self.cfg.model.use_tex:
             albedo = self.flametex(codedict['tex'])
         else:
@@ -335,8 +337,8 @@ class DECA(nn.Module):
         return codedict, image
 
     def decode_flame(self, codedict):
-        out_dict = self.decode(codedict)
-        return out_dict
+        verts = self.decode(codedict)
+        return verts
 
     def model_dict(self):
         return {

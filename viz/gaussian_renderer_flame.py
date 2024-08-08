@@ -8,7 +8,7 @@ from tqdm import tqdm
 import json
 import re
 
-
+from decalib.datasets.datasets import process_single_image
 from decalib.deca import DECA
 from gaussian_renderer import render_simple
 from scene import GaussianModel
@@ -33,6 +33,9 @@ class FlameRenderer(Renderer):
         self.fov_rad_ffhq = None
         with open("/home/barthel/datasets/FFHQ/label/dataset_old.json", "r") as f:
             self.label_dict = json.load(f)
+
+        with open("/home/barthel/datasets/FFHQ/label/deca_predictions.json", "r") as f:
+            self.deca_predictions = json.load(f)
 
     def _render_impl(
         self,
@@ -60,7 +63,13 @@ class FlameRenderer(Renderer):
         images = []
         # Load
         if ply_file_paths[0] != self.last_image_path:
-            self.codedict, self.input_image = self.deca.encode_image(ply_file_paths[0])
+            self.input_image = process_single_image(ply_file_paths[0])
+            # _, self.input_image = self.deca.encode_image(ply_file_paths[0])
+            self.codedict = self.deca_predictions[ply_file_paths[0].split("/")[-1]]
+
+            for key in ["pose", "exp", "shape"]:
+                self.codedict[key] = torch.tensor(self.codedict[key], dtype=torch.float, device="cuda")
+
             self.last_image_path = ply_file_paths[0]
 
             # load ffhq cam
@@ -84,7 +93,7 @@ class FlameRenderer(Renderer):
 
         fov_rad = fov / 360 * 2 * np.pi
         if use_ffhq_cam:
-            scale = 2
+            scale = 1
             fov_rad = self.fov_rad_ffhq / scale
             self.cam_params = copy.deepcopy(self.cam_params_ffhq)
             self.cam_params[:3, 3:] = self.cam_params_ffhq[:3, 3:] * scale
@@ -97,8 +106,8 @@ class FlameRenderer(Renderer):
                 exec(self.sanitize_command(edit_text))
             except Exception as e:
                 res.error = e
-        out_dict = self.deca.decode_flame(codedict)
-        self.gaussian_model = self._load_model(out_dict)
+        verts = self.deca.decode_flame(codedict)
+        self.gaussian_model = self._load_model(verts)
         gaussian: GaussianModel = copy.deepcopy(self.gaussian_model)
         if not edit_before_flame:
             try:
@@ -149,40 +158,40 @@ class FlameRenderer(Renderer):
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 
-    def _load_model(self, out_dict):
+    def _load_model(self, verts): # (1, 5023, 3)
         model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
-
-        verts = out_dict["verts"] # (1, 5023, 3)
         num_verts = verts.shape[1]
 
-        if False:
-            cam_coords = self.cam_params_ffhq[:3, 3:]
-            cam_dists = torch.sqrt(torch.sum(torch.square(cam_coords[None, :, 0] - verts[0]), dim=-1))
+        """
+        flame_to_bfm_neutral_37_face_only = torch.tensor([
+            [2.682716929557429, 0.010446918125791843, 0.04746649927210553, 0.0030014961233934233],
+            [-0.009421598630294275, 2.682515580606053, -0.05790466856909523, 0.04740944787628047],
+            [-0.047680604263683285, 0.05772857372357329, 2.682112266656848, -0.0024605516344398115],
+            [0.0, 0.0, 0.0, 1.0]
+        ], device="cuda")
+        xyz_h = torch.ones([num_verts, 4], dtype=torch.float32, device="cuda")
+        xyz_h[:, :3] = verts[0]
 
+        xyz_h= torch.bmm(flame_to_bfm_neutral_37_face_only[None, ...].tile([len(xyz_h), 1, 1]), xyz_h[..., None])
+        new_xyz = xyz_h[:, :3, 0] / xyz_h[:, 3:4, 0]
+        """
 
-            # scale xy in the camera space with z so that the coords align with the image
-            xyz_h = torch.ones([num_verts, 4], dtype=torch.float32, device="cuda")
-            xyz_h[:, :3] = verts[0]
-            xyz_h_cam = torch.bmm(self.cam_params_ffhq[None, ...].tile([len(xyz_h), 1, 1]), xyz_h[..., None])
-            xyz_h_cam = xyz_h_cam[:, :, :] / xyz_h_cam[:, 3:4, :]
-            xyz_h_cam[:, 0, :] *= cam_dists[:, None] # todo check if its the same as the cam dist
-            xyz_h_cam[:, 1, :] *= cam_dists[:, None]
+        flame_to_bfm_neutral_37_face_only = torch.tensor([
+            [2.682716929557429, 0.010446918125791843, 0.04746649927210553, 0.0030014961233934233],
+            [-0.009421598630294275, 2.682515580606053, -0.05790466856909523, 0.04740944787628047],
+            [-0.047680604263683285, 0.05772857372357329, 2.682112266656848, -0.0024605516344398115],
+            [0.0, 0.0, 0.0, 1.0]
+        ], device="cuda")
 
-            # inverse_extr = torch.eye(4, dtype=torch.float32, device="cuda")
-            # inverse_extr[:3, 3:] = - self.cam_params_ffhq[:3, 3:]
-            # inverse_extr[:3, :3] = self.cam_params_ffhq[:3, :3].inverse()
-            # inverse_extr = self.cam_params_ffhq.inverse()
-            inverse_extr = torch.linalg.inv(self.cam_params_ffhq)
+        flame_vertices = (to_homogeneous(verts) @ flame_to_bfm_neutral_37_face_only.T)[..., :3]
 
-            xyz_h = torch.bmm(inverse_extr[None, ...].tile([len(xyz_h), 1, 1]), xyz_h_cam)
-            new_xyz = xyz_h[:, :3, 0] / xyz_h[:, 3:4, 0]
+        # xyz_h = torch.ones([num_verts, 4], dtype=torch.float32, device="cuda")
+        # xyz_h[:, :3] = verts[0]
 
-            model._xyz = new_xyz
-            # model._xyz[:, -1] = - model._xyz[:, -1]
-            # model._xyz[:, -1] *= -1
-        else:
-            model._xyz = verts[0]
+        # xyz_h= torch.bmm(flame_to_bfm_neutral_37_face_only[None, ...].tile([len(xyz_h), 1, 1]), xyz_h[..., None])
+        # new_xyz = xyz_h[:, :3, 0] / xyz_h[:, 3:4, 0]
 
+        model._xyz = flame_vertices[0]
         model._features_dc = torch.ones([num_verts, 1, 3], device="cuda")
         model._features_rest = torch.zeros([num_verts, (model.max_sh_degree + 1) ** 2 - 1, 3], device="cuda")
         model._rotation = torch.zeros([num_verts, 4], device="cuda")
@@ -201,3 +210,9 @@ class FlameRenderer(Renderer):
             video.append_data(img)
         video.close()
         print(f"Video saved in {filename}.")
+
+def to_homogeneous(points: torch.Tensor) -> torch.Tensor:
+    ones = torch.ones((*points.shape[:-1], 1), dtype=points.dtype, device=points.device)
+    points = torch.concat([points, ones], dim=-1)
+
+    return points
