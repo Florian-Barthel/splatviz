@@ -28,6 +28,8 @@ class CamWidget:
         self.invert_y = False
         self.move_speed = 0.02
         self.wasd_move_speed = 0.1
+        self.drag_speed = 0.005
+        self.rotate_speed = 0.003
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
         self.last_drag_delta = imgui.ImVec2(0, 0)
@@ -48,7 +50,7 @@ class CamWidget:
         if self.control_modes[self.current_control_mode] == "WASD":
             imgui.text("Move Speed")
             imgui.same_line(viz.label_w)
-            speed_changed, self.wasd_move_speed = imgui.slider_float(
+            _, self.wasd_move_speed = imgui.slider_float(
                 "##WASD_Move_Speed",
                 v=self.wasd_move_speed,
                 v_min=0.001,
@@ -57,12 +59,32 @@ class CamWidget:
                 flags=imgui.SliderFlags_.logarithmic.value,
             )
 
+        imgui.text("Drag Speed")
+        imgui.same_line(viz.label_w)
+        _, self.drag_speed = imgui.slider_float(
+            "##drag_speed",
+            v=self.drag_speed,
+            v_min=0.001,
+            v_max=0.01,
+            format="%.3f",
+            flags=imgui.SliderFlags_.logarithmic.value,
+        )
+
+        imgui.text("Rotate Speed")
+        imgui.same_line(viz.label_w)
+        _, self.rotate_speed = imgui.slider_float(
+            "##rotate_speed",
+            v=self.rotate_speed,
+            v_min=0.001,
+            v_max=0.1,
+            format="%.3f",
+            flags=imgui.SliderFlags_.logarithmic.value,
+        )
+
         imgui.push_item_width(200)
         imgui.text("Up Vector")
         imgui.same_line(viz.label_w)
-        _changed, up_vector_tuple = imgui.input_float3(
-            "##up_vector", v=self.up_vector.tolist(), format="%.1f"
-        )
+        _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
         if _changed:
             self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
         imgui.same_line()
@@ -76,35 +98,21 @@ class CamWidget:
 
         imgui.text("FOV")
         imgui.same_line(viz.label_w)
-        _changed, self.fov = imgui.slider_float(
-            "##fov", self.fov, 1, 180, format="%.1f °"
-        )
+        _changed, self.fov = imgui.slider_float("##fov", self.fov, 1, 180, format="%.1f °")
 
         if self.control_modes[self.current_control_mode] == "Orbit":
             imgui.text("Radius")
             imgui.same_line(viz.label_w)
-            _changed, self.radius = imgui.slider_float(
-                "##radius", self.radius, 0, 10, format="%.1f"
-            )
+            _changed, self.radius = imgui.slider_float("##radius", self.radius, 0, 10, format="%.1f")
             imgui.same_line()
-            if (
-                    imgui_utils.button("Set to xyz stddev", width=viz.button_large_w)
-                    and "std_xyz" in viz.result.keys()
-            ):
+            if imgui_utils.button("Set to xyz stddev", width=viz.button_large_w) and "std_xyz" in viz.result.keys():
                 self.radius = viz.result.std_xyz.item()
             imgui.text("Look at point")
             imgui.same_line(viz.label_w)
-            _changed, look_at_point_tuple = imgui.input_float3(
-                "##lookat", self.lookat_point.tolist(), format="%.1f"
-            )
-            self.lookat_point = torch.tensor(
-                look_at_point_tuple, device=torch.device("cuda")
-            )
+            _changed, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
+            self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
             imgui.same_line()
-            if (
-                    imgui_utils.button("Set to xyz mean", width=viz.button_large_w)
-                    and "mean_xyz" in viz.result.keys()
-            ):
+            if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
                 self.lookat_point = viz.result.mean_xyz
         imgui.pop_item_width()
 
@@ -116,9 +124,7 @@ class CamWidget:
         imgui.same_line(viz.label_w)
         _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
 
-        self.cam_params = create_cam2world_matrix(
-            self.forward, self.cam_pos, self.up_vector
-        ).to("cuda")[0]
+        self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
 
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
@@ -135,13 +141,9 @@ class CamWidget:
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
-
-                if self.control_modes[self.current_control_mode] == "WASD":
-                    x_dir *= -1
-                    y_dir *= -1
-                self.pose.yaw += x_dir * delta.x / viz.font_size * 3e-2
+                self.pose.yaw += x_dir * delta.x * self.rotate_speed
                 self.pose.pitch = np.clip(
-                    self.pose.pitch + y_dir * delta.y / viz.font_size * 3e-2,
+                    self.pose.pitch + y_dir * delta.y * self.rotate_speed,
                     -np.pi / 2,
                     np.pi / 2,
                 )
@@ -159,8 +161,8 @@ class CamWidget:
                 cam_up = torch.linalg.cross(right, self.forward)
                 cam_up = cam_up / torch.linalg.norm(cam_up)
 
-                x_change = x_dir * right * (-delta.x) / viz.font_size * 6e-2
-                y_change = y_dir * cam_up * delta.y / viz.font_size * 6e-2
+                x_change = x_dir * right * -delta.x * self.drag_speed
+                y_change = y_dir * cam_up * delta.y * self.drag_speed
                 self.cam_pos += x_change
                 self.cam_pos += y_change
                 if self.control_modes[self.current_control_mode] == "Orbit":
@@ -179,25 +181,13 @@ class CamWidget:
                 up_vector=self.up_vector,
             )
             self.sideways = torch.linalg.cross(self.forward, self.up_vector)
-            if (
-                    imgui.is_key_down(imgui.Key.up_arrow)
-                    or "w" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.cam_pos += self.forward * self.wasd_move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.left_arrow)
-                    or "a" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
                 self.cam_pos -= self.sideways * self.wasd_move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.down_arrow)
-                    or "s" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.down_arrow) or "s" in self.viz.current_pressed_keys:
                 self.cam_pos -= self.forward * self.wasd_move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.right_arrow)
-                    or "d" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
                 self.cam_pos += self.sideways * self.wasd_move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
@@ -210,25 +200,13 @@ class CamWidget:
                 up_vector=self.up_vector,
             )
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
-            if (
-                    imgui.is_key_down(imgui.Key.up_arrow)
-                    or "w" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.up_arrow) or "w" in self.viz.current_pressed_keys:
                 self.pose.pitch += self.move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.left_arrow)
-                    or "a" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.left_arrow) or "a" in self.viz.current_pressed_keys:
                 self.pose.yaw += self.move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.down_arrow)
-                    or "s" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.down_arrow) or "s" in self.viz.current_pressed_keys:
                 self.pose.pitch -= self.move_speed
-            if (
-                    imgui.is_key_down(imgui.Key.right_arrow)
-                    or "d" in self.viz.current_pressed_keys
-            ):
+            if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
                 self.pose.yaw -= self.move_speed
 
     def handle_mouse_wheel(self):
