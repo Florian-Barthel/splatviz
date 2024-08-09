@@ -29,7 +29,7 @@ class CamWidget:
         self.move_speed = 0.02
         self.wasd_move_speed = 0.1
         self.drag_speed = 0.005
-        self.rotate_speed = 0.003
+        self.rotate_speed = 0.02
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
         self.last_drag_delta = imgui.ImVec2(0, 0)
@@ -65,7 +65,7 @@ class CamWidget:
             "##drag_speed",
             v=self.drag_speed,
             v_min=0.001,
-            v_max=0.01,
+            v_max=0.1,
             format="%.3f",
             flags=imgui.SliderFlags_.logarithmic.value,
         )
@@ -141,12 +141,9 @@ class CamWidget:
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
-                self.pose.yaw += x_dir * delta.x * self.rotate_speed
-                self.pose.pitch = np.clip(
-                    self.pose.pitch + y_dir * delta.y * self.rotate_speed,
-                    -np.pi / 2,
-                    np.pi / 2,
-                )
+                self.pose.yaw += x_dir * delta.x * self.rotate_speed * 0.1
+                self.pose.pitch += y_dir * delta.y * self.rotate_speed * 0.1
+                self.pose.pitch = np.clip(self.pose.pitch, -np.pi / 2, np.pi / 2)
         elif imgui.is_mouse_dragging(1):  # middle mouse button
             # TODO: dragging with the middle mouse button could be used for yet another purpose
             pass
