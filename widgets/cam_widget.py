@@ -88,8 +88,8 @@ class CamWidget:
             )
             imgui.same_line()
             if (
-                imgui_utils.button("Set to xyz stddev", width=viz.button_large_w)
-                and "std_xyz" in viz.result.keys()
+                    imgui_utils.button("Set to xyz stddev", width=viz.button_large_w)
+                    and "std_xyz" in viz.result.keys()
             ):
                 self.radius = viz.result.std_xyz.item()
             imgui.text("Look at point")
@@ -102,8 +102,8 @@ class CamWidget:
             )
             imgui.same_line()
             if (
-                imgui_utils.button("Set to xyz mean", width=viz.button_large_w)
-                and "mean_xyz" in viz.result.keys()
+                    imgui_utils.button("Set to xyz mean", width=viz.button_large_w)
+                    and "mean_xyz" in viz.result.keys()
             ):
                 self.lookat_point = viz.result.mean_xyz
         imgui.pop_item_width()
@@ -145,23 +145,27 @@ class CamWidget:
                     -np.pi / 2,
                     np.pi / 2,
                 )
-        elif imgui.is_mouse_dragging(1):  # right mouse button
-            new_delta = imgui.get_mouse_drag_delta(1)
+        elif imgui.is_mouse_dragging(1):  # middle mouse button
+            # TODO: dragging with the middle mouse button could be used for yet another purpose
+            pass
+        elif imgui.is_mouse_dragging(2):  # right mouse button
+            new_delta = imgui.get_mouse_drag_delta(2)
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
 
                 right = torch.linalg.cross(self.forward, self.up_vector)
+                right = right / torch.linalg.norm(right)
+                cam_up = torch.linalg.cross(right, self.forward)
+                cam_up = cam_up / torch.linalg.norm(cam_up)
+
                 x_change = x_dir * right * (-delta.x) / viz.font_size * 6e-2
-                y_change = y_dir * self.up_vector * delta.y / viz.font_size * 6e-2
+                y_change = y_dir * cam_up * delta.y / viz.font_size * 6e-2
                 self.cam_pos += x_change
                 self.cam_pos += y_change
                 if self.control_modes[self.current_control_mode] == "Orbit":
                     self.lookat_point += x_change
                     self.lookat_point += y_change
-        elif imgui.is_mouse_dragging(2):  # middle mouse button
-            # TODO: dragging with the middle mouse button could be used for yet another purpose
-            pass
         else:
             self.last_drag_delta = imgui.ImVec2(0, 0)
 
@@ -176,23 +180,23 @@ class CamWidget:
             )
             self.sideways = torch.linalg.cross(self.forward, self.up_vector)
             if (
-                imgui.is_key_down(imgui.Key.up_arrow)
-                or "w" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.up_arrow)
+                    or "w" in self.viz.current_pressed_keys
             ):
                 self.cam_pos += self.forward * self.wasd_move_speed
             if (
-                imgui.is_key_down(imgui.Key.left_arrow)
-                or "a" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.left_arrow)
+                    or "a" in self.viz.current_pressed_keys
             ):
                 self.cam_pos -= self.sideways * self.wasd_move_speed
             if (
-                imgui.is_key_down(imgui.Key.down_arrow)
-                or "s" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.down_arrow)
+                    or "s" in self.viz.current_pressed_keys
             ):
                 self.cam_pos -= self.forward * self.wasd_move_speed
             if (
-                imgui.is_key_down(imgui.Key.right_arrow)
-                or "d" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.right_arrow)
+                    or "d" in self.viz.current_pressed_keys
             ):
                 self.cam_pos += self.sideways * self.wasd_move_speed
 
@@ -207,23 +211,23 @@ class CamWidget:
             )
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)
             if (
-                imgui.is_key_down(imgui.Key.up_arrow)
-                or "w" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.up_arrow)
+                    or "w" in self.viz.current_pressed_keys
             ):
                 self.pose.pitch += self.move_speed
             if (
-                imgui.is_key_down(imgui.Key.left_arrow)
-                or "a" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.left_arrow)
+                    or "a" in self.viz.current_pressed_keys
             ):
                 self.pose.yaw += self.move_speed
             if (
-                imgui.is_key_down(imgui.Key.down_arrow)
-                or "s" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.down_arrow)
+                    or "s" in self.viz.current_pressed_keys
             ):
                 self.pose.pitch -= self.move_speed
             if (
-                imgui.is_key_down(imgui.Key.right_arrow)
-                or "d" in self.viz.current_pressed_keys
+                    imgui.is_key_down(imgui.Key.right_arrow)
+                    or "d" in self.viz.current_pressed_keys
             ):
                 self.pose.yaw -= self.move_speed
 
