@@ -35,97 +35,97 @@ class CamWidget:
         self.last_drag_delta = imgui.ImVec2(0, 0)
 
     @imgui_utils.scoped_by_object_id
-    def __call__(self, active_region: EasyDict):
+    def __call__(self, active_region: EasyDict, show: bool):
         viz = self.viz
         self.handle_dragging_in_window(**active_region)
         self.handle_mouse_wheel()
         self.handle_wasd()
 
-        imgui.text("Camera Mode")
-        imgui.same_line(viz.label_w)
-        _clicked, self.current_control_mode = imgui.combo(
-            "##Camera Modes", self.current_control_mode, self.control_modes
-        )
-
-        if self.control_modes[self.current_control_mode] == "WASD":
-            imgui.text("Move Speed")
+        if show:
+            imgui.text("Camera Mode")
             imgui.same_line(viz.label_w)
-            _, self.wasd_move_speed = imgui.slider_float(
-                "##WASD_Move_Speed",
-                v=self.wasd_move_speed,
+            _clicked, self.current_control_mode = imgui.combo(
+                "##Camera Modes", self.current_control_mode, self.control_modes
+            )
+
+            if self.control_modes[self.current_control_mode] == "WASD":
+                imgui.text("Move Speed")
+                imgui.same_line(viz.label_w)
+                _, self.wasd_move_speed = imgui.slider_float(
+                    "##WASD_Move_Speed",
+                    v=self.wasd_move_speed,
+                    v_min=0.001,
+                    v_max=1,
+                    format="%.3f",
+                    flags=imgui.SliderFlags_.logarithmic.value,
+                )
+
+            imgui.text("Drag Speed")
+            imgui.same_line(viz.label_w)
+            _, self.drag_speed = imgui.slider_float(
+                "##drag_speed",
+                v=self.drag_speed,
                 v_min=0.001,
-                v_max=1,
+                v_max=0.1,
                 format="%.3f",
                 flags=imgui.SliderFlags_.logarithmic.value,
             )
 
-        imgui.text("Drag Speed")
-        imgui.same_line(viz.label_w)
-        _, self.drag_speed = imgui.slider_float(
-            "##drag_speed",
-            v=self.drag_speed,
-            v_min=0.001,
-            v_max=0.1,
-            format="%.3f",
-            flags=imgui.SliderFlags_.logarithmic.value,
-        )
-
-        imgui.text("Rotate Speed")
-        imgui.same_line(viz.label_w)
-        _, self.rotate_speed = imgui.slider_float(
-            "##rotate_speed",
-            v=self.rotate_speed,
-            v_min=0.001,
-            v_max=0.1,
-            format="%.3f",
-            flags=imgui.SliderFlags_.logarithmic.value,
-        )
-
-        imgui.push_item_width(200)
-        imgui.text("Up Vector")
-        imgui.same_line(viz.label_w)
-        _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
-        if _changed:
-            self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
-        imgui.same_line()
-        if imgui_utils.button("Set current direction", width=viz.button_large_w):
-            self.up_vector = self.forward
-            self.pose.yaw = 0
-            self.pose.pitch = 0
-        imgui.same_line()
-        if imgui_utils.button("Flip", width=viz.button_w):
-            self.up_vector = -self.up_vector
-
-        imgui.text("FOV")
-        imgui.same_line(viz.label_w)
-        _changed, self.fov = imgui.slider_float("##fov", self.fov, 1, 180, format="%.1f °")
-
-        if self.control_modes[self.current_control_mode] == "Orbit":
-            imgui.text("Radius")
+            imgui.text("Rotate Speed")
             imgui.same_line(viz.label_w)
-            _changed, self.radius = imgui.slider_float("##radius", self.radius, 0, 10, format="%.1f")
-            imgui.same_line()
-            if imgui_utils.button("Set to xyz stddev", width=viz.button_large_w) and "std_xyz" in viz.result.keys():
-                self.radius = viz.result.std_xyz.item()
-            imgui.text("Look at point")
+            _, self.rotate_speed = imgui.slider_float(
+                "##rotate_speed",
+                v=self.rotate_speed,
+                v_min=0.001,
+                v_max=0.1,
+                format="%.3f",
+                flags=imgui.SliderFlags_.logarithmic.value,
+            )
+
+            imgui.push_item_width(200)
+            imgui.text("Up Vector")
             imgui.same_line(viz.label_w)
-            _changed, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
-            self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
+            _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
+            if _changed:
+                self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
             imgui.same_line()
-            if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
-                self.lookat_point = viz.result.mean_xyz
-        imgui.pop_item_width()
+            if imgui_utils.button("Set current direction", width=viz.button_large_w):
+                self.up_vector = self.forward
+                self.pose.yaw = 0
+                self.pose.pitch = 0
+            imgui.same_line()
+            if imgui_utils.button("Flip", width=viz.button_w):
+                self.up_vector = -self.up_vector
 
-        imgui.text("Invert X")
-        imgui.same_line(viz.label_w)
-        _, self.invert_x = imgui.checkbox("##invert_x", self.invert_x)
+            imgui.text("FOV")
+            imgui.same_line(viz.label_w)
+            _changed, self.fov = imgui.slider_float("##fov", self.fov, 1, 180, format="%.1f °")
 
-        imgui.text("Invert Y")
-        imgui.same_line(viz.label_w)
-        _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
+            if self.control_modes[self.current_control_mode] == "Orbit":
+                imgui.text("Radius")
+                imgui.same_line(viz.label_w)
+                _changed, self.radius = imgui.slider_float("##radius", self.radius, 0, 10, format="%.1f")
+                imgui.same_line()
+                if imgui_utils.button("Set to xyz stddev", width=viz.button_large_w) and "std_xyz" in viz.result.keys():
+                    self.radius = viz.result.std_xyz.item()
+                imgui.text("Look at point")
+                imgui.same_line(viz.label_w)
+                _changed, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
+                self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
+                imgui.same_line()
+                if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
+                    self.lookat_point = viz.result.mean_xyz
+            imgui.pop_item_width()
+
+            imgui.text("Invert X")
+            imgui.same_line(viz.label_w)
+            _, self.invert_x = imgui.checkbox("##invert_x", self.invert_x)
+
+            imgui.text("Invert Y")
+            imgui.same_line(viz.label_w)
+            _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
 
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
-
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
         viz.args.fov = self.fov
