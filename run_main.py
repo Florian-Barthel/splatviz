@@ -146,13 +146,13 @@ class Visualizer(imgui_window.ImguiWindow):
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         imgui.indent()
-        active_region = EasyDict({
-            "x": self.pane_w,
-            "y": 0,
-            "width": self.content_width - self.pane_w,
-            "height": self.content_height
-        })
-        self.cam_widget(active_region)
+        active_region = EasyDict(
+            x=self.pane_w,
+            y=0,
+            width=self.content_width - self.pane_w,
+            height=self.content_height
+        )
+        self.cam_widget(active_region, expanded)
         imgui.unindent()
 
         if self.use_gan_decoder:
