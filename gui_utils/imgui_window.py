@@ -13,7 +13,6 @@ from imgui_bundle import imgui, implot
 from imgui_bundle.python_backends.glfw_backend import GlfwRenderer
 
 from . import glfw_window
-from . import imgui_utils
 from . import text_utils
 from gui_utils import style
 
@@ -50,7 +49,6 @@ class ImguiWindow(glfw_window.GlfwWindow):
         imgui.get_io().mouse_drag_threshold = 0  # Improve behavior with imgui_utils.drag_custom().
         self._imgui_fonts = {size: imgui.get_io().fonts.add_font_from_file_ttf(font, size + 3) for size in font_sizes}
         self._imgui_fonts_code = {size: imgui.get_io().fonts.add_font_from_file_ttf(code_font, size) for size in font_sizes}
-
         self._imgui_renderer.refresh_font_texture()
 
     def close(self):

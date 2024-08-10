@@ -149,19 +149,6 @@ class GlfwWindow:
     def is_skipping_frames(self):
         return self._skip_frames > 0
 
-    def capture_next_frame(self):
-        self._capture_next_frame = True
-
-    def pop_captured_frame(self):
-        frame = self._captured_frame
-        self._captured_frame = None
-        return frame
-
-    def pop_drag_and_drop_paths(self):
-        paths = self._drag_and_drop_paths
-        self._drag_and_drop_paths = None
-        return paths
-
     def draw_frame(self):  # To be overridden by subclass.
         self.begin_frame()
         # Rendering code goes here.
@@ -244,4 +231,3 @@ class GlfwWindow:
 
     def _glfw_drop_callback(self, _window, paths):
         self._drag_and_drop_paths = paths
-

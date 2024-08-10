@@ -44,12 +44,8 @@ class Visualizer(imgui_window.ImguiWindow):
             code_font=self.code_font_path,
         )
 
-        self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(
-            self.code_font_path, 14
-        )
-        self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(
-            self.code_font_path, 14
-        )
+        self.code_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
+        self.regular_font = imgui.get_io().fonts.add_font_from_file_ttf(self.code_font_path, 14)
         self._imgui_renderer.refresh_font_texture()
 
         # Internals.
@@ -98,12 +94,6 @@ class Visualizer(imgui_window.ImguiWindow):
             print("\n" + error + "\n")
             self._last_error_print = error
 
-    def defer_rendering(self, num_frames=1):
-        self._defer_rendering = max(self._defer_rendering, num_frames)
-
-    def clear_result(self):
-        self._async_renderer.clear_result()
-
     def _adjust_font_size(self):
         old = self.font_size
         self.set_font_size(min(self.content_width / 120, self.content_height / 60))
@@ -146,12 +136,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
         expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
         imgui.indent()
-        active_region = EasyDict(
-            x=self.pane_w,
-            y=0,
-            width=self.content_width - self.pane_w,
-            height=self.content_height
-        )
+        active_region = EasyDict(x=self.pane_w, y=0, width=self.content_width - self.pane_w, height=self.content_height)
         self.cam_widget(active_region, expanded)
         imgui.unindent()
 
@@ -202,12 +187,8 @@ class Visualizer(imgui_window.ImguiWindow):
         if "image" in self.result:
             if self._tex_img is not self.result.image:
                 self._tex_img = self.result.image
-                if self._tex_obj is None or not self._tex_obj.is_compatible(
-                    image=self._tex_img
-                ):
-                    self._tex_obj = gl_utils.Texture(
-                        image=self._tex_img, bilinear=False, mipmap=False
-                    )
+                if self._tex_obj is None or not self._tex_obj.is_compatible(image=self._tex_img):
+                    self._tex_obj = gl_utils.Texture(image=self._tex_img, bilinear=False, mipmap=False)
                 else:
                     self._tex_obj.update(self._tex_img)
             zoom = min(max_w / self._tex_obj.width, max_h / self._tex_obj.height)

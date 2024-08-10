@@ -84,22 +84,6 @@ def drag_button(label, width=0, enabled=True):
     return clicked, dragging, dx, dy
 
 
-def drag_hidden_window(label, x, y, width, height, enabled=True):
-    imgui.push_style_color(COLOR_WINDOW_BACKGROUND, 0)
-    imgui.push_style_color(COLOR_BORDER, 0)
-    imgui.set_next_window_pos(imgui.ImVec2(x, y))
-    imgui.set_next_window_size(imgui.ImVec2(width, height))
-    imgui.begin(
-        label,
-        p_open=False,
-        flags=(WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE),
-    )
-    dragging, dx, dy = drag_previous_control(enabled=enabled, mouse_button=2)
-    imgui.end()
-    imgui.pop_style_color(2)
-    return dragging, dx, dy
-
-
 def did_drag_start_in_window(x, y, width, height, drag_delta):
     mouse_pos_at_drag_start = imgui.get_mouse_pos() - drag_delta
     return (x <= mouse_pos_at_drag_start.x <= x + width) and (y <= mouse_pos_at_drag_start.y <= y + height)
