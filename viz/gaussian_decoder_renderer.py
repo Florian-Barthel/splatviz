@@ -1,14 +1,3 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-#
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
-
-
 import copy
 import os
 import pickle
@@ -37,6 +26,7 @@ class GaussianDecoderRenderer(Renderer):
         self.reload_model = True
         self._current_ply_file_path = ""
         self.gaussian_model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
+        self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device="cuda")
 
     def _render_impl(
         self,
@@ -56,32 +46,22 @@ class GaussianDecoderRenderer(Renderer):
         latent_y=0.0,
         render_gan_image=False,
         save_ply_path=None,
-        fast_render_mode=False,
         **slider,
     ):
-        if not fast_render_mode:
-            slider = EasyDict(slider)
-            self.load_decoder(ply_file_paths[0])
+        slider = EasyDict(slider)
+        self.load_decoder(ply_file_paths[0])
 
         # create videos
         if len(video_cams) > 0:
             self.render_video("./_videos", video_cams)
 
         # create camera
-        width = resolution
-        height = resolution
-
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
         fov_rad = fov / 360 * 2 * np.pi
-        render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
+        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
         gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
-        # generate latent vector todo optimize
-        if not fast_render_mode or self.last_z is None:
-            z = self.create_z(latent_x, latent_y)
-        else:
-            z = self.last_z
-
+        z = self.create_z(latent_x, latent_y)
         if not torch.equal(self.last_z, z) or self.reload_model or render_gan_image:
             result = self.position_prediction.get_data(z=z, camera_params=gan_camera_params)
             gaussian_attr = self.decoder(z, gan_camera_params, result.vertices, truncation_psi=1.0)
@@ -93,52 +73,27 @@ class GaussianDecoderRenderer(Renderer):
             self.last_z = z
             self.reload_model = False
 
-        if not fast_render_mode:
-            command = re.sub(";+", ";", edit_text.replace("\n", ";"))
-            gaussian = copy.deepcopy(self.gaussian_model)  # for editing todo optimize
-            exec(command)
-        else:
-            gaussian = self.gaussian_model
+        gaussian = copy.deepcopy(self.gaussian_model)
+        exec(self.sanitize_command(edit_text))
 
         if save_ply_path is not None:
-            os.makedirs(save_ply_path, exist_ok=True)
-            save_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
-            print("Model saved in", save_path)
-            gaussian.save_ply(save_path)
+            self.save_ply(gaussian, save_ply_path)
 
-        render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
-
-        img = render["render"]
-        if not fast_render_mode:
-            res.stats = torch.stack(
-                [
-                    img.mean(),
-                    img.mean(),
-                    img.std(),
-                    img.std(),
-                    img.norm(float("inf")),
-                    img.norm(float("inf")),
-                ]
-            )
-            if render_alpha:
-                img = render["alpha"]
-            if render_depth:
-                img = render["depth"] / render["depth"].max()
-            res.mean_xyz = torch.mean(gaussian.get_xyz, dim=0)
-            res.std_xyz = torch.std(gaussian.get_xyz)
-
+        img = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)["render"]
         if render_gan_image:
             gan_image = torch.nn.functional.interpolate(result.img, size=[img.shape[1], img.shape[2]])[0]
             img = torch.concat([img, gan_image], dim=2)
-        # Scale and convert to uint8.
-        if img_normalize:
-            img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
-        img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
-        res.image = img
+        self._return_image(img, res, normalize=img_normalize)
 
-        if not fast_render_mode:
-            if len(eval_text) > 0:
-                res.eval = eval(eval_text)
+        if len(eval_text) > 0:
+            res.eval = eval(eval_text)
+
+    @staticmethod
+    def save_ply(gaussian, save_ply_path):
+        os.makedirs(save_ply_path, exist_ok=True)
+        save_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
+        print("Model saved in", save_path)
+        gaussian.save_ply(save_path)
 
     def create_z(self, latent_x, latent_y):
         latent_x = torch.tensor(latent_x, device="cuda", dtype=torch.float)
