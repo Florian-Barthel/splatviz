@@ -4,6 +4,7 @@ import PIL
 from imgui_bundle import imgui
 import numpy as np
 
+from gui_utils.easy_imgui import label
 from gui_utils import imgui_utils
 from viz.render_utils import CapturedException
 
@@ -18,16 +19,14 @@ class CaptureWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            imgui.text("Save Screenshot")
-            imgui.same_line(viz.label_w)
+            label("Save Screenshot", viz.label_w)
             if imgui.is_item_hovered() and not imgui.is_item_active() and self.path != "":
                 imgui.set_tooltip(self.path)
             if imgui_utils.button("Save img", width=viz.button_w):
                 if "image" in viz.result:
                     self.save_png(viz.result.image)
 
-            imgui.text("Save PLY")
-            imgui.same_line(viz.label_w)
+            label("Save PLY", viz.label_w)
             if imgui_utils.button("Save ply", width=viz.button_w):
                 viz.args.save_ply_path = self.path_ply
             else:

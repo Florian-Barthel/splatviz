@@ -1,6 +1,8 @@
 from gui_utils import imgui_utils
 from imgui_bundle import imgui
 
+from gui_utils.easy_imgui import label
+
 
 class RenderWidget:
     def __init__(self, viz):
@@ -14,20 +16,16 @@ class RenderWidget:
     def __call__(self, show=True, decoder=False):
         viz = self.viz
         if show:
-            imgui.text("Resolution")
-            imgui.same_line(viz.label_w)
+            label("Resolution", viz.label_w)
             _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 128)
 
-            imgui.text("Render Alpha")
-            imgui.same_line(viz.label_w)
+            label("Render Alpha", viz.label_w)
             alpha_changed, self.render_alpha = imgui.checkbox("##RenderAlpha", self.render_alpha)
 
-            imgui.text("Render Depth")
-            imgui.same_line(viz.label_w)
+            label("Render Depth", viz.label_w)
             depth_changed, self.render_depth = imgui.checkbox("##RenderDepth", self.render_depth)
             if decoder:
-                imgui.text("Render GAN")
-                imgui.same_line(viz.label_w)
+                label("Render GAN", viz.label_w)
                 _, self.render_gan_image = imgui.checkbox("##RenderGAN", self.render_gan_image)
 
             if self.render_alpha and alpha_changed:

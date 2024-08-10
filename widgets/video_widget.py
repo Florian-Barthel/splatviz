@@ -2,6 +2,7 @@ from imgui_bundle import imgui
 import numpy as np
 
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
 from scene.cameras import CustomCam
 from viz_utils.camera_utils import LookAtPoseSampler
 
@@ -20,24 +21,19 @@ class VideoWidget:
         viz = self.viz
         viz.args.video_cams = []
         if show:
-            imgui.text("Num Frames")
-            imgui.same_line(viz.label_w)
+            label("Num Frames", viz.label_w)
             _changed, self.num_frames = imgui.input_int("##num_frames", self.num_frames)
 
-            imgui.text("Camera Height")
-            imgui.same_line(viz.label_w)
+            label("Camera Height", viz.label_w)
             _changed, self.cam_height = imgui.input_float("##camera_height", self.cam_height)
 
-            imgui.text("Radius")
-            imgui.same_line(viz.label_w)
+            label("Radius", viz.label_w)
             _changed, self.radius = imgui.input_float("##radius", self.radius)
 
-            imgui.text("Resolution")
-            imgui.same_line(viz.label_w)
+            label("Resolution", viz.label_w)
             _changed, self.resolution = imgui.input_int("##resolution", self.resolution)
 
-            imgui.text("FOV")
-            imgui.same_line(viz.label_w)
+            label("FOV", viz.label_w)
             _changed, self.fov = imgui.input_int("##fov", self.fov)
 
             if imgui_utils.button("Render", viz.button_w):

@@ -4,6 +4,7 @@ import torch
 import pprint
 
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
 from viz_utils.dict import EasyDict
 from gui_utils import style
 
@@ -20,8 +21,7 @@ class EvalWidget:
         viz = self.viz
 
         if show:
-            imgui.text("Eval code:")
-            imgui.same_line()
+            label("Eval code:")
             _changed, self.text = imgui.input_text("##input_text", self.text)
             imgui.new_line()
             with style.eval_color():
@@ -74,8 +74,7 @@ class EvalWidget:
             self.use_cache_dict[var_name] = True
         imgui.new_line()
         imgui.same_line(depth)
-        imgui.text("Cache")
-        imgui.same_line()
+        label("Cache")
         _, self.use_cache_dict[var_name] = imgui.checkbox(f"##cache{var_name}", self.use_cache_dict[var_name])
         bins = 50
         if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:

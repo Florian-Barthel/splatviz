@@ -12,6 +12,7 @@
 from imgui_bundle import imgui
 import dnnlib
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
 
 
 class LatentWidget:
@@ -27,8 +28,7 @@ class LatentWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            imgui.text("Latent")
-            imgui.same_line()
+            label("Latent")
             with imgui_utils.item_width(viz.font_size * 8):
                 changed, (x_man, y_man) = imgui.input_float2("##xy", v=[self.latent.x, self.latent.y])
                 if changed:

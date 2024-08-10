@@ -1,15 +1,16 @@
 from imgui_bundle import imgui
+from gui_utils.easy_imgui import label, slider, checkbox
 import torch
 import numpy as np
 
 from gui_utils import imgui_utils
+from viz_utils.dict import EasyDict
 from viz_utils.camera_utils import (
     get_forward_vector,
     create_cam2world_matrix,
     get_origin,
     normalize_vecs,
 )
-from viz_utils.dict import EasyDict
 
 
 class CamWidget:
@@ -42,88 +43,58 @@ class CamWidget:
         self.handle_wasd()
 
         if show:
-            imgui.text("Camera Mode")
-            imgui.same_line(viz.label_w)
-            _clicked, self.current_control_mode = imgui.combo(
-                "##Camera Modes", self.current_control_mode, self.control_modes
-            )
+            label("Camera Mode", viz.label_w)
+            _, self.current_control_mode = imgui.combo("##cam_modes", self.current_control_mode, self.control_modes)
 
             if self.control_modes[self.current_control_mode] == "WASD":
-                imgui.text("Move Speed")
-                imgui.same_line(viz.label_w)
-                _, self.wasd_move_speed = imgui.slider_float(
-                    "##WASD_Move_Speed",
-                    v=self.wasd_move_speed,
-                    v_min=0.001,
-                    v_max=1,
-                    format="%.3f",
-                    flags=imgui.SliderFlags_.logarithmic.value,
-                )
+                label("Move Speed", viz.label_w)
+                self.wasd_move_speed = slider(self.wasd_move_speed, "move_speed", 0.001, 1, log=True)
 
-            imgui.text("Drag Speed")
-            imgui.same_line(viz.label_w)
-            _, self.drag_speed = imgui.slider_float(
-                "##drag_speed",
-                v=self.drag_speed,
-                v_min=0.001,
-                v_max=0.1,
-                format="%.3f",
-                flags=imgui.SliderFlags_.logarithmic.value,
-            )
+            label("Drag Speed", viz.label_w)
+            self.drag_speed = slider(self.drag_speed, "drag_speed", 0.001, 0.1, log=True)
 
-            imgui.text("Rotate Speed")
-            imgui.same_line(viz.label_w)
-            _, self.rotate_speed = imgui.slider_float(
-                "##rotate_speed",
-                v=self.rotate_speed,
-                v_min=0.001,
-                v_max=0.1,
-                format="%.3f",
-                flags=imgui.SliderFlags_.logarithmic.value,
-            )
+            label("Rotate Speed", viz.label_w)
+            self.rotate_speed = slider(self.rotate_speed, "rot_speed", 0.001, 0.1, log=True)
 
             imgui.push_item_width(200)
-            imgui.text("Up Vector")
-            imgui.same_line(viz.label_w)
+            label("Up Vector", viz.label_w)
             _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
             if _changed:
                 self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
+
             imgui.same_line()
             if imgui_utils.button("Set current direction", width=viz.button_large_w):
                 self.up_vector = self.forward
                 self.pose.yaw = 0
                 self.pose.pitch = 0
+
             imgui.same_line()
             if imgui_utils.button("Flip", width=viz.button_w):
                 self.up_vector = -self.up_vector
 
-            imgui.text("FOV")
-            imgui.same_line(viz.label_w)
-            _changed, self.fov = imgui.slider_float("##fov", self.fov, 1, 180, format="%.1f °")
+            label("FOV", viz.label_w)
+            self.fov = slider(self.fov, "##fov", 1, 180, format="%.1f °")
 
             if self.control_modes[self.current_control_mode] == "Orbit":
-                imgui.text("Radius")
-                imgui.same_line(viz.label_w)
-                _changed, self.radius = imgui.slider_float("##radius", self.radius, 0, 10, format="%.1f")
+                label("Radius", viz.label_w)
+                self.radius = slider(self.radius, "##radius", 1, 20, format="%.1f °")
+
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz stddev", width=viz.button_large_w) and "std_xyz" in viz.result.keys():
                     self.radius = viz.result.std_xyz.item()
-                imgui.text("Look at point")
-                imgui.same_line(viz.label_w)
-                _changed, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
+
+                label("Look at Point", viz.label_w)
+                _, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
                 self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
                     self.lookat_point = viz.result.mean_xyz
             imgui.pop_item_width()
 
-            imgui.text("Invert X")
-            imgui.same_line(viz.label_w)
-            _, self.invert_x = imgui.checkbox("##invert_x", self.invert_x)
-
-            imgui.text("Invert Y")
-            imgui.same_line(viz.label_w)
-            _, self.invert_y = imgui.checkbox("##invert_y", self.invert_y)
+            label("Invert X", viz.label_w)
+            self.invert_x = checkbox(self.invert_x, "invert_x")
+            label("Invert Y", viz.label_w)
+            self.invert_y = checkbox(self.invert_y, "invert_y")
 
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
         viz.args.yaw = self.pose.yaw

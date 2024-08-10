@@ -1,12 +1,13 @@
 import os.path
 import time
 import uuid
-from dnnlib import EasyDict
-from gui_utils import imgui_utils
-import json
 from imgui_bundle import imgui, imgui_color_text_edit as edit
 import inspect
 
+from dnnlib import EasyDict
+from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
+from gui_utils.easy_json import load_json, save_json
 from scene.cameras import CustomCam
 from viz.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
@@ -70,13 +71,14 @@ class EditWidget:
         self.presets = {}
         self.history = {}
         self.history_size = 5
-        self.load_presets()
         self.safe_load = False
+        self.preset_path = "./presets.json"
+        self.history_path = "./history.json"
+        self.load_presets()
 
         self.editor = edit.TextEditor()
         language = edit.TextEditor.LanguageDefinition.python()
         self.last_text = ""
-
         custom_identifiers = {
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
             "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
@@ -88,7 +90,6 @@ class EditWidget:
             ),
             "slider": edit.TextEditor.Identifier(m_declaration=get_description(Slider)),
         }
-
         copy_identifiers = language.m_identifiers.copy()
         copy_identifiers.update(custom_identifiers)
         language.m_identifiers = copy_identifiers
@@ -149,16 +150,14 @@ class EditWidget:
                 self.editor.render("Python Edit Code", a_size=imgui.ImVec2(viz.pane_w - 50, editor_height))
 
             imgui.new_line()
-            imgui.text("Preset Name")
-            imgui.same_line()
-            _changed, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
+            label("Preset Name", viz.pane_w)
+            _, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
             imgui.same_line()
             if imgui_utils.button("Save as Preset", width=self.viz.button_large_w):
                 self.presets[self._cur_preset_name] = dict(
                     edit_text=self.editor.get_text(), slider=[vars(slider) for slider in self.sliders]
                 )
-                with open("./presets.json", "w", encoding="utf-8") as f:
-                    json.dump(self.presets, f)
+                save_json(filename=self.preset_path, data=self.presets)
                 self._cur_preset_name = ""
 
             edit_text = self.editor.get_text()
@@ -166,28 +165,25 @@ class EditWidget:
                 self.history[self.current_session_name] = dict(
                     edit_text=self.editor.get_text(), slider=[vars(slider) for slider in self.sliders]
                 )
-                with open("./history.json", "w", encoding="utf-8") as f:
-                    json.dump(self.history, f)
+                save_json(filename=self.history_path, data=self.history)
             self.last_text = edit_text
 
         viz.args.edit_text = self.last_text
         viz.args.update({slider.key: slider.value for slider in self.sliders})
 
     def load_presets(self):
-        if not os.path.exists("./presets.json"):
-            with open("./presets.json", "w", encoding="utf-8") as f:
-                json.dump(dict(Default=dict(edit_text=default_preset, slider=[vars(Slider("x", 1, 0, 10))])), f)
+        if not os.path.exists(self.preset_path):
+            save_dict = dict(Default=dict(edit_text=default_preset, slider=[vars(Slider("x", 1, 0, 10))]))
+            save_json(data=save_dict, filename=self.preset_path)
 
-        with open("./presets.json", "r", encoding="utf-8") as f:
-            self.presets = json.load(f)
+        self.presets = load_json(self.preset_path)
 
-        if os.path.exists("./history.json"):
-            with open("./history.json", "r", encoding="utf-8") as f:
-                history_all = json.load(f)
-                keys = sorted(history_all.keys())
-                num_keep = min(len(keys), self.history_size)
-                keys = keys[-num_keep:]
-                self.history = {key: history_all[key] for key in keys}
+        if os.path.exists(self.history_path):
+            history_all = load_json(self.history_path)
+            keys = sorted(history_all.keys())
+            num_keep = min(len(keys), self.history_size)
+            keys = keys[-num_keep:]
+            self.history = {key: history_all[key] for key in keys}
 
     def render_sliders(self):
         delete_keys = []
@@ -201,24 +197,20 @@ class EditWidget:
             del self.sliders[i]
 
         imgui.push_item_width(70)
-        imgui.text("Var name")
-        imgui.same_line()
-        _changed, self._cur_name_slider = imgui.input_text("##input_name", self._cur_name_slider)
+        label("Var name")
+        _, self._cur_name_slider = imgui.input_text("##input_name", self._cur_name_slider)
 
         imgui.same_line()
-        imgui.text("min")
-        imgui.same_line()
-        _changed, self._cur_min_slider = imgui.input_int("##input_min", self._cur_min_slider, 0)
+        label("min")
+        _, self._cur_min_slider = imgui.input_int("##input_min", self._cur_min_slider, 0)
 
         imgui.same_line()
-        imgui.text("val")
-        imgui.same_line()
-        _changed, self._cur_val_slider = imgui.input_int("##input_val", self._cur_val_slider, 0)
+        label("val")
+        _, self._cur_val_slider = imgui.input_int("##input_val", self._cur_val_slider, 0)
 
         imgui.same_line()
-        imgui.text("max")
-        imgui.same_line()
-        _changed, self._cur_max_slider = imgui.input_int("##input_max", self._cur_max_slider, 0)
+        label("max")
+        _, self._cur_max_slider = imgui.input_int("##input_max", self._cur_max_slider, 0)
         imgui.pop_item_width()
 
         imgui.same_line()

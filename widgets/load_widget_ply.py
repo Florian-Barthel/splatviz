@@ -1,6 +1,7 @@
 import os
 from imgui_bundle import imgui
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
 
 
 class LoadWidget:
@@ -19,8 +20,7 @@ class LoadWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            imgui.text("Search Filters (comma separated)")
-            imgui.same_line()
+            label("Search Filters (comma separated)")
             _changed, self.filter = imgui.input_text("##Filter", self.filter)
             plys_to_remove = []
 

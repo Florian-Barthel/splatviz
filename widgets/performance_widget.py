@@ -7,6 +7,8 @@ import GPUtil
 import time
 from imgui_bundle import implot
 
+from gui_utils.easy_imgui import label
+
 
 class Monitor(Thread):
     def __init__(self, delay):
@@ -78,51 +80,40 @@ class PerformanceWidget:
                 implot.end_plot()
 
             with imgui_utils.item_width(viz.font_size * 6):
-                imgui.text(f"GUI FPS Limit:")
-                imgui.same_line(viz.label_w)
+                label("GUI FPS Limit:", viz.label_w)
                 _changed, self.fps_limit = imgui.input_int("##FPS_limit", self.fps_limit)
                 self.fps_limit = min(max(self.fps_limit, 5), 1000)
 
-                imgui.text(f"Vertical sync:")
-                imgui.same_line(viz.label_w)
+                label("Vertical sync:", viz.label_w)
                 _clicked, self.use_vsync = imgui.checkbox("##Vertical_sync", self.use_vsync)
 
-            imgui.text(f"FPS GUI:")
-            imgui.same_line(viz.label_w)
+            label("FPS GUI:", viz.label_w)
             imgui.text(f"{self.gui_FPS_smooth[-1]:.2f}")
 
-            imgui.text(f"FPS Render:")
-            imgui.same_line(viz.label_w)
+            label("FPS Render:", viz.label_w)
             imgui.text(f"{self.render_FPS_smooth[-1]:.2f}")
+            imgui.new_line()
 
             # CUDA
-            imgui.new_line()
-            imgui.text(f"Device:")
-            imgui.same_line(viz.label_w)
+            label("Device:", viz.label_w)
             imgui.text(f"{self.gpu_monitor.gpu.name}")
 
-            imgui.text(f"Device Capability:")
-            imgui.same_line(viz.label_w)
+            label("Device Capability:", viz.label_w)
             imgui.text(f"{self.device_capability[0]}.{self.device_capability[1]}")
 
-            imgui.text(f"Driver:")
-            imgui.same_line(viz.label_w)
+            label("Driver:", viz.label_w)
             imgui.text(f"{self.gpu_monitor.gpu.driver}")
 
-            imgui.text(f"CUDA Version:")
-            imgui.same_line(viz.label_w)
+            label("CUDA Version:", viz.label_w)
             imgui.text(f"{self.cuda_version}")
 
-            imgui.text(f"Clock Rate:")
-            imgui.same_line(viz.label_w)
+            label("Clock Rate:", viz.label_w)
             imgui.text(f"{torch.cuda.clock_rate()}")
 
-            imgui.text(f"Temperature:")
-            imgui.same_line(viz.label_w)
+            label("Temperature:", viz.label_w)
             imgui.text(f"{self.gpu_monitor.gpu.temperature}° C")
 
-            imgui.text(f"Memory Used:")
-            imgui.same_line(viz.label_w)
+            label("Memory Used:", viz.label_w)
             imgui.progress_bar(self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
 
             if imgui.button("Empty Cache"):
