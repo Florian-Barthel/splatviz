@@ -1,11 +1,12 @@
 import os
 from imgui_bundle import imgui
 from gui_utils import imgui_utils
+from widgets.widget import Widget
 
 
-class LoadWidget:
+class LoadWidget(Widget):
     def __init__(self, viz, root):
-        self.viz = viz
+        super().__init__(viz, "Load")
         self.root = root
         self.filter = ""
         self.items = self.list_runs_and_pkls()

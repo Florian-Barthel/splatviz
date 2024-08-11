@@ -2,11 +2,12 @@ from gui_utils import imgui_utils
 from imgui_bundle import imgui
 
 from gui_utils.easy_imgui import label
+from widgets.widget import Widget
 
 
-class RenderWidget:
+class RenderWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Render")
         self.render_alpha = False
         self.render_depth = False
         self.render_gan_image = False

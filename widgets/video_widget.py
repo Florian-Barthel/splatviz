@@ -5,11 +5,12 @@ from gui_utils import imgui_utils
 from gui_utils.easy_imgui import label
 from scene.cameras import CustomCam
 from viz_utils.camera_utils import LookAtPoseSampler
+from widgets.widget import Widget
 
 
-class VideoWidget:
+class VideoWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Video")
         self.num_frames = 1000
         self.cam_height = 0.3
         self.radius = 6

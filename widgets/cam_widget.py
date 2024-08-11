@@ -11,11 +11,12 @@ from viz_utils.camera_utils import (
     get_origin,
     normalize_vecs,
 )
+from widgets.widget import Widget
 
 
-class CamWidget:
+class CamWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Camera")
         self.fov = 45
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
@@ -36,8 +37,9 @@ class CamWidget:
         self.last_drag_delta = imgui.ImVec2(0, 0)
 
     @imgui_utils.scoped_by_object_id
-    def __call__(self, active_region: EasyDict, show: bool):
+    def __call__(self, show: bool):
         viz = self.viz
+        active_region = EasyDict(x=viz.pane_w, y=0, width=viz.content_width - viz.pane_w, height=viz.content_height)
         self.handle_dragging_in_window(**active_region)
         self.handle_mouse_wheel()
         self.handle_wasd()

@@ -8,6 +8,7 @@ import time
 from imgui_bundle import implot
 
 from gui_utils.easy_imgui import label
+from widgets.widget import Widget
 
 
 class Monitor(Thread):
@@ -27,10 +28,10 @@ class Monitor(Thread):
         self.stopped = True
 
 
-class PerformanceWidget:
+class PerformanceWidget(Widget):
     def __init__(self, viz):
+        super().__init__(viz, "Performance")
         self.num_elements = 500
-        self.viz = viz
         self.gui_FPS = [0] * 10
         self.gui_FPS_smooth = [0] * self.num_elements
         self.render_FPS = [0] * 10

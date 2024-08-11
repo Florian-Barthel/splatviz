@@ -64,17 +64,21 @@ class Visualizer(imgui_window.ImguiWindow):
 
         # Widgets.
         if self.use_gan_decoder:
-            self.load_widget = load_widget_pkl.LoadWidget(self, data_path)
+            load_widget = load_widget_pkl.LoadWidget(self, data_path)
         else:
-            self.load_widget = load_widget_ply.LoadWidget(self, data_path)
-        self.cam_widget = cam_widget.CamWidget(self)
-        self.latent_widget = latent_widget.LatentWidget(self)
-        self.edit_widget = edit_widget.EditWidget(self)
-        self.eval_widget = eval_widget.EvalWidget(self)
-        self.perf_widget = performance_widget.PerformanceWidget(self)
-        self.video_widget = video_widget.VideoWidget(self)
-        self.capture_widget = capture_widget.CaptureWidget(self)
-        self.render_widget = render_widget.RenderWidget(self)
+            load_widget = load_widget_ply.LoadWidget(self, data_path)
+        self.widgets = [
+            load_widget,
+            cam_widget.CamWidget(self),
+            performance_widget.PerformanceWidget(self),
+            video_widget.VideoWidget(self),
+            capture_widget.CaptureWidget(self),
+            render_widget.RenderWidget(self),
+            edit_widget.EditWidget(self),
+            eval_widget.EvalWidget(self),
+        ]
+        if use_gan_decoder:
+            self.widgets.append(latent_widget.LatentWidget(self))
 
         # Initialize window.
         self.set_position(0, 0)
@@ -82,7 +86,8 @@ class Visualizer(imgui_window.ImguiWindow):
         self.skip_frame()  # Layout may change after first frame.
 
     def close(self):
-        self.perf_widget.close()
+        for widget in self.widgets:
+            widget.close()
         super().close()
         if self._async_renderer is not None:
             self._async_renderer.close()
@@ -98,7 +103,7 @@ class Visualizer(imgui_window.ImguiWindow):
         old = self.font_size
         self.set_font_size(min(self.content_width / 120, self.content_height / 60))
         if self.font_size != old:
-            self.skip_frame()  # Layout changed.
+            self.skip_frame()
 
     def draw_frame(self):
         self.begin_frame()
@@ -117,55 +122,12 @@ class Visualizer(imgui_window.ImguiWindow):
             flags=(WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE),
         )
 
-        ### Widgets. ###
-
-        expanded, _visible = imgui_utils.collapsing_header("Load", default=True)
-        imgui.indent()
-        self.load_widget(expanded)
-        imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Performance", default=False)
-        imgui.indent()
-        self.perf_widget(expanded)
-        imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Render", default=False)
-        imgui.indent()
-        self.render_widget(expanded, decoder=self.use_gan_decoder)
-        imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Camera", default=False)
-        imgui.indent()
-        active_region = EasyDict(x=self.pane_w, y=0, width=self.content_width - self.pane_w, height=self.content_height)
-        self.cam_widget(active_region, expanded)
-        imgui.unindent()
-
-        if self.use_gan_decoder:
-            expanded, _visible = imgui_utils.collapsing_header("Latent", default=False)
+        ### Widgets. ##
+        for widget in self.widgets:
+            expanded, _visible = imgui_utils.collapsing_header(widget.name, default=widget.name == "Load")
             imgui.indent()
-            self.latent_widget(expanded)
+            widget(expanded)
             imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Video", default=False)
-        imgui.indent()
-        self.video_widget(expanded)
-        imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Save", default=False)
-        imgui.indent()
-        self.capture_widget(expanded)
-        imgui.unindent()
-
-        # with imgui_utils.change_font(self.code_font):
-        expanded, _visible = imgui_utils.collapsing_header("Edit", default=False)
-        imgui.indent()
-        self.edit_widget(expanded)
-        imgui.unindent()
-
-        expanded, _visible = imgui_utils.collapsing_header("Eval", default=False)
-        imgui.indent()
-        self.eval_widget(expanded)
-        imgui.unindent()
 
         # imgui.show_style_editor()
 

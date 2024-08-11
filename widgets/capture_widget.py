@@ -7,11 +7,12 @@ import numpy as np
 from gui_utils.easy_imgui import label
 from gui_utils import imgui_utils
 from viz.render_utils import CapturedException
+from widgets.widget import Widget
 
 
-class CaptureWidget:
+class CaptureWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Save")
         self.path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_screenshots"))
         self.path_ply = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_ply_files"))
 

@@ -7,11 +7,12 @@ from gui_utils import imgui_utils
 from gui_utils.easy_imgui import label
 from viz_utils.dict import EasyDict
 from gui_utils import style
+from widgets.widget import Widget
 
 
-class EvalWidget:
+class EvalWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Eval")
         self.text = "gaussian"
         self.hist_cache = dict()
         self.use_cache_dict = dict()

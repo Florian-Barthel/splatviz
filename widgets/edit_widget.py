@@ -11,6 +11,7 @@ from scene.cameras import CustomCam
 from viz.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
 from viz_utils.dict import EasyDict
+from widgets.widget import Widget
 
 default_preset = """gaussian._xyz = gaussian._xyz
 gaussian._rotation = gaussian._rotation
@@ -61,10 +62,9 @@ class Slider(object):
             self.value = max(self.value, self.min_value)
 
 
-class EditWidget:
+class EditWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
-
+        super().__init__(viz, "Edit")
         cur_time = time.strftime("%Y.%m.%d %H:%M:%S", time.localtime())
         self.current_session_name = f"Restore Session {cur_time}"
         self.presets = {}
