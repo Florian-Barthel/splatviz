@@ -1,12 +1,14 @@
 from imgui_bundle import imgui
-import dnnlib
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
+from viz_utils.dict import EasyDict
+from widgets.widget import Widget
 
 
-class LatentWidget:
+class LatentWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
-        self.latent = dnnlib.EasyDict(x=0, y=0)
+        super().__init__(viz, "Latent")
+        self.latent = EasyDict(x=0, y=0)
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000
@@ -16,10 +18,9 @@ class LatentWidget:
     def __call__(self, show=True):
         viz = self.viz
         if show:
-            imgui.text("Latent")
-            imgui.same_line()
+            label("Latent")
             with imgui_utils.item_width(viz.font_size * 8):
-                changed, (x_man, y_man) = imgui.input_float2("##xy", self.latent.x, self.latent.y)
+                changed, (x_man, y_man) = imgui.input_float2("##xy", v=[self.latent.x, self.latent.y])
                 if changed:
                     self.latent.x = x_man
                     self.latent.y = y_man

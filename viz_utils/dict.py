@@ -2,7 +2,10 @@ from typing import Any
 
 
 class EasyDict(dict):
-    """Convenience class that behaves like a dict but allows access with the attribute syntax."""
+
+    @property
+    def __name__(self):
+        return self.__class__.__name__
 
     def __getattr__(self, name: str) -> Any:
         try:

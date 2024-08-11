@@ -4,12 +4,15 @@ import torch
 import pprint
 
 from gui_utils import imgui_utils
+from gui_utils.easy_imgui import label
 from viz_utils.dict import EasyDict
+from gui_utils import style
+from widgets.widget import Widget
 
 
-class EvalWidget:
+class EvalWidget(Widget):
     def __init__(self, viz):
-        self.viz = viz
+        super().__init__(viz, "Eval")
         self.text = "gaussian"
         self.hist_cache = dict()
         self.use_cache_dict = dict()
@@ -19,11 +22,10 @@ class EvalWidget:
         viz = self.viz
 
         if show:
-            imgui.text("Eval code:")
-            imgui.same_line()
+            label("Eval code:")
             _changed, self.text = imgui.input_text("##input_text", self.text)
             imgui.new_line()
-            with imgui_utils.eval_color():
+            with style.eval_color():
                 with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
                     self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
 
@@ -73,8 +75,7 @@ class EvalWidget:
             self.use_cache_dict[var_name] = True
         imgui.new_line()
         imgui.same_line(depth)
-        imgui.text("Cache")
-        imgui.same_line()
+        label("Cache")
         _, self.use_cache_dict[var_name] = imgui.checkbox(f"##cache{var_name}", self.use_cache_dict[var_name])
         bins = 50
         if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:
