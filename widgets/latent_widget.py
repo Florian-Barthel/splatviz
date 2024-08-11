@@ -10,15 +10,15 @@
 
 
 from imgui_bundle import imgui
-import dnnlib
 from gui_utils import imgui_utils
 from gui_utils.easy_imgui import label
+from viz_utils.dict import EasyDict
 
 
 class LatentWidget:
     def __init__(self, viz):
         self.viz = viz
-        self.latent = dnnlib.EasyDict(x=0, y=0)
+        self.latent = EasyDict(x=0, y=0)
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000

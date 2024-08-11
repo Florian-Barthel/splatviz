@@ -1,7 +1,6 @@
 import copy
 import os
 import pickle
-import re
 import imageio
 import numpy as np
 import torch

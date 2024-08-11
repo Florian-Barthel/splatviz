@@ -88,7 +88,7 @@ class Renderer:
         normalize: bool,
         use_splitscreen: bool = False,
         highlight_border: bool = False,
-        on_top: bool = False
+        on_top: bool = False,
     ) -> None:
 
         if isinstance(images, list):
@@ -109,16 +109,7 @@ class Renderer:
                 img = torch.concat(images, dim=2)
         else:
             img = images
-        res.stats = torch.stack(
-            [
-                img.mean(),
-                img.mean(),
-                img.std(),
-                img.std(),
-                img.norm(float("inf")),
-                img.norm(float("inf")),
-            ]
-        )
+        res.stats = torch.stack([img.mean(), img.std()])
 
         # Scale and convert to uint8.
         if normalize:
