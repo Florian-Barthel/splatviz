@@ -3,7 +3,7 @@ from typing import List
 import torch
 import torch.nn
 
-from viz.render_utils import CapturedException
+from viz_renderer.render_utils import CapturedException
 from viz_utils.dict import EasyDict
 
 
@@ -83,7 +83,7 @@ class Renderer:
 
     @staticmethod
     def _return_image(
-        images: List[torch.Tensor],
+        images,
         res: dict,
         normalize: bool,
         use_splitscreen: bool = False,
@@ -91,24 +91,25 @@ class Renderer:
         on_top: bool = False,
     ) -> None:
 
-        if isinstance(images, list):
-            if use_splitscreen:
-                img = torch.zeros_like(images[0])
-                split_size = img.shape[-1] // len(images)
-                offset = 0
-                for i in range(len(images)):
-                    img[..., offset : offset + split_size] = images[i][..., offset : offset + split_size]
-                    offset += split_size
-                    if highlight_border and i != len(images) - 1:
-                        img[..., offset - 1 : offset] = 1
+        if not isinstance(images, list):
+            images = [images]
 
-            elif on_top:
-                mask = torch.mean(images[1], dim=0)
-                img = images[0] * (1 - mask) + images[1] * mask
-            else:
-                img = torch.concat(images, dim=2)
+        if use_splitscreen:
+            img = torch.zeros_like(images[0])
+            split_size = img.shape[-1] // len(images)
+            offset = 0
+            for i in range(len(images)):
+                img[..., offset : offset + split_size] = images[i][..., offset : offset + split_size]
+                offset += split_size
+                if highlight_border and i != len(images) - 1:
+                    img[..., offset - 1 : offset] = 1
+
+        elif on_top:
+            mask = torch.mean(images[1], dim=0)
+            img = images[0] * (1 - mask) + images[1] * mask
         else:
-            img = images
+            img = torch.concat(images, dim=2)
+
         res.stats = torch.stack([img.mean(), img.std()])
 
         # Scale and convert to uint8.

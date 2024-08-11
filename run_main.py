@@ -26,13 +26,14 @@ from widgets import (
     latent_widget,
     render_widget,
 )
-from viz.async_renderer import AsyncRenderer
-from viz.gaussian_renderer import GaussianRenderer
-from viz.gaussian_decoder_renderer import GaussianDecoderRenderer
+from viz_renderer.async_renderer import AsyncRenderer
+from viz_renderer.gaussian_renderer import GaussianRenderer
+from viz_renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from viz_renderer.attach_renderer import AttachRenderer
 
 
 class Visualizer(imgui_window.ImguiWindow):
-    def __init__(self, data_path=None, use_gan_decoder=False):
+    def __init__(self, data_path, mode, host, port):
         self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
@@ -50,9 +51,23 @@ class Visualizer(imgui_window.ImguiWindow):
 
         # Internals.
         self._last_error_print = None
-        self.use_gan_decoder = use_gan_decoder
-        renderer = GaussianDecoderRenderer() if use_gan_decoder else GaussianRenderer()
-        self._async_renderer = AsyncRenderer(renderer)
+
+        self.widgets = []
+        self.mode = mode
+        update_all_the_time = False
+        if self.mode == "default":
+            self.widgets.append(load_widget_ply.LoadWidget(self, data_path))
+            renderer = GaussianRenderer()
+        elif self.mode == "decoder":
+            self.widgets.append(load_widget_pkl.LoadWidget(self, data_path))
+            renderer = GaussianDecoderRenderer()
+        elif self.mode == "attach":
+            renderer = AttachRenderer(host=host, port=port)
+            update_all_the_time = True
+        else:
+            raise NotImplementedError(f"Mode '{self.mode}' not recognized.")
+
+        self._async_renderer = AsyncRenderer(renderer, update_all_the_time)
         self._defer_rendering = 0
         self._tex_img = None
         self._tex_obj = None
@@ -63,12 +78,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.result = EasyDict()
 
         # Widgets.
-        if self.use_gan_decoder:
-            load_widget = load_widget_pkl.LoadWidget(self, data_path)
-        else:
-            load_widget = load_widget_ply.LoadWidget(self, data_path)
-        self.widgets = [
-            load_widget,
+        self.widgets.extend([
             cam_widget.CamWidget(self),
             performance_widget.PerformanceWidget(self),
             video_widget.VideoWidget(self),
@@ -76,8 +86,8 @@ class Visualizer(imgui_window.ImguiWindow):
             render_widget.RenderWidget(self),
             edit_widget.EditWidget(self),
             eval_widget.EvalWidget(self),
-        ]
-        if use_gan_decoder:
+        ])
+        if self.mode == "decoder":
             self.widgets.append(latent_widget.LatentWidget(self))
 
         # Initialize window.
@@ -186,9 +196,11 @@ class Visualizer(imgui_window.ImguiWindow):
     metavar="PATH",
     default="./sample_scenes",
 )
-@click.option("--use_decoder", help="Visualizes the results of a decoder", is_flag=True)
-def main(data_path, use_decoder):
-    viz = Visualizer(data_path=data_path, use_gan_decoder=use_decoder)
+@click.option("--mode", help="[default, decoder, attach]", default="default")
+@click.option("--host", help="host address", default="127.0.0.1")
+@click.option("--port", help="port", default=6009)
+def main(data_path, mode, host, port):
+    viz = Visualizer(data_path=data_path, mode=mode, host=host, port=port)
     while not viz.should_close():
         viz.draw_frame()
     viz.close()

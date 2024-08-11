@@ -6,7 +6,7 @@ import numpy as np
 
 from gui_utils.easy_imgui import label
 from gui_utils import imgui_utils
-from viz.render_utils import CapturedException
+from viz_renderer.render_utils import CapturedException
 from widgets.widget import Widget
 
 

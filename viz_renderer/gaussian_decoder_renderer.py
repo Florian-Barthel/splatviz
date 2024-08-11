@@ -9,7 +9,7 @@ from tqdm import tqdm
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
-from viz.base_renderer import Renderer
+from viz_renderer.base_renderer import Renderer
 from viz_utils.camera_utils import fov_to_intrinsics
 from viz_utils.dict import EasyDict
 

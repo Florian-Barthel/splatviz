@@ -12,7 +12,7 @@ from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
-from viz.base_renderer import Renderer
+from viz_renderer.base_renderer import Renderer
 from viz_utils.dict import EasyDict
 
 
