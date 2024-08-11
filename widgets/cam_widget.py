@@ -103,7 +103,6 @@ class CamWidget:
         viz.args.cam_params = self.cam_params
 
     def handle_dragging_in_window(self, x, y, width, height):
-        viz = self.viz
         x_dir = -1 if self.invert_x else 1
         y_dir = -1 if self.invert_y else 1
 

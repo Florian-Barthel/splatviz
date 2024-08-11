@@ -77,8 +77,21 @@ class EditWidget:
         self.load_presets()
 
         self.editor = edit.TextEditor()
-        language = edit.TextEditor.LanguageDefinition.python()
+        self.setup_editor()
+
         self.last_text = ""
+        self.sliders = [Slider(**dict_values) for dict_values in self.presets["Default"]["slider"]]
+
+        self.var_names = "xyzijklmnuvwabcdefghopqrst"
+        self.var_name_index = 1
+        self._cur_min_slider = -10
+        self._cur_max_slider = 10
+        self._cur_val_slider = 0
+        self._cur_name_slider = self.var_names[self.var_name_index]
+        self._cur_preset_name = ""
+
+    def setup_editor(self):
+        language = edit.TextEditor.LanguageDefinition.python()
         custom_identifiers = {
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
             "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
@@ -95,15 +108,6 @@ class EditWidget:
         language.m_identifiers = copy_identifiers
         self.editor.set_language_definition(language)
         self.editor.set_text(self.presets["Default"]["edit_text"])
-        self.sliders = [Slider(**dict_values) for dict_values in self.presets["Default"]["slider"]]
-
-        self.var_names = "xyzijklmnuvwabcdefghopqrst"
-        self.var_name_index = 1
-        self._cur_min_slider = -10
-        self._cur_max_slider = 10
-        self._cur_val_slider = 0
-        self._cur_name_slider = self.var_names[self.var_name_index]
-        self._cur_preset_name = ""
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
