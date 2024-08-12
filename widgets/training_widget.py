@@ -47,9 +47,6 @@ class TrainingWidget(Widget):
         self.plots.sh_degree["values"].append(stats["sh_degree"])
 
         if show:
-            if imgui.button(self.pause_button_states[int(self.do_training)]):
-                self.do_training = not self.do_training
-
             for plot_name, plot_values in self.plots.items():
                 plot_size = imgui.ImVec2(viz.pane_w - 150, 200)
                 implot.set_next_axes_to_fit()
