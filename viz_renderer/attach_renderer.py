@@ -67,6 +67,7 @@ class AttachRenderer(Renderer):
         edit_text,
         resolution,
         cam_params,
+        do_training,
         slider={},
         img_normalize=False,
         save_ply_path=None,
@@ -100,7 +101,7 @@ class AttachRenderer(Renderer):
         message = {
             "resolution_x": resolution,
             "resolution_y": resolution,
-            "train": True,
+            "train": do_training,
             "fov_y": fov_rad,
             "fov_x": fov_rad,
             "z_near": 0.01,

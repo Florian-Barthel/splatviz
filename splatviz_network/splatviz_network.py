@@ -20,7 +20,7 @@ class SplatvizNetwork:
     network.render(pipe, gaussians, ema_loss_for_log, render, background, iteration, opt)
     """
 
-    def __init__(self, host="127.0.0.1", port=6077):
+    def __init__(self, host="127.0.0.1", port=6009):
         self.host = host
         self.port = port
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

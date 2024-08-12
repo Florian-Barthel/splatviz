@@ -22,9 +22,17 @@ class TrainingWidget(Widget):
             sh_degree=dict(values=[], dtype=int),
         )
 
+        self.pause_button_states = ["Resume Training", "Pause Training"]
+        self.do_training = True
+
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
+
+        if show:
+            if imgui.button(self.pause_button_states[int(self.do_training)]):
+                self.do_training = not self.do_training
+        viz.args.do_training = self.do_training
 
         if "training_stats" in viz.result.keys():
             stats = viz.result["training_stats"]
@@ -39,6 +47,9 @@ class TrainingWidget(Widget):
         self.plots.sh_degree["values"].append(stats["sh_degree"])
 
         if show:
+            if imgui.button(self.pause_button_states[int(self.do_training)]):
+                self.do_training = not self.do_training
+
             for plot_name, plot_values in self.plots.items():
                 plot_size = imgui.ImVec2(viz.pane_w - 150, 200)
                 implot.set_next_axes_to_fit()
@@ -56,3 +67,4 @@ class TrainingWidget(Widget):
                     label(str(param), viz.label_w_large)
                     label(str(value), viz.label_w_large)
                     imgui.new_line()
+
