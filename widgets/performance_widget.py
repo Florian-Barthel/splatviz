@@ -65,17 +65,10 @@ class PerformanceWidget(Widget):
 
         if show:
             plot_size = imgui.ImVec2(viz.pane_w - 150, 200)
+            implot.set_next_axes_to_fit()
             if implot.begin_plot("FPS", plot_size):
-                implot.setup_axis(implot.ImAxis_.x1.value, flags=implot.AxisFlags_.no_decorations.value)
-                implot.setup_axis_limits(implot.ImAxis_.x1.value, v_min=0, v_max=self.num_elements)
-                # implot.setup_axis_zoom_constraints(implot.ImAxis_.x1.value, -10, 10)
-
-                implot.setup_axis(implot.ImAxis_.y1.value)
-                implot.setup_axis_limits(implot.ImAxis_.y1.value, v_min=0, v_max=200)
-
                 values_gui = np.array(self.gui_FPS_smooth)
                 implot.plot_line("GUI", values=values_gui)
-
                 values_render = np.array(self.render_FPS_smooth)
                 implot.plot_line("Render", values=values_render)
                 implot.end_plot()

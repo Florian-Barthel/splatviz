@@ -28,16 +28,28 @@ class AttachRenderer(Renderer):
             print(e)
 
     def read(self, resolution):
-        if self.socket is None:
-            return torch.zeros([3, resolution, resolution])
-        message = self.socket.recv(resolution * resolution * 3)
-        verify_len = self.socket.recv(4)
-        verify_len = int.from_bytes(verify_len, "little")
-        verify_string = self.socket.recv(verify_len)
-        image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
-        image = torch.from_numpy(image) / 255.0
-        image = image.permute(2, 0, 1)
-        return image
+        try:
+            current_bytes = 0
+            expected_bytes = resolution * resolution * 3
+            while current_bytes < expected_bytes:
+                message = self.socket.recv(expected_bytes - current_bytes)
+                current_bytes = len(message)
+
+            verify_len = self.socket.recv(4)
+            verify_len = int.from_bytes(verify_len, "little")
+            verify_data = self.socket.recv(verify_len)
+            try:
+                verify_dict = json.loads(verify_data)
+            except Exception:
+                verify_dict = {}
+
+            image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
+            image = torch.from_numpy(image) / 255.0
+            image = image.permute(2, 0, 1)
+            return image, verify_dict
+        except Exception as e:
+            print(e)
+            return torch.zeros([3, resolution, resolution]), {}
 
     def send(self, message):
         try:
@@ -53,12 +65,12 @@ class AttachRenderer(Renderer):
         res,
         fov,
         edit_text,
-        eval_text,
         resolution,
         cam_params,
+        slider={},
         img_normalize=False,
         save_ply_path=None,
-        **slider,
+        **other_args,
     ):
         if self.socket is None:
             self.try_connect()
@@ -66,7 +78,7 @@ class AttachRenderer(Renderer):
                 time.sleep(1)
                 return
 
-        slider = EasyDict(slider)
+        # slider = EasyDict(slider)
         fov_rad = fov / 360 * 2 * np.pi
         render_cam = CustomCam(
             resolution,
@@ -100,9 +112,12 @@ class AttachRenderer(Renderer):
             "view_matrix": world_view_transform.cpu().numpy().flatten().tolist(),
             "view_projection_matrix": full_proj_transform.cpu().numpy().flatten().tolist(),
             "edit_text": self.sanitize_command(edit_text),
+            "slider": slider
         }
         self.send(message)
-        image = self.read(resolution)
+        image, stats = self.read(resolution)
+        if len(stats.keys()) > 0:
+            res.training_stats = stats
 
         self._return_image(
             image,

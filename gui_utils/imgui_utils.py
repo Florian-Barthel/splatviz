@@ -30,13 +30,18 @@ def item_width(width=None):
         yield
 
 
+@contextlib.contextmanager
+def indent(width=0.0):
+    imgui.indent(width)
+    yield
+    imgui.unindent(width)
+
 def scoped_by_object_id(method):
     def decorator(self, *args, **kwargs):
         imgui.push_id(str(id(self)))
         res = method(self, *args, **kwargs)
         imgui.pop_id()
         return res
-
     return decorator
 
 

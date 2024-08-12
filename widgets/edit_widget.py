@@ -45,7 +45,7 @@ class Slider(object):
 
     def render(self, viz):
         _changed, self.value = imgui.slider_float(
-            f"##slider-{self._id}",
+            f"##slider-{self.key}-{self._id}",
             self.value,
             self.min_value,
             self.max_value,
@@ -172,7 +172,7 @@ class EditWidget(Widget):
             self.last_text = edit_text
 
         viz.args.edit_text = self.last_text
-        viz.args.update({slider.key: slider.value for slider in self.sliders})
+        viz.args.slider = {slider.key: slider.value for slider in self.sliders}
 
     def load_presets(self):
         if not os.path.exists(self.preset_path):

@@ -13,8 +13,6 @@ import glfw
 import OpenGL.GL as gl
 from PIL import Image
 
-from . import gl_utils
-
 
 class GlfwWindow:
     def __init__(
@@ -203,11 +201,6 @@ class GlfwWindow:
         if self._skip_frames > 0:
             self._skip_frames -= 1
             return
-
-        # Capture frame if requested.
-        if self._capture_next_frame:
-            self._captured_frame = gl_utils.read_pixels(self.content_width, self.content_height)
-            self._capture_next_frame = False
 
         # Update window.
         if self._deferred_show:

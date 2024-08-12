@@ -25,6 +25,7 @@ from widgets import (
     capture_widget,
     latent_widget,
     render_widget,
+    training_widget
 )
 from viz_renderer.async_renderer import AsyncRenderer
 from viz_renderer.gaussian_renderer import GaussianRenderer
@@ -56,12 +57,40 @@ class Visualizer(imgui_window.ImguiWindow):
         self.mode = mode
         update_all_the_time = False
         if self.mode == "default":
-            self.widgets.append(load_widget_ply.LoadWidget(self, data_path))
+            self.widgets = [
+                load_widget_ply.LoadWidget(self, data_path),
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                eval_widget.EvalWidget(self)
+            ]
             renderer = GaussianRenderer()
         elif self.mode == "decoder":
-            self.widgets.append(load_widget_pkl.LoadWidget(self, data_path))
+            self.widgets = [
+                load_widget_pkl.LoadWidget(self, data_path),
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                eval_widget.EvalWidget(self),
+                latent_widget.LatentWidget(self)
+            ]
             renderer = GaussianDecoderRenderer()
         elif self.mode == "attach":
+            self.widgets = [
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                training_widget.TrainingWidget(self)
+            ]
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
         else:
@@ -76,19 +105,6 @@ class Visualizer(imgui_window.ImguiWindow):
         # Widget interface.
         self.args = EasyDict()
         self.result = EasyDict()
-
-        # Widgets.
-        self.widgets.extend([
-            cam_widget.CamWidget(self),
-            performance_widget.PerformanceWidget(self),
-            video_widget.VideoWidget(self),
-            capture_widget.CaptureWidget(self),
-            render_widget.RenderWidget(self),
-            edit_widget.EditWidget(self),
-            eval_widget.EvalWidget(self),
-        ])
-        if self.mode == "decoder":
-            self.widgets.append(latent_widget.LatentWidget(self))
 
         # Initialize window.
         self.set_position(0, 0)
@@ -122,6 +138,7 @@ class Visualizer(imgui_window.ImguiWindow):
         self.button_w = self.font_size * 5
         self.button_large_w = self.font_size * 10
         self.label_w = round(self.font_size * 5.5) + 100
+        self.label_w_large = round(self.font_size * 5.5) + 150
 
         ### Begin control pane. ###
         imgui.set_next_window_pos(imgui.ImVec2(0, 0))
@@ -198,7 +215,7 @@ class Visualizer(imgui_window.ImguiWindow):
 )
 @click.option("--mode", help="[default, decoder, attach]", default="default")
 @click.option("--host", help="host address", default="127.0.0.1")
-@click.option("--port", help="port", default=6009)
+@click.option("--port", help="port", default=6077)
 def main(data_path, mode, host, port):
     viz = Visualizer(data_path=data_path, mode=mode, host=host, port=port)
     while not viz.should_close():
