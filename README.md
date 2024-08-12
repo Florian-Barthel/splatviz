@@ -49,7 +49,7 @@ Launch with a specified path to look for .ply or .yml files:
   
 <details close>
   
-<summary><h3>🚚 Load Widget</h3></summary>
+<summary><h3>🗃️ Load Widget</h3></summary>
 
 Once you run the `run_main.py` file, the viewer will directly load the first scene that is found in the data
 directory you have specified. You can change the scene by clicking the **Browse** button. You will be displayed a list
