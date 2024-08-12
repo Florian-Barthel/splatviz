@@ -207,10 +207,12 @@ while, after saving a ply file.
 </details>
 
 ## Future Plans
-- Attach to Gaussian Splatting training for live tracking
 - Test other 3DGS render for OSX support
+- Improve the Video Widget
 
 ## Recent Updates ⚡ 
+- Attach to a running 3DGS training
+- Better Mouse Control (translate with middle mouse button)
 - New Performance Widget
 - New Design
 - Compare two or more Gaussian Splatting scenes side by side
