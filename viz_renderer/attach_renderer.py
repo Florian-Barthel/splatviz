@@ -1,6 +1,7 @@
 import json
 import socket
 import time
+from threading import Thread
 
 import numpy as np
 import torch
@@ -11,29 +12,63 @@ from viz_renderer.base_renderer import Renderer
 from viz_utils.dict import EasyDict
 
 
+class AsyncConnector(Thread):
+    def __init__(self, delay, host, port):
+        super(AsyncConnector, self).__init__()
+        self.delay = delay
+        self.host = host
+        self.port = port
+        self._socket = None
+        self.socket = None
+        self.finished = False
+        self.start()
+
+    def run(self):
+        while self.socket is None:
+            try:
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket.connect((self.host, self.port))
+                self.socket = self._socket
+                self.finished = True
+                return
+            except Exception as e:
+                self._socket = None
+                self.socket = None
+                time.sleep(self.delay)
+
+    def restart(self):
+        self._socket = None
+        self.socket = None
+        self.run()
+
+
 class AttachRenderer(Renderer):
     def __init__(self, host, port):
         super().__init__()
         self.host = host
         self.port = port
-        self.socket = None
-        self.try_connect()
+        self.connector = AsyncConnector(1, host, port)
+        self.socket = self.connector.socket
+        self.next_bytes = bytes()
 
-    def try_connect(self):
-        try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.connect((self.host, self.port))
-        except Exception as e:
-            self.socket = None
-            print(e)
+    def restart_connector(self):
+        self.connector = AsyncConnector(1, self.host, self.port)
 
     def read(self, resolution):
         try:
             current_bytes = 0
             expected_bytes = resolution * resolution * 3
+            try_counter = 3
+            counter = 0
+            message = bytes()
             while current_bytes < expected_bytes:
-                message = self.socket.recv(expected_bytes - current_bytes)
+                message += self.socket.recv(expected_bytes - current_bytes)
                 current_bytes = len(message)
+                counter += 1
+                if counter > try_counter:
+                    print("Package loss")
+                    break
+
 
             verify_len = self.socket.recv(4)
             verify_len = int.from_bytes(verify_len, "little")
@@ -48,7 +83,8 @@ class AttachRenderer(Renderer):
             image = image.permute(2, 0, 1)
             return image, verify_dict
         except Exception as e:
-            print(e)
+            print("Read Error", e)
+            self.restart_connector()
             return torch.zeros([3, resolution, resolution]), {}
 
     def send(self, message):
@@ -57,8 +93,8 @@ class AttachRenderer(Renderer):
             message_len_bytes = len(message_encode).to_bytes(4, 'little')
             self.socket.sendall(message_len_bytes + bytes(message_encode))
         except Exception as e:
-            self.socket = None
-            print(e)
+            self.restart_connector()
+            print("Send Error", e)
 
     def _render_impl(
         self,
@@ -73,11 +109,12 @@ class AttachRenderer(Renderer):
         save_ply_path=None,
         **other_args,
     ):
+        self.socket = self.connector.socket
         if self.socket is None:
-            self.try_connect()
-            if self.socket is None:
-                time.sleep(1)
-                return
+            if self.connector.finished:
+                self.restart_connector()
+            res.message = "Waiting for connection"
+            return
 
         # slider = EasyDict(slider)
         fov_rad = fov / 360 * 2 * np.pi
