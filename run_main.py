@@ -34,7 +34,7 @@ from viz_renderer.attach_renderer import AttachRenderer
 
 
 class Visualizer(imgui_window.ImguiWindow):
-    def __init__(self, data_path, mode, host, port):
+    def __init__(self, data_path, mode, host, port, ggd_path=""):
         self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
@@ -54,9 +54,8 @@ class Visualizer(imgui_window.ImguiWindow):
         self._last_error_print = None
 
         self.widgets = []
-        self.mode = mode
         update_all_the_time = False
-        if self.mode == "default":
+        if mode == "default":
             self.widgets = [
                 load_widget_ply.LoadWidget(self, data_path),
                 cam_widget.CamWidget(self),
@@ -68,7 +67,7 @@ class Visualizer(imgui_window.ImguiWindow):
                 eval_widget.EvalWidget(self)
             ]
             renderer = GaussianRenderer()
-        elif self.mode == "decoder":
+        elif mode == "decoder":
             self.widgets = [
                 load_widget_pkl.LoadWidget(self, data_path),
                 cam_widget.CamWidget(self),
@@ -80,8 +79,12 @@ class Visualizer(imgui_window.ImguiWindow):
                 eval_widget.EvalWidget(self),
                 latent_widget.LatentWidget(self)
             ]
+            sys.path.append(ggd_path)
+            # sys.path.append(ggd_path + "/eg3d") # switch between EG3D and PanoHead
+            sys.path.append(ggd_path + "/PanoHead")
+            sys.path.append(ggd_path + "/main")
             renderer = GaussianDecoderRenderer()
-        elif self.mode == "attach":
+        elif mode == "attach":
             self.widgets = [
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
@@ -94,7 +97,7 @@ class Visualizer(imgui_window.ImguiWindow):
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
         else:
-            raise NotImplementedError(f"Mode '{self.mode}' not recognized.")
+            raise NotImplementedError(f"Mode '{mode}' not recognized.")
 
         self._async_renderer = AsyncRenderer(renderer, update_all_the_time)
         self._defer_rendering = 0
@@ -216,8 +219,9 @@ class Visualizer(imgui_window.ImguiWindow):
 @click.option("--mode", help="[default, decoder, attach]", default="default")
 @click.option("--host", help="host address", default="127.0.0.1")
 @click.option("--port", help="port", default=6009)
-def main(data_path, mode, host, port):
-    viz = Visualizer(data_path=data_path, mode=mode, host=host, port=port)
+@click.option("--ggd_path", help="path to Gaussian GAN Decoder project", default="", type=click.Path())
+def main(data_path, mode, host, port, ggd_path):
+    viz = Visualizer(data_path=data_path, mode=mode, host=host, port=port, ggd_path=ggd_path)
     while not viz.should_close():
         viz.draw_frame()
     viz.close()

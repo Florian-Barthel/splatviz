@@ -93,7 +93,7 @@ class EditWidget(Widget):
         language = edit.TextEditor.LanguageDefinition.python()
         custom_identifiers = {
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
-            "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
+            "gs": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
             "render_cam": edit.TextEditor.Identifier(m_declaration=get_description(CustomCam)),
             "render": edit.TextEditor.Identifier(
                 m_declaration=get_description(
