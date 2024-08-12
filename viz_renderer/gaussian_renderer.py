@@ -12,7 +12,7 @@ from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
-from viz.base_renderer import Renderer
+from viz_renderer.base_renderer import Renderer
 from viz_utils.dict import EasyDict
 
 
@@ -63,7 +63,7 @@ class GaussianRenderer(Renderer):
                 self._current_ply_file_paths[scene_index] = ply_file_path
 
             # Edit
-            gaussian: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
+            gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
             try:
                 exec(self.sanitize_command(edit_text))
             except Exception as e:
@@ -71,7 +71,7 @@ class GaussianRenderer(Renderer):
 
             # Render video
             if len(video_cams) > 0:
-                self.render_video("./_videos", video_cams, gaussian)
+                self.render_video("./_videos", video_cams, gs)
 
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
@@ -84,7 +84,7 @@ class GaussianRenderer(Renderer):
                 zfar=10,
                 extr=cam_params,
             )
-            render = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)
+            render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=self.bg_color)
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:
@@ -94,7 +94,7 @@ class GaussianRenderer(Renderer):
 
             # Save ply
             if save_ply_path is not None:
-                self.save_ply(gaussian, save_ply_path)
+                self.save_ply(gs, save_ply_path)
 
         self._return_image(
             images,
@@ -104,8 +104,8 @@ class GaussianRenderer(Renderer):
             highlight_border=highlight_border,
         )
 
-        res.mean_xyz = torch.mean(gaussian.get_xyz, dim=0)
-        res.std_xyz = torch.std(gaussian.get_xyz)
+        res.mean_xyz = torch.mean(gs.get_xyz, dim=0)
+        res.std_xyz = torch.std(gs.get_xyz)
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 

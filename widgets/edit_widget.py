@@ -8,7 +8,7 @@ from gui_utils import imgui_utils
 from gui_utils.easy_imgui import label
 from gui_utils.easy_json import load_json, save_json
 from scene.cameras import CustomCam
-from viz.gaussian_renderer import GaussianRenderer
+from viz_renderer.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
 from viz_utils.dict import EasyDict
 from widgets.widget import Widget
@@ -45,7 +45,7 @@ class Slider(object):
 
     def render(self, viz):
         _changed, self.value = imgui.slider_float(
-            f"##slider-{self._id}",
+            f"##slider-{self.key}-{self._id}",
             self.value,
             self.min_value,
             self.max_value,
@@ -93,7 +93,7 @@ class EditWidget(Widget):
         language = edit.TextEditor.LanguageDefinition.python()
         custom_identifiers = {
             "self": edit.TextEditor.Identifier(m_declaration=get_description(GaussianRenderer)),
-            "gaussian": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
+            "gs": edit.TextEditor.Identifier(m_declaration=get_description(GaussianModel)),
             "render_cam": edit.TextEditor.Identifier(m_declaration=get_description(CustomCam)),
             "render": edit.TextEditor.Identifier(
                 m_declaration=get_description(
@@ -172,7 +172,7 @@ class EditWidget(Widget):
             self.last_text = edit_text
 
         viz.args.edit_text = self.last_text
-        viz.args.update({slider.key: slider.value for slider in self.sliders})
+        viz.args.slider = {slider.key: slider.value for slider in self.sliders}
 
     def load_presets(self):
         if not os.path.exists(self.preset_path):

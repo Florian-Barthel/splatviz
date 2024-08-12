@@ -12,12 +12,12 @@
 import copy
 import multiprocessing
 
-from viz.render_utils import CapturedException
+from viz_renderer.render_utils import CapturedException
 from viz_utils.compare_dict import equal_dicts
 
 
 class AsyncRenderer:
-    def __init__(self, renderer):
+    def __init__(self, renderer, update_all_the_time):
         self.renderer = renderer
         self._closed = False
         self._is_async = False
@@ -30,6 +30,7 @@ class AsyncRenderer:
         self._process = None
         self._cur_multiplier = None
         self._cur_background = None
+        self.update_all_the_time = update_all_the_time
 
     def close(self):
         self._closed = True
@@ -50,7 +51,7 @@ class AsyncRenderer:
     def set_args(self, **args):
         assert not self._closed
         something_changed = not equal_dicts(args, self._cur_args)
-        if something_changed:
+        if something_changed or self.update_all_the_time:
             if self._is_async:
                 self._set_args_async(**args)
             else:

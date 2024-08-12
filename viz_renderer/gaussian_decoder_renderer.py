@@ -9,7 +9,7 @@ from tqdm import tqdm
 from gaussian_renderer import render_simple
 from scene import GaussianModel
 from scene.cameras import CustomCam
-from viz.base_renderer import Renderer
+from viz_renderer.base_renderer import Renderer
 from viz_utils.camera_utils import fov_to_intrinsics
 from viz_utils.dict import EasyDict
 
@@ -72,13 +72,13 @@ class GaussianDecoderRenderer(Renderer):
             self.last_z = z
             self.reload_model = False
 
-        gaussian = copy.deepcopy(self.gaussian_model)
+        gs = copy.deepcopy(self.gaussian_model)
         exec(self.sanitize_command(edit_text))
 
         if save_ply_path is not None:
-            self.save_ply(gaussian, save_ply_path)
+            self.save_ply(gs, save_ply_path)
 
-        img = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)["render"]
+        img = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=self.bg_color)["render"]
         if render_gan_image:
             gan_image = torch.nn.functional.interpolate(result.img, size=[img.shape[1], img.shape[2]])[0]
             img = torch.concat([img, gan_image], dim=2)

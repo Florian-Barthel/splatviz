@@ -1,6 +1,6 @@
 {
   "Default": {
-    "edit_text": "gaussian._xyz = gaussian._xyz\ngaussian._rotation = gaussian._rotation\ngaussian._scaling = gaussian._scaling\ngaussian._opacity = gaussian._opacity\ngaussian._features_dc = gaussian._features_dc\ngaussian._features_rest = gaussian._features_rest\nself.bg_color[:] = 0\n",
+    "edit_text": "gs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc\ngs._features_rest = gs._features_rest\n",
     "slider": [
       {
         "key": "x",
@@ -12,7 +12,7 @@
     ]
   },
   "Point Cloud": {
-    "edit_text": "gaussian._scaling = gaussian._scaling * 0 - slider.scaling\ngaussian._opacity = gaussian._opacity * 0 + 10\nself.bg_color[:] = 0\n",
+    "edit_text": "gs._scaling = gs._scaling * 0 - slider.scaling\ngs._opacity = gs._opacity * 0 + 10\n",
     "slider": [
       {
         "key": "scaling",
@@ -24,7 +24,7 @@
     ]
   },
   "Only SH": {
-    "edit_text": "gaussian._features_dc = gaussian._features_dc * slider.dc_scale\ngaussian._features_rest = gaussian._features_rest * slider.sh_scale\n",
+    "edit_text": "gs._features_dc = gs._features_dc * slider.dc_scale\ngs._features_rest = gs._features_rest * slider.sh_scale\n",
     "slider": [
       {
         "key": "dc_scale",
@@ -43,19 +43,19 @@
     ]
   },
   "Filter Opacity": {
-    "edit_text": "mask = torch.linalg.norm(gaussian._opacity, dim=-1) < slider.opacity\n\ngaussian._xyz = gaussian._xyz[mask]\ngaussian._rotation = gaussian._rotation[mask]\ngaussian._scaling = gaussian._scaling[mask]\ngaussian._opacity = gaussian._opacity[mask]\ngaussian._features_dc = gaussian._features_dc[mask]\ngaussian._features_rest = gaussian._features_rest[mask]\nself.bg_color[:] = 0\n",
+    "edit_text": "mask = torch.linalg.norm(gs._opacity, dim=-1) < slider.opacity\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
     "slider": [
       {
         "key": "opacity",
         "value": 10.0,
         "min_value": 0,
         "max_value": 20,
-        "_id": "c42c7910-fc95-4faf-aeeb-22b7ce6f217b"
+        "_id": "12364012634"
       }
     ]
   },
-  "Highlight Large Gaussians": {
-    "edit_text": "mask = torch.linalg.norm(gaussian._scaling, dim=-1) < slider.scaling\n\ncolor = [slider.r, slider.g ,slider.b]\ngaussian._features_dc[mask] = gaussian._features_dc[mask] * 0 + torch.tensor(color, device=\"cuda\")\nself.bg_color[:] = 1\n\n",
+  "Highlight Large gs": {
+    "edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ncolor = [slider.r, slider.g ,slider.b]\ngs._features_dc[mask] = gs._features_dc[mask] * 0 + torch.tensor(color, device=\"cuda\")\n\n",
     "slider": [
       {
         "key": "scaling",
@@ -69,38 +69,38 @@
         "value": 1.0,
         "min_value": -1,
         "max_value": 1,
-        "_id": "c42c7910-fc95-4faf-aeeb-22b7ce6f217b"
+        "_id": "610356120935721"
       },
       {
         "key": "g",
         "value": 0.0,
         "min_value": -1,
         "max_value": 1,
-        "_id": "c42c7910-fc95-4faf-aeeb-22b7ce6f217b"
+        "_id": "19161646843249846"
       },
       {
         "key": "b",
         "value": 0.0,
         "min_value": -1,
         "max_value": 1,
-        "_id": "c42c7910-fc95-4faf-aeeb-22b7ce6f217b"
+        "_id": "12+92+17+174+9174+5"
       }
     ]
   },
   "Sin(xyz)": {
-    "edit_text": "gaussian._xyz = torch.sin(gaussian._xyz/3+slider.x) + gaussian._xyz\n",
+    "edit_text": "gs._xyz = torch.sin(gs._xyz/3+slider.x) + gs._xyz\n",
     "slider": [
       {
         "key": "x",
         "value": 0.0,
         "min_value": -10,
         "max_value": 10,
-        "_id": "f18c9684-4be5-4d09-96a4-0c4d7655153e"
+        "_id": "28971294217951247"
       }
     ]
   },
   "Random Colors": {
-    "edit_text": "torch.manual_seed(0)\ngaussian._features_dc = torch.rand_like(gaussian._features_dc) * slider.intensity - slider.intensity / 2\ngaussian._features_rest = gaussian._features_rest * 0\n\n",
+    "edit_text": "torch.manual_seed(0)\ngs._features_dc = torch.rand_like(gs._features_dc) * slider.intensity - slider.intensity / 2\ngs._features_rest = gs._features_rest * 0\n\n",
     "slider": [
       {
         "key": "intensity",
@@ -112,33 +112,33 @@
     ]
   },
   "Recoloring": {
-    "edit_text": "selected_color = torch.tensor([slider.r, slider.g, slider.b], device=\"cuda\")\n\ngaussian._xyz = gaussian._xyz\ngaussian._rotation = gaussian._rotation\ngaussian._scaling = gaussian._scaling\ngaussian._opacity = gaussian._opacity\ngaussian._features_dc = gaussian._features_dc + selected_color\ngaussian._features_rest = gaussian._features_rest\nself.bg_color[:] = 0\n",
+    "edit_text": "selected_color = torch.tensor([slider.r, slider.g, slider.b], device=\"cuda\")\n\ngs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc + selected_color\ngs._features_rest = gs._features_rest\n",
     "slider": [
       {
         "key": "r",
         "value": 0.0,
         "min_value": -10,
         "max_value": 10,
-        "_id": "f18c9684-4be5-4d09-96a4-0c4d7655153e"
+        "_id": "9419751979747546"
       },
       {
         "key": "g",
         "value": 0.0,
         "min_value": -10,
         "max_value": 10,
-        "_id": "f18c9684-4be5-4d09-96a4-0c4d7655153e"
+        "_id": "52795+7+5+4959597"
       },
       {
         "key": "b",
         "value": 0.0,
         "min_value": -10,
         "max_value": 10,
-        "_id": "f18c9684-4be5-4d09-96a4-0c4d7655153e"
+        "_id": "47954795627648945"
       }
     ]
   },
-  "Filter Small Gaussians": {
-    "edit_text": "mask = torch.linalg.norm(gaussian._scaling, dim=-1) < slider.scaling\n\ngaussian._xyz = gaussian._xyz[mask]\ngaussian._rotation = gaussian._rotation[mask]\ngaussian._scaling = gaussian._scaling[mask]\ngaussian._opacity = gaussian._opacity[mask]\ngaussian._features_dc = gaussian._features_dc[mask]\ngaussian._features_rest = gaussian._features_rest[mask]\n",
+  "Filter Small gs": {
+    "edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
     "slider": [
       {
         "key": "scaling",
