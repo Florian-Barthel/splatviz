@@ -1,4 +1,6 @@
-from imgui_bundle import imgui
+import uuid
+
+from imgui_bundle import imgui, ImVec2
 from gui_utils import imgui_utils
 from gui_utils.easy_imgui import label
 from imgui_bundle import implot
@@ -14,25 +16,31 @@ class TrainingWidget(Widget):
         self.text = "gaussian"
         self.hist_cache = dict()
         self.use_cache_dict = dict()
-
         self.iterations = []
         self.plots = EasyDict(
             num_gaussians=dict(values=[], dtype=int),
             loss=dict(values=[], dtype=float),
             sh_degree=dict(values=[], dtype=int),
         )
-
-        self.pause_button_states = ["Resume Training", "Pause Training"]
-        self.do_training = True
+        self.stop_at_value = -1
+        self.stop_training = False
+        self.stop_from_renderer = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
 
         if show:
-            if imgui.button(self.pause_button_states[int(self.do_training)]):
-                self.do_training = not self.do_training
-        viz.args.do_training = self.do_training
+            if self.stop_training or self.stop_from_renderer:
+                if imgui.button("Resume Training", ImVec2(viz.label_w_large, 0)):
+                    self.stop_training = False
+                    if self.stop_from_renderer:
+                        self.stop_at_value = -1
+            else:
+                if imgui.button("Pause Training", ImVec2(viz.label_w_large, 0)):
+                    self.stop_training = True
+
+        viz.args.do_training = not self.stop_training
 
         if "training_stats" in viz.result.keys():
             stats = viz.result["training_stats"]
@@ -45,8 +53,19 @@ class TrainingWidget(Widget):
         self.plots.num_gaussians["values"].append(stats["num_gaussians"])
         self.plots.loss["values"].append(stats["loss"])
         self.plots.sh_degree["values"].append(stats["sh_degree"])
+        self.stop_from_renderer = stats["paused"]
 
         if show:
+            if self.stop_training or self.stop_from_renderer:
+                if imgui.button("Single Training Step", ImVec2(viz.label_w_large, 0)):
+                    viz.args.single_training_step = True
+                    self.stop_training = True
+
+            label(f"Current Iteration", viz.label_w_large)
+            imgui.text(str(stats['iteration']))
+            label("Pause Training at", viz.label_w_large)
+            _, self.stop_at_value = imgui.input_int("##stop_at", self.stop_at_value)
+
             for plot_name, plot_values in self.plots.items():
                 plot_size = imgui.ImVec2(viz.pane_w - 150, 200)
                 implot.set_next_axes_to_fit()
@@ -65,3 +84,4 @@ class TrainingWidget(Widget):
                     label(str(value), viz.label_w_large)
                     imgui.new_line()
 
+        viz.args.stop_at_value = self.stop_at_value

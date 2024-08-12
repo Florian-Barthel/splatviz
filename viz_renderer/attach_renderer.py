@@ -69,7 +69,6 @@ class AttachRenderer(Renderer):
                     print("Package loss")
                     break
 
-
             verify_len = self.socket.recv(4)
             verify_len = int.from_bytes(verify_len, "little")
             verify_data = self.socket.recv(verify_len)
@@ -104,6 +103,8 @@ class AttachRenderer(Renderer):
         resolution,
         cam_params,
         do_training,
+        stop_at_value=-1,
+        single_training_step=False,
         slider={},
         img_normalize=False,
         save_ply_path=None,
@@ -113,7 +114,7 @@ class AttachRenderer(Renderer):
         if self.socket is None:
             if self.connector.finished:
                 self.restart_connector()
-            res.message = "Waiting for connection"
+            res.message = f"Waiting for connection\n{self.host}:{self.port}"
             return
 
         # slider = EasyDict(slider)
@@ -150,13 +151,15 @@ class AttachRenderer(Renderer):
             "view_matrix": world_view_transform.cpu().numpy().flatten().tolist(),
             "view_projection_matrix": full_proj_transform.cpu().numpy().flatten().tolist(),
             "edit_text": self.sanitize_command(edit_text),
-            "slider": slider
+            "slider": slider,
+            "single_training_step": single_training_step,
+            "stop_at_value": stop_at_value
         }
         self.send(message)
         image, stats = self.read(resolution)
         if len(stats.keys()) > 0:
             res.training_stats = stats
-
+            res.error = res.training_stats["error"]
         self._return_image(
             image,
             res,

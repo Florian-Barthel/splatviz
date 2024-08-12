@@ -8,6 +8,10 @@ sys.path.append("./gaussian-splatting")
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
 
+from viz_renderer.async_renderer import AsyncRenderer
+from viz_renderer.gaussian_renderer import GaussianRenderer
+from viz_renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from viz_renderer.attach_renderer import AttachRenderer
 from gui_utils import imgui_window
 from gui_utils import imgui_utils
 from gui_utils import gl_utils
@@ -27,10 +31,6 @@ from widgets import (
     render_widget,
     training_widget
 )
-from viz_renderer.async_renderer import AsyncRenderer
-from viz_renderer.gaussian_renderer import GaussianRenderer
-from viz_renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
-from viz_renderer.attach_renderer import AttachRenderer
 
 
 class Visualizer(imgui_window.ImguiWindow):
@@ -89,7 +89,6 @@ class Visualizer(imgui_window.ImguiWindow):
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
                 video_widget.VideoWidget(self),
-                capture_widget.CaptureWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
                 training_widget.TrainingWidget(self)
@@ -210,12 +209,7 @@ class Visualizer(imgui_window.ImguiWindow):
 
 
 @click.command()
-@click.option(
-    "--data_path",
-    help="Where to search for .ply files",
-    metavar="PATH",
-    default="./sample_scenes",
-)
+@click.option("--data_path", help="root path for .ply files", metavar="PATH", default="./sample_scenes")
 @click.option("--mode", help="[default, decoder, attach]", default="default")
 @click.option("--host", help="host address", default="127.0.0.1")
 @click.option("--port", help="port", default=6009)
