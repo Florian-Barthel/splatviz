@@ -39,8 +39,19 @@ class SplatvizNetwork:
 
     def read(self):
         messageLength = self.conn.recv(4)
-        messageLength = int.from_bytes(messageLength, 'little')
-        message = self.conn.recv(messageLength)
+        expected_bytes = int.from_bytes(messageLength, 'little')
+
+        current_bytes = 0
+        try_counter = 10
+        counter = 0
+        message = bytes()
+        while current_bytes < expected_bytes:
+            message += self.conn.recv(expected_bytes - current_bytes)
+            current_bytes = len(message)
+            counter += 1
+            if counter > try_counter:
+                print("Package loss")
+                break
         return json.loads(message.decode("utf-8"))
 
     def send(self, message_bytes, training_stats):

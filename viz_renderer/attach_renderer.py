@@ -58,7 +58,7 @@ class AttachRenderer(Renderer):
         try:
             current_bytes = 0
             expected_bytes = resolution * resolution * 3
-            try_counter = 3
+            try_counter = 10
             counter = 0
             message = bytes()
             while current_bytes < expected_bytes:
