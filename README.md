@@ -292,10 +292,10 @@ while, after saving a ply file.
 - 2024-08-05: Allow editing of existing sliders
 - 2024-07-30: Store slider values in presets
 - 2024-07-28: New Performance Widget
+- 2024-07-28: Editor now highlights special variables (gs, self, slider) and gives tooltips
 
 **_Version 1.0.0_**
 
-- 2024-07-28: Editor now highlights special variables (gs, self, slider) and gives tooltips
 - 2024-07-12: Rebuild the whole application with imgui_bundle
 - 2024-07-05: Compare two or more Gaussian Splatting scenes side by side
 
