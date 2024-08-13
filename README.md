@@ -280,12 +280,6 @@ while, after saving a ply file.
 </details>
 </div>
 
-## Future Plans
-
-- Test other 3DGS render for OSX support
-- Improve the Video Widget
-- Tutorial for coding new widgets or renderer
-
 ## ⭐ Recent Features
 
 **_Version 1.1.0_**
@@ -303,6 +297,12 @@ while, after saving a ply file.
 - 2024-07-28: Editor now highlights special variables (gs, self, slider) and gives tooltips
 - 2024-07-12: Rebuild the whole application with imgui_bundle
 - 2024-07-05: Compare two or more Gaussian Splatting scenes side by side
+
+## 🔭 Future Plans
+
+- Test other 3DGS render for OSX support
+- Improve the Video Widget
+- Tutorial for coding new widgets or renderer
 
 ## Contribute
 
