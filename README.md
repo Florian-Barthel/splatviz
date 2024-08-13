@@ -47,7 +47,8 @@ git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 Create conda environment with <b>conda</b>:
 
 ```bash
-conda env create -f environment.yml
+conda env create \
+-f environment.yml
 
 conda activate gs-view
 ```
