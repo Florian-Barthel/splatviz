@@ -48,6 +48,7 @@ Create conda environment with <b>conda</b>:
 
 ```bash
 conda env create -f environment.yml
+
 conda activate gs-view
 ```
 </td>
@@ -55,7 +56,9 @@ conda activate gs-view
 Alternatively, create the environment with <b>micromamba</b>:
 
 ```bash
-micromamba env create --file environment.yml --channel-priority flexible -y
+micromamba env create --file environment.yml \
+--channel-priority flexible -y
+
 micromamba activate gs-view
 ```
 </td>
@@ -114,7 +117,9 @@ this <a href="https://github.com/fraunhoferhhi/gaussian_gan_decoder/blob/main/RE
 <td>
 
 ```bash
-python run_main.py --mode=decoder --data_path=path/with/pkl/files 
+python run_main.py \
+--mode=decoder \
+--data_path=path/with/pkl/files \
 --ggd_path=path/to/gaussian_gan_decoder/project
 ```
 </td>
