@@ -56,7 +56,8 @@ conda activate gs-view
 Alternatively, create the environment with <b>micromamba</b>:
 
 ```bash
-micromamba env create --file environment.yml \
+micromamba env create \
+--file environment.yml \
 --channel-priority flexible -y
 
 micromamba activate gs-view
