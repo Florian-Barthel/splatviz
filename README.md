@@ -36,6 +36,9 @@ git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 ```
 </td>
 </tr>
+
+<tr></tr>
+
 <tr>
 <th>
 2. Install
@@ -67,6 +70,8 @@ micromamba activate gs-view
 <th>Mode</th><th>Description</th><th>Command</th>
 </tr>
 
+<tr></tr>
+
 <tr>
 <td>Default Mode</td>
 <td>The default mode loads and renders standard 3DGS scenes stored in ply files or compressed yml files.</td>
@@ -84,6 +89,7 @@ python run_main.py --data_path=path/with/ply/files
 </td>
 </tr>
 
+<tr></tr>
 
 <tr>
 <td>Attach to Training</td>
@@ -99,6 +105,7 @@ python run_main.py --mode=attach
 </td>
 </tr>
 
+<tr></tr>
 
 <tr>
 <td>Decoder Mode</td>
