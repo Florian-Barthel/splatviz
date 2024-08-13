@@ -331,16 +331,12 @@ If you find this viewer useful, please consider citing our work:
 This viewer is inspired by the visualizer from Efficient Geometry-aware 3D Generative Adversarial
 Networks (EG3D).
 
-GUI: <a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a> and
+- GUI: <a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a> and
 <a href="https://github.com/pthom/imgui_bundle">imgui_bundle</a> which are python wrappers for the c++ library
 <a href="https://github.com/ocornut/imgui">ImGUI</a>
-
-Original code base: <a href="https://github.com/NVlabs/eg3d">EG3D</a>
-
-3DGS: <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"> 3D Gaussian Splatting</a>
-
-Compressing 3DGS scenes: <a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">Compact 3D Scene
+- Original code base: <a href="https://github.com/NVlabs/eg3d">EG3D</a>
+- 3DGS: <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"> 3D Gaussian Splatting</a>
+- Compressing 3DGS scenes: <a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">Compact 3D Scene
 Representation via Self-Organizing Gaussian Grids</a>
-
-3DGS Rasterizer with depth and alpha: <a href="https://github.com/slothfulxtx/diff-gaussian-rasterization">Diff
+- 3DGS Rasterizer with depth and alpha: <a href="https://github.com/slothfulxtx/diff-gaussian-rasterization">Diff
 rasterizer with depth and alpha</a>
