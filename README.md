@@ -17,6 +17,10 @@ of the current scene and even videos of a 360° rotation around the scene.
 
 See some example editings in this  <a href="https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel">
 video</a>.
+
+**NEW UPDATE:** splatviz now supports live tracking of a running 3DGS training: <a href="https://www.youtube.com/watch?v=lnMB83wnfvE">
+video</a>.
+
 </div>
 <div align="center">
   <img src="images/teaser.png" width="650">
