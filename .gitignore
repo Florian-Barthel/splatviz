@@ -13,3 +13,4 @@ sample_scenes
 *.obj
 *.npz
 *.pdf
+*.code-workspace
