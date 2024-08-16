@@ -29,7 +29,8 @@ from widgets import (
     capture_widget,
     latent_widget,
     render_widget,
-    training_widget
+    training_widget,
+    compression_widget
 )
 
 
@@ -64,7 +65,8 @@ class Visualizer(imgui_window.ImguiWindow):
                 capture_widget.CaptureWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
-                eval_widget.EvalWidget(self)
+                eval_widget.EvalWidget(self),
+                compression_widget.CompressionWidget(self),
             ]
             renderer = GaussianRenderer()
         elif mode == "decoder":
@@ -91,7 +93,8 @@ class Visualizer(imgui_window.ImguiWindow):
                 video_widget.VideoWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
-                training_widget.TrainingWidget(self)
+                training_widget.TrainingWidget(self),
+                compression_widget.CompressionWidget(self),
             ]
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
