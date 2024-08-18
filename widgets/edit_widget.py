@@ -4,13 +4,13 @@ import uuid
 from imgui_bundle import imgui, imgui_color_text_edit as edit
 import inspect
 
-from gui_utils import imgui_utils
-from gui_utils.easy_imgui import label
-from gui_utils.easy_json import load_json, save_json
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
+from splatviz_utils.gui_utils.easy_json import load_json, save_json
+from splatviz_utils.dict_utils import EasyDict
 from scene.cameras import CustomCam
-from viz_renderer.gaussian_renderer import GaussianRenderer
+from renderer.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
-from viz_utils.dict import EasyDict
 from widgets.widget import Widget
 
 default_preset = """gaussian._xyz = gaussian._xyz

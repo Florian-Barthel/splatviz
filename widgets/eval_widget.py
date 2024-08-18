@@ -3,10 +3,10 @@ import numpy as np
 import torch
 import pprint
 
-from gui_utils import imgui_utils
-from gui_utils.easy_imgui import label
-from viz_utils.dict import EasyDict
-from gui_utils import style
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
+from splatviz_utils.gui_utils import style
+from splatviz_utils.dict_utils import EasyDict
 from widgets.widget import Widget
 
 

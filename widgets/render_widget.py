@@ -1,7 +1,7 @@
-from gui_utils import imgui_utils
 from imgui_bundle import imgui
 
-from gui_utils.easy_imgui import label
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
 from widgets.widget import Widget
 
 

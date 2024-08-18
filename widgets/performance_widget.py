@@ -1,13 +1,13 @@
 from threading import Thread
 import numpy as np
 from imgui_bundle import imgui
-from gui_utils import imgui_utils
 import torch
 import GPUtil
 import time
 from imgui_bundle import implot
 
-from gui_utils.easy_imgui import label
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
 from widgets.widget import Widget
 
 

@@ -1,13 +1,11 @@
-import uuid
-
 from imgui_bundle import imgui, ImVec2
-from gui_utils import imgui_utils
-from gui_utils.easy_imgui import label
 from imgui_bundle import implot
-
-from viz_utils.dict import EasyDict
-from widgets.widget import Widget
 import numpy as np
+
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
+from splatviz_utils.dict_utils import EasyDict
+from widgets.widget import Widget
 
 
 class TrainingWidget(Widget):

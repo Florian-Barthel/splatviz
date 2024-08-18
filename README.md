@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1><img src="images/icon.png" width="35"> splatviz</h1>
+  <h1><img src="resources/images/icon.png" width="35"> splatviz</h1>
 
 ![GitHub top language](https://img.shields.io/github/languages/top/Florian-barthel/splatviz) ![GitHub Release](https://img.shields.io/github/v/release/Florian-Barthel/splatviz) ![GitHub last commit](https://img.shields.io/github/last-commit/Florian-Barthel/splatviz) ![Static Badge](https://img.shields.io/badge/Platform-Linux-green) ![Static Badge](https://img.shields.io/badge/Platform-Windows-green)
 
@@ -23,7 +23,7 @@ video</a>.
 
 </div>
 <div align="center">
-  <img src="images/teaser.png" width="650">
+  <img src="resources/images/teaser.png" width="650">
 </div>
 
 ## Install
@@ -157,7 +157,7 @@ scenes [here](https://drive.google.com/drive/folders/1RNMis5ibSrl2a87ZX614ZPsHKa
 They were created using the gaussian splatting compression method
 from: https://fraunhoferhhi.github.io/Self-Organizing-Gaussians.
 
-<img src="images/load.png">
+<img src="resources/images/load.png">
 </details>
 
 
@@ -198,7 +198,7 @@ gaussian._features_rest = gaussian._features_rest[mask]
 Lastly, you can save and load presets of code snippets so that you don't have to type the same code again after
 closing the application. Those presets are stored in a .json file (presets.json).
 
-<img src="images/edit.png">
+<img src="resources/images/edit.png">
 </details>
 
 <details close>
@@ -215,7 +215,7 @@ from the rendering context and visualize them in a histogram. Some useful variab
 
 You can also access variables that you have defined in the editor of the Edit Widget.
 
-<img src="images/eval.png">
+<img src="resources/images/eval.png">
 </details>
 
 
@@ -236,7 +236,7 @@ looking straight up or down. Then set the up-vector to the current viewing direc
 **.
 If you were looking down, you will have to press the **Flip** button, since the scene is now upside down.
 
-<img src="images/camera.png">
+<img src="resources/images/camera.png">
 </details>
 
 
@@ -250,7 +250,7 @@ rendering, the UI is frozen. A loading screen is shown in the terminal output.
 🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
 position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
 
-<img src="images/video.png">
+<img src="resources/images/video.png">
 </details>
 
 
@@ -260,7 +260,7 @@ In the performance widget, you can track the FPS of the viewer and the FPS of th
 limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
 skips some editing and evaluation calculations.
 
-<img src="images/performance.png">
+<img src="resources/images/performance.png">
 </details>
 
 
@@ -271,7 +271,7 @@ In the render tab, you can specify the rendering resolution (at the moment only 
 mode.
 Next to RGB, you can also render the image 3D depth and the alpha values.
 
-<img src="images/render.png">
+<img src="resources/images/render.png">
 </details>
 
 
@@ -282,7 +282,7 @@ To save the .ply file or a rendering of the current (edited) 3D scene press the 
 save widget. Those files will be saved under _screenshots or _ply_files. The viewer might be frozen for a short
 while, after saving a ply file.
 
-<img src="images/save.png">
+<img src="resources/images/save.png">
 </details>
 </div>
 

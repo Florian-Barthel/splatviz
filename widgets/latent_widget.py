@@ -1,7 +1,8 @@
 from imgui_bundle import imgui
-from gui_utils import imgui_utils
-from gui_utils.easy_imgui import label
-from viz_utils.dict import EasyDict
+
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
+from splatviz_utils.dict_utils import EasyDict
 from widgets.widget import Widget
 
 

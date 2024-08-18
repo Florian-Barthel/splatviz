@@ -1,11 +1,11 @@
 from imgui_bundle import imgui
-from gui_utils.easy_imgui import label, slider, checkbox
 import torch
 import numpy as np
 
-from gui_utils import imgui_utils
-from viz_utils.dict import EasyDict
-from viz_utils.camera_utils import (
+from splatviz_utils.gui_utils.easy_imgui import label, slider, checkbox
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.dict_utils import EasyDict
+from splatviz_utils.cam_utils import (
     get_forward_vector,
     create_cam2world_matrix,
     get_origin,

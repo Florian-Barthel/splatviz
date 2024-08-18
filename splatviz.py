@@ -7,16 +7,16 @@ sys.path.append("./gaussian-splatting")
 torch.set_printoptions(precision=2, sci_mode=False)
 np.set_printoptions(precision=2)
 
-from viz_renderer.renderer_wrapper import RendererWrapper
-from viz_renderer.gaussian_renderer import GaussianRenderer
-from viz_renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
-from viz_renderer.attach_renderer import AttachRenderer
-from gui_utils import imgui_window
-from gui_utils import imgui_utils
-from gui_utils import gl_utils
-from gui_utils import text_utils
-from gui_utils.constants import *
-from viz_utils.dict import EasyDict
+from renderer.renderer_wrapper import RendererWrapper
+from renderer.gaussian_renderer import GaussianRenderer
+from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from renderer.attach_renderer import AttachRenderer
+from splatviz_utils.gui_utils import imgui_window
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils import gl_utils
+from splatviz_utils.gui_utils import text_utils
+from splatviz_utils.gui_utils.constants import *
+from splatviz_utils.dict_utils import EasyDict
 from widgets import (
     edit_widget,
     eval_widget,
@@ -34,8 +34,8 @@ from widgets import (
 
 class Splatviz(imgui_window.ImguiWindow):
     def __init__(self, data_path, mode, host, port, ggd_path=""):
-        self.code_font_path = "fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
-        self.regular_font_path = "fonts/source_sans_pro/SourceSansPro-Regular.otf"
+        self.code_font_path = "resources/fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
+        self.regular_font_path = "resources/fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
         super().__init__(
             title="splatviz",
@@ -119,7 +119,7 @@ class Splatviz(imgui_window.ImguiWindow):
     def print_error(self, error):
         error = str(error)
         if error != self._last_error_print:
-            print("\n" + error + "\n")
+            print(f"\n{error}\n")
             self._last_error_print = error
 
     def _adjust_font_size(self):

@@ -1,11 +1,11 @@
 from imgui_bundle import imgui
 import numpy as np
 
-from gui_utils import imgui_utils
-from gui_utils.easy_imgui import label
-from scene.cameras import CustomCam
-from viz_utils.camera_utils import LookAtPoseSampler
+from splatviz_utils.gui_utils import imgui_utils
+from splatviz_utils.gui_utils.easy_imgui import label
+from splatviz_utils.cam_utils import LookAtPoseSampler
 from widgets.widget import Widget
+from scene.cameras import CustomCam
 
 
 class VideoWidget(Widget):
