@@ -18,7 +18,7 @@ class RenderWidget(Widget):
         viz = self.viz
         if show:
             label("Resolution", viz.label_w)
-            _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 128)
+            _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
 
             label("Render Alpha", viz.label_w)
             alpha_changed, self.render_alpha = imgui.checkbox("##RenderAlpha", self.render_alpha)

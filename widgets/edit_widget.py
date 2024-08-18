@@ -153,7 +153,7 @@ class EditWidget(Widget):
                 self.editor.render("Python Edit Code", a_size=imgui.ImVec2(viz.pane_w - 50, editor_height))
 
             imgui.new_line()
-            label("Preset Name", viz.pane_w)
+            label("Preset Name")
             _, self._cur_preset_name = imgui.input_text("##preset_name", self._cur_preset_name)
             imgui.same_line()
             if imgui_utils.button("Save as Preset", width=self.viz.button_large_w):
