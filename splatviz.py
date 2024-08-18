@@ -1,7 +1,10 @@
+import PIL.Image
 from imgui_bundle import imgui
+from imgui_bundle import immvision
 import numpy as np
 import torch
 import sys
+import moderngl
 
 sys.path.append("./gaussian-splatting")
 torch.set_printoptions(precision=2, sci_mode=False)
@@ -101,6 +104,7 @@ class Splatviz(imgui_window.ImguiWindow):
         self._tex_img = None
         self._tex_obj = None
         self.eval_result = ""
+        self._cur_img = None
 
         # Widget interface.
         self.args = EasyDict()
@@ -165,6 +169,23 @@ class Splatviz(imgui_window.ImguiWindow):
                 self.result = result
 
         # Display
+        use_immvision = False
+        if use_immvision:
+            self.draw_img_immvision()
+        else:
+            self.draw_img_ogl()
+
+        if "eval" in self.result:
+            self.eval_result = self.result.eval
+        else:
+            self.eval_result = None
+
+        # End frame.
+        self._adjust_font_size()
+        imgui.end()
+        self.end_frame()
+
+    def draw_img_ogl(self):
         max_w = self.content_width - self.pane_w
         max_h = self.content_height
         pos = np.array([self.pane_w + max_w / 2, max_h / 2])
@@ -175,6 +196,9 @@ class Splatviz(imgui_window.ImguiWindow):
                     self._tex_obj = gl_utils.Texture(image=self._tex_img, bilinear=False, mipmap=False)
                 else:
                     self._tex_obj.update(self._tex_img)
+
+            self._tex_obj.width = max(self._tex_obj.width, 1)
+            self._tex_obj.height = max(self._tex_obj.height, 1)
             zoom = min(max_w / self._tex_obj.width, max_h / self._tex_obj.height)
             self._tex_obj.draw(pos=pos, zoom=zoom, align=0.5, rint=True)
         if "error" in self.result:
@@ -190,12 +214,29 @@ class Splatviz(imgui_window.ImguiWindow):
                 outline=2,
             )
             tex.draw(pos=pos, align=0.5, rint=True, color=1)
-        if "eval" in self.result:
-            self.eval_result = self.result.eval
-        else:
-            self.eval_result = None
 
-        # End frame.
-        self._adjust_font_size()
+    def draw_img_immvision(self):
         imgui.end()
-        self.end_frame()
+        max_w = self.content_width - self.pane_w
+        imgui.set_next_window_pos(imgui.ImVec2(self.pane_w, 0))
+        imgui.set_next_window_size(imgui.ImVec2(max_w, self.content_height))
+        control_pane_flags = WINDOW_NO_TITLE_BAR | WINDOW_NO_RESIZE | WINDOW_NO_MOVE
+        imgui.begin("##image_pane", p_open=True, flags=control_pane_flags)
+        if "image" in self.result:
+            if self._cur_img is not self.result.image:
+                self._cur_img = self.result.image
+                immvision.image_display(
+                    "##Original",
+                    self.result.image,
+                    image_display_size=(self.content_height, self.content_height),
+                    refresh_image=True,
+                    is_bgr_or_bgra=False,
+                )
+            else:
+                immvision.image_display(
+                    "##Original",
+                    self.result.image,
+                    image_display_size=(self.content_height, self.content_height),
+                    refresh_image=False,
+                    is_bgr_or_bgra=False,
+                )
