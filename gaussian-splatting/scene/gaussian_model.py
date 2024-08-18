@@ -274,6 +274,10 @@ class GaussianModel:
 
         if len(extra_f_names) == 0:
             self.max_sh_degree = 0
+        if len(extra_f_names) == 9:
+            self.max_sh_degree = 1
+        if len(extra_f_names) == 24:
+            self.max_sh_degree = 2
         if len(extra_f_names) == 45:
             self.max_sh_degree = 3
         assert len(extra_f_names)==3*(self.max_sh_degree + 1) ** 2 - 3
