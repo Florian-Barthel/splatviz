@@ -45,7 +45,8 @@ class GaussianDecoderRenderer(Renderer):
         latent_y=0.0,
         render_gan_image=False,
         save_ply_path=None,
-        **slider,
+        slider={},
+        **other_args
     ):
         slider = EasyDict(slider)
         self.load_decoder(ply_file_paths[0])

@@ -1,5 +1,6 @@
 import copy
 import os
+import traceback
 from typing import List
 import imageio
 import numpy as np
@@ -42,8 +43,10 @@ class GaussianRenderer(Renderer):
         use_splitscreen=False,
         highlight_border=False,
         save_ply_path=None,
-        **slider,
+        slider={},
+        **other_args
     ):
+        cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
         if len(ply_file_paths) == 0:
             res.error = "Select a .ply file"
@@ -67,7 +70,9 @@ class GaussianRenderer(Renderer):
             try:
                 exec(self.sanitize_command(edit_text))
             except Exception as e:
-                res.error = e
+                error = traceback.format_exc()
+                error += str(e)
+                res.error = error
 
             # Render video
             if len(video_cams) > 0:
