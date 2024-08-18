@@ -1,9 +1,8 @@
-from compression.codec import Codec
-
 import imagecodecs
+from compression.codecs.base_codec import BaseCodec
 
 
-class JpegXlCodec(Codec):
+class JpegXlCodec(BaseCodec):
 
     def encode_image(self, image, out_file, **kwargs):
         imagecodecs.imwrite(out_file, image, **kwargs)

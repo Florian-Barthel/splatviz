@@ -48,6 +48,7 @@ class GaussianDecoderRenderer(Renderer):
         slider={},
         **other_args
     ):
+        cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
         self.load_decoder(ply_file_paths[0])
 

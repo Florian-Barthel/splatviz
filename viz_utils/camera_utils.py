@@ -24,22 +24,21 @@ class LookAtPoseSampler:
         radius,
         up_vector,
         forward_vector=None,
-        device=torch.device("cuda"),
     ):
         camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector)
         if forward_vector is None:
             forward_vector = get_forward_vector(
                 lookat_position, horizontal_mean, vertical_mean, radius, up_vector, camera_origins
             )
-        return create_cam2world_matrix(forward_vector, camera_origins, up_vector).to(device)
+        return create_cam2world_matrix(forward_vector, camera_origins, up_vector)
 
 
-def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector, device=torch.device("cuda")):
+def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector):
     h = torch.tensor(horizontal_mean)
     v = torch.tensor(vertical_mean)
     v = torch.clamp(v, 1e-5, math.pi - 1e-5)
 
-    camera_origins = torch.zeros(3, device=device)
+    camera_origins = torch.zeros(3)
     camera_origins[0] = radius * torch.sin(v) * torch.cos(math.pi - h)
     camera_origins[2] = radius * torch.sin(v) * torch.sin(math.pi - h)
     camera_origins[1] = radius * torch.cos(v)
@@ -54,7 +53,7 @@ def rotate_coordinates(coordinates, vector):
         return coordinates
     unit_vector = normalize_vecs(vector)
 
-    base_vector = torch.tensor([0, -1, 0.0], device=coordinates.device)
+    base_vector = torch.tensor([0.0, -1.0, 0.0], device=coordinates.device)
     theta = torch.arccos(torch.dot(unit_vector, base_vector))  # Angle of rotation
     if theta == 0:
         rotation_matrix = torch.eye(3, device=coordinates.device)

@@ -1,12 +1,12 @@
 import os
 import re
+import traceback
 import PIL
 from imgui_bundle import imgui
 import numpy as np
 
 from gui_utils.easy_imgui import label
 from gui_utils import imgui_utils
-from viz_renderer.render_utils import CapturedException
 from widgets.widget import Widget
 
 
@@ -51,5 +51,6 @@ class CaptureWidget(Widget):
             else:
                 pil_image = PIL.Image.fromarray(image, "RGB")
             pil_image.save(os.path.join(self.path, f"{file_id:05d}.png"))
-        except:
-            viz.result.error = CapturedException()
+        except Exception as e:
+            viz.result.error = traceback.format_exception(e)
+            viz.result.error += str(e)

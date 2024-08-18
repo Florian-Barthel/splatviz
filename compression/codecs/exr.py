@@ -1,6 +1,5 @@
-from compression.codec import Codec
-
 import os
+from compression.codecs.base_codec import BaseCodec
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
 
@@ -12,7 +11,7 @@ import cv2
 # compression: ["none", "rle", "zps", "zip", "piz", "pxr24", "b4a", "b44", "dwaa", "dwab"]
 
 
-class EXRCodec(Codec):
+class EXRCodec(BaseCodec):
 
     def encode_image(self, image, out_file, type="half", compression="none"):
 

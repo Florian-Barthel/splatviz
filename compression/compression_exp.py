@@ -5,10 +5,10 @@ from scene import GaussianModel
 import yaml
 import pandas as pd
 
-from compression.jpeg_xl import JpegXlCodec
-from compression.npz import NpzCodec
-from compression.exr import EXRCodec
-from compression.png import PNGCodec
+from compression.codecs.jpeg_xl import JpegXlCodec
+from compression.codecs.npz import NpzCodec
+from compression.codecs.exr import EXRCodec
+from compression.codecs.png import PNGCodec
 
 codecs = {
     "jpeg-xl": JpegXlCodec,
@@ -55,9 +55,11 @@ def run_single_decompression(compressed_dir):
     with open(os.path.join(compressed_dir, "compression_config.yml"), "r") as stream:
         experiment_config = yaml.safe_load(stream)
     disable_xyz_log_activation = experiment_config.get("disable_xyz_log_activation")
-    # disable_xyz_log_activation = True if disable_xyz_log_activation is None else disable_xyz_log_activation
+    if disable_xyz_log_activation is None:
+        disable_xyz_log_activation = True
     decompressed_gaussians = GaussianModel(experiment_config["max_sh_degree"], disable_xyz_log_activation)
     decompressed_gaussians.active_sh_degree = experiment_config["active_sh_degree"]
+
     for attribute in experiment_config["attributes"]:
         attr_name = attribute["name"]
         # compressed_bytes = compressed_attrs[attr_name]

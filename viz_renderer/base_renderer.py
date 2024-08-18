@@ -1,9 +1,8 @@
 import re
-from typing import List
+import traceback
 import torch
 import torch.nn
 
-from viz_renderer.render_utils import CapturedException
 from viz_utils.dict import EasyDict
 
 
@@ -14,8 +13,6 @@ class Renderer:
         self._is_timing = False
         self._start_event = torch.cuda.Event(enable_timing=True)
         self._end_event = torch.cuda.Event(enable_timing=True)
-        self._net_layers = dict()
-        self._last_model_input = None
 
     def render(self, **args):
         self._is_timing = True
@@ -24,13 +21,14 @@ class Renderer:
         try:
             with torch.no_grad():
                 self._render_impl(res, **args)
-        except:
-            res.error = CapturedException()
+        except Exception as e:
+            res.error = "".join(traceback.format_exception(e))
+            res.error += str(e)
         self._end_event.record(torch.cuda.current_stream(self._device))
         if "image" in res:
-            res.image = self.to_cpu(res.image).detach().numpy()
+            res.image = res.image.cpu().detach().numpy()
         if "stats" in res:
-            res.stats = self.to_cpu(res.stats).detach().numpy()
+            res.stats = res.stats.cpu().detach().numpy()
         if "error" in res:
             res.error = str(res.error)
         if self._is_timing:
@@ -39,20 +37,6 @@ class Renderer:
             self._is_timing = False
         return res
 
-    def _get_pinned_buf(self, ref):
-        key = (tuple(ref.shape), ref.dtype)
-        buf = self._pinned_bufs.get(key, None)
-        if buf is None:
-            buf = torch.empty(ref.shape, dtype=ref.dtype).pin_memory()
-            self._pinned_bufs[key] = buf
-        return buf
-
-    def to_device(self, buf):
-        return self._get_pinned_buf(buf).copy_(buf).to(self._device)
-
-    def to_cpu(self, buf):
-        return self._get_pinned_buf(buf).copy_(buf).clone()
-
     @staticmethod
     def sanitize_command(edit_text):
         command = re.sub(";+", ";", edit_text.replace("\n", ";"))
@@ -60,22 +44,7 @@ class Renderer:
             command = command[1:]
         return command
 
-    def _render_impl(
-        self,
-        res,
-        fov,
-        edit_text,
-        eval_text,
-        size,
-        ply_file_path,
-        cam_params,
-        current_ply_names,
-        video_cams=[],
-        render_depth=False,
-        render_alpha=False,
-        img_normalize=False,
-        **slider,
-    ):
+    def _render_impl(self, **args):
         raise NotImplementedError
 
     def _load_model(self, path):

@@ -9,7 +9,6 @@ import torch.nn
 
 from scene.cameras import CustomCam
 from viz_renderer.base_renderer import Renderer
-from viz_utils.dict import EasyDict
 
 
 class AsyncConnector(Thread):
@@ -78,7 +77,7 @@ class AttachRenderer(Renderer):
                 verify_dict = {}
 
             image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
-            image = torch.from_numpy(image) / 255.0
+            image = torch.from_numpy(np.array(image)) / 255.0
             image = image.permute(2, 0, 1)
             return image, verify_dict
         except Exception as e:
@@ -110,6 +109,7 @@ class AttachRenderer(Renderer):
         save_ply_path=None,
         **other_args,
     ):
+        cam_params = cam_params.to("cuda")
         self.socket = self.connector.socket
         if self.socket is None:
             if self.connector.finished:

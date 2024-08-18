@@ -43,10 +43,10 @@ class VideoWidget(Widget):
                     extrinsic = LookAtPoseSampler.sample(
                         horizontal_mean=x,
                         vertical_mean=np.pi / 2 + self.cam_height,
-                        lookat_position=self.viz.cam_widget.lookat_point,
+                        lookat_position=self.viz.args.lookat_point,
                         radius=self.radius,
-                        up_vector=self.viz.cam_widget.up_vector,
-                    )[0]
+                        up_vector=self.viz.args.up_vector,
+                    )
                     viz.args.video_cams.append(
                         CustomCam(
                             width=self.resolution,
@@ -55,6 +55,6 @@ class VideoWidget(Widget):
                             fovx=self.fov / 360 * 2 * np.pi,
                             znear=0.01,
                             zfar=100,
-                            extr=extrinsic,
+                            extr=extrinsic[0].to("cuda"),
                         )
                     )

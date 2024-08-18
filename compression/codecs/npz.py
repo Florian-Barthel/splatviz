@@ -1,9 +1,8 @@
-from compression.codec import Codec
-
 import numpy as np
+from compression.codecs.base_codec import BaseCodec
 
 
-class NpzCodec(Codec):
+class NpzCodec(BaseCodec):
 
     def encode_image(self, image, out_file, **kwargs):
         return np.savez_compressed(out_file, image, **kwargs)

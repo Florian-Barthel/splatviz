@@ -32,7 +32,7 @@ max_thresholds = {
 }
 
 
-class Codec(ABC):
+class BaseCodec(ABC):
 
     def encode_image(self, image, out_file, **kwargs):
         raise NotImplementedError("Subclasses should implement this!")

@@ -19,10 +19,10 @@ class CamWidget(Widget):
         super().__init__(viz, "Camera")
         self.fov = 45
         self.radius = 3
-        self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
-        self.cam_pos = torch.tensor([0.0, 0.0, 1.0], device="cuda")
-        self.up_vector = torch.tensor([0.0, -1.0, 0.0], device="cuda")
-        self.forward = torch.tensor([0.0, 0.0, -1.0], device="cuda")
+        self.lookat_point = torch.tensor((0.0, 0.0, 0.0))
+        self.cam_pos = torch.tensor([0.0, 0.0, 1.0])
+        self.up_vector = torch.tensor([0.0, -1.0, 0.0])
+        self.forward = torch.tensor([0.0, 0.0, -1.0])
 
         # controls
         self.pose = EasyDict(yaw=0, pitch=0)
@@ -62,7 +62,7 @@ class CamWidget(Widget):
             label("Up Vector", viz.label_w)
             _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
             if _changed:
-                self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
+                self.up_vector = torch.tensor(up_vector_tuple)
 
             imgui.same_line()
             if imgui_utils.button("Set current direction", width=viz.button_large_w):
@@ -87,7 +87,7 @@ class CamWidget(Widget):
 
                 label("Look at Point", viz.label_w)
                 _, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
-                self.lookat_point = torch.tensor(look_at_point_tuple, device=torch.device("cuda"))
+                self.lookat_point = torch.tensor(look_at_point_tuple)
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
                     self.lookat_point = viz.result.mean_xyz
@@ -98,11 +98,15 @@ class CamWidget(Widget):
             label("Invert Y", viz.label_w)
             self.invert_y = checkbox(self.invert_y, "invert_y")
 
-        self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector).to("cuda")[0]
+        self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector)[0]
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
         viz.args.fov = self.fov
         viz.args.cam_params = self.cam_params
+
+        # params for the video widget
+        viz.args.lookat_point = self.lookat_point
+        viz.args.up_vector = self.up_vector
 
     def handle_dragging_in_window(self, x, y, width, height):
         x_dir = -1 if self.invert_x else 1
@@ -165,7 +169,6 @@ class CamWidget(Widget):
                 self.pose.pitch + np.pi / 2,
                 self.radius,
                 self.lookat_point,
-                device=torch.device("cuda"),
                 up_vector=self.up_vector,
             )
             self.forward = normalize_vecs(self.lookat_point - self.cam_pos)

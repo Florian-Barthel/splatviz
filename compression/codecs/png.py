@@ -1,13 +1,13 @@
-from compression.codec import Codec
-
 import numpy as np
 import cv2
+
+from compression.codecs.base_codec import BaseCodec
 
 
 # dtype: uint8, uint16
 
 
-class PNGCodec(Codec):
+class PNGCodec(BaseCodec):
 
     def encode_image(self, image, out_file, dtype):
 
