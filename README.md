@@ -105,7 +105,7 @@ python run_main.py --data_path=path/with/ply/files
 <td>The _attach_ mode allows you to view and edit a running 3DGS training. This works with the default implementation of
 3DGS.
 In order to edit the scene during the training and to view some extra information, follow the simple steps
-described <a href="splatviz_network/README.md">here</a>.</td>
+described here: https://github.com/Florian-Barthel/splatviz_network.</td>
 <td>
 
 ```bash
