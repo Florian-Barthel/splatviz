@@ -1,4 +1,5 @@
 import copy
+
 from splatviz_utils.dict_utils import equal_dicts
 
 
@@ -7,7 +8,6 @@ class RendererWrapper:
         self.renderer = renderer
         self._cur_args = None
         self.result = None
-        self._renderer_obj = None
         self.update_all_the_time = update_all_the_time
 
     def set_args(self, **args):

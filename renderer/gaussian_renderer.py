@@ -44,7 +44,7 @@ class GaussianRenderer(Renderer):
         highlight_border=False,
         save_ply_path=None,
         slider={},
-        **other_args
+        **other_args,
     ):
         cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
@@ -80,15 +80,7 @@ class GaussianRenderer(Renderer):
 
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
-            render_cam = CustomCam(
-                resolution,
-                resolution,
-                fovy=fov_rad,
-                fovx=fov_rad,
-                znear=0.01,
-                zfar=10,
-                extr=cam_params,
-            )
+            render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
             render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=self.bg_color)
             if render_alpha:
                 images.append(render["alpha"])

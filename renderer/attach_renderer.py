@@ -88,7 +88,7 @@ class AttachRenderer(Renderer):
     def send(self, message):
         try:
             message_encode = json.dumps(message).encode()
-            message_len_bytes = len(message_encode).to_bytes(4, 'little')
+            message_len_bytes = len(message_encode).to_bytes(4, "little")
             self.socket.sendall(message_len_bytes + bytes(message_encode))
         except Exception as e:
             self.restart_connector()
@@ -119,15 +119,7 @@ class AttachRenderer(Renderer):
 
         # slider = EasyDict(slider)
         fov_rad = fov / 360 * 2 * np.pi
-        render_cam = CustomCam(
-            resolution,
-            resolution,
-            fovy=fov_rad,
-            fovx=fov_rad,
-            znear=0.01,
-            zfar=10,
-            extr=cam_params,
-        )
+        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
 
         # Invert all operations from network_gui.py
         world_view_transform = render_cam.world_view_transform
@@ -153,7 +145,7 @@ class AttachRenderer(Renderer):
             "edit_text": self.sanitize_command(edit_text),
             "slider": slider,
             "single_training_step": single_training_step,
-            "stop_at_value": stop_at_value
+            "stop_at_value": stop_at_value,
         }
         self.send(message)
         image, stats = self.read(resolution)
@@ -165,4 +157,3 @@ class AttachRenderer(Renderer):
             res,
             normalize=img_normalize,
         )
-

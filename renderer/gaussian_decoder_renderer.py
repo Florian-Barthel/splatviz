@@ -59,7 +59,7 @@ class GaussianDecoderRenderer(Renderer):
         # create camera
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
         fov_rad = fov / 360 * 2 * np.pi
-        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, znear=0.01, zfar=10, extr=cam_params)
+        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
         gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
         z = self.create_z(latent_x, latent_y)
