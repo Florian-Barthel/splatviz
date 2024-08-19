@@ -36,6 +36,7 @@ class GaussianRenderer(Renderer):
         ply_file_paths,
         cam_params,
         current_ply_names,
+        background_color,
         video_cams=[],
         render_depth=False,
         render_alpha=False,
@@ -81,7 +82,7 @@ class GaussianRenderer(Renderer):
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
             render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
-            render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=self.bg_color)
+            render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:

@@ -1,3 +1,4 @@
+import torch
 from imgui_bundle import imgui
 
 from splatviz_utils.gui_utils import imgui_utils
@@ -12,6 +13,7 @@ class RenderWidget(Widget):
         self.render_depth = False
         self.render_gan_image = False
         self.resolution = 1024
+        self.background_color = torch.tensor([0.0, 0.0, 0.0])
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True, decoder=False):
@@ -34,6 +36,12 @@ class RenderWidget(Widget):
             if self.render_depth and depth_changed:
                 self.render_alpha = False
 
+            label("Background Color", viz.label_w)
+            _changed, background_color = imgui.input_float3("##background_color", v=self.background_color.tolist(), format="%.1f")
+            if _changed:
+                self.background_color = torch.tensor(background_color)
+
+        viz.args.background_color = self.background_color
         viz.args.resolution = self.resolution
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth

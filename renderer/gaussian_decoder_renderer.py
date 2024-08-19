@@ -37,6 +37,7 @@ class GaussianDecoderRenderer(Renderer):
         ply_file_paths,
         cam_params,
         current_ply_names,
+        background_color,
         video_cams=[],
         render_depth=False,
         render_alpha=False,
@@ -80,7 +81,7 @@ class GaussianDecoderRenderer(Renderer):
         if save_ply_path is not None:
             self.save_ply(gs, save_ply_path)
 
-        img = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=self.bg_color)["render"]
+        img = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))["render"]
         if render_gan_image:
             gan_image = torch.nn.functional.interpolate(result.img, size=[img.shape[1], img.shape[2]])[0]
             img = torch.concat([img, gan_image], dim=2)
