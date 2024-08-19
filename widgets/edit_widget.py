@@ -160,7 +160,7 @@ class EditWidget(Widget):
                 self.presets[self._cur_preset_name] = dict(
                     edit_text=self.editor.get_text(), slider=[vars(slider) for slider in self.sliders]
                 )
-                save_json(filename=self.preset_path, data=self.presets)
+                save_json(filename=self.preset_path, data=self.presets, indent=2)
                 self._cur_preset_name = ""
 
             edit_text = self.editor.get_text()
