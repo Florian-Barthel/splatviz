@@ -14,3 +14,4 @@ sample_scenes
 *.npz
 *.pdf
 *.code-workspace
+.vscode/*

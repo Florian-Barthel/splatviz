@@ -65,8 +65,7 @@ class Visualizer(imgui_window.ImguiWindow):
                 capture_widget.CaptureWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
-                eval_widget.EvalWidget(self),
-                compression_widget.CompressionWidget(self),
+                eval_widget.EvalWidget(self)
             ]
             renderer = GaussianRenderer()
         elif mode == "decoder":

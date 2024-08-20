@@ -3,6 +3,7 @@ import socket
 import time
 from threading import Thread
 
+from matplotlib.pyplot import grid
 import numpy as np
 import torch
 import torch.nn
@@ -68,10 +69,17 @@ class AttachRenderer(Renderer):
                 if counter > try_counter:
                     print("Package loss")
                     break
-
+            
             verify_len = self.socket.recv(4)
             verify_len = int.from_bytes(verify_len, "little")
             verify_data = self.socket.recv(verify_len)
+            
+            grid_image_len = int.from_bytes(self.socket.recv(4), "little")
+            if grid_image_len != 0:
+                grid_data = bytes()
+                while len(grid_data) < grid_image_len:
+                    grid_data += self.socket.recv(grid_image_len - len(grid_data))
+
             try:
                 verify_dict = json.loads(verify_data)
             except Exception:
@@ -80,7 +88,15 @@ class AttachRenderer(Renderer):
             image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
             image = torch.from_numpy(image) / 255.0
             image = image.permute(2, 0, 1)
-            return image, verify_dict
+
+            grid_side_len = int(np.sqrt(verify_dict["num_gaussians"]))
+            if grid_image_len != 0:
+                grid_image = np.frombuffer(grid_data, dtype=np.uint8).copy() # copy to make it writable (needed by immvision)
+                grid_image = grid_image.reshape(grid_side_len, grid_side_len, 1)
+            else:
+                grid_image = np.zeros([grid_side_len, grid_side_len, 3], dtype=np.uint8)
+
+            return image, verify_dict, grid_image
         except Exception as e:
             print("Read Error", e)
             self.restart_connector()
@@ -108,6 +124,7 @@ class AttachRenderer(Renderer):
         slider={},
         img_normalize=False,
         save_ply_path=None,
+        grid_attr = None,
         **other_args,
     ):
         self.socket = self.connector.socket
@@ -153,10 +170,12 @@ class AttachRenderer(Renderer):
             "edit_text": self.sanitize_command(edit_text),
             "slider": slider,
             "single_training_step": single_training_step,
-            "stop_at_value": stop_at_value
+            "stop_at_value": stop_at_value,
+            "grid_attr": grid_attr
         }
         self.send(message)
-        image, stats = self.read(resolution)
+        image, stats, grid_image = self.read(resolution)
+        res["2D Grid"] = grid_image
         if len(stats.keys()) > 0:
             res.training_stats = stats
             res.error = res.training_stats["error"]
@@ -165,4 +184,3 @@ class AttachRenderer(Renderer):
             res,
             normalize=img_normalize,
         )
-

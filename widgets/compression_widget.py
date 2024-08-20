@@ -24,6 +24,7 @@ class CompressionWidget(Widget):
         viz = self.viz
 
         if show:
+
             prune_changed, self.prune_grid = imgui.checkbox("Prune 2d grid", self.prune_grid)
             viz.args.prune_grid = self.prune_grid
 
@@ -35,8 +36,8 @@ class CompressionWidget(Widget):
 
             if "2D Grid" in viz.result.keys():
                 im_params = immvision.ImageParams()
-                im_params.image_display_size = (512, 512)
 
                 grid_img = viz.result["2D Grid"]
+                im_params.image_display_size = (grid_img.shape[0], grid_img.shape[1])
 
                 immvision.image("2D Grid", grid_img, params=im_params)
