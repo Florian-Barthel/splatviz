@@ -74,11 +74,17 @@ class AttachRenderer(Renderer):
             verify_len = int.from_bytes(verify_len, "little")
             verify_data = self.socket.recv(verify_len)
             
-            grid_image_len = int.from_bytes(self.socket.recv(4), "little")
-            if grid_image_len != 0:
+            grid_image_nbytes = int.from_bytes(self.socket.recv(4), "little")
+            if grid_image_nbytes != 0:
+                grid_side_len = int.from_bytes(self.socket.recv(4), "little")
+                grid_channels = int.from_bytes(self.socket.recv(4), "little")
                 grid_data = bytes()
-                while len(grid_data) < grid_image_len:
-                    grid_data += self.socket.recv(grid_image_len - len(grid_data))
+                while len(grid_data) < grid_image_nbytes:
+                    grid_data += self.socket.recv(grid_image_nbytes - len(grid_data))
+                grid_image = np.frombuffer(grid_data, dtype=np.uint8).copy() # copy to make it writable (needed by immvision)
+                grid_image = grid_image.reshape(grid_side_len, grid_side_len, grid_channels)
+            else:
+                grid_image = np.zeros([grid_image_nbytes, grid_image_nbytes, 3], dtype=np.uint8)
 
             try:
                 verify_dict = json.loads(verify_data)
@@ -88,13 +94,6 @@ class AttachRenderer(Renderer):
             image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
             image = torch.from_numpy(image) / 255.0
             image = image.permute(2, 0, 1)
-
-            grid_side_len = int(np.sqrt(verify_dict["num_gaussians"]))
-            if grid_image_len != 0:
-                grid_image = np.frombuffer(grid_data, dtype=np.uint8).copy() # copy to make it writable (needed by immvision)
-                grid_image = grid_image.reshape(grid_side_len, grid_side_len, 1)
-            else:
-                grid_image = np.zeros([grid_side_len, grid_side_len, 3], dtype=np.uint8)
 
             return image, verify_dict, grid_image
         except Exception as e:
