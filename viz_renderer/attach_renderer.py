@@ -75,12 +75,14 @@ class AttachRenderer(Renderer):
             verify_data = self.socket.recv(verify_len)
             
             grid_image_nbytes = int.from_bytes(self.socket.recv(4), "little")
+            attributes_activated = True
             if grid_image_nbytes != 0:
-                grid_side_len = int.from_bytes(self.socket.recv(4), "little")
-                grid_channels = int.from_bytes(self.socket.recv(4), "little")
                 grid_data = bytes()
                 while len(grid_data) < grid_image_nbytes:
                     grid_data += self.socket.recv(grid_image_nbytes - len(grid_data))
+                grid_side_len = int.from_bytes(self.socket.recv(4), "little")
+                grid_channels = int.from_bytes(self.socket.recv(4), "little")
+                attributes_activated = bool.from_bytes(self.socket.recv(1), "little")
                 grid_image = np.frombuffer(grid_data, dtype=np.uint8).copy() # copy to make it writable (needed by immvision)
                 grid_image = grid_image.reshape(grid_side_len, grid_side_len, grid_channels)
             else:
@@ -95,7 +97,7 @@ class AttachRenderer(Renderer):
             image = torch.from_numpy(image) / 255.0
             image = image.permute(2, 0, 1)
 
-            return image, verify_dict, grid_image
+            return image, verify_dict, grid_image, attributes_activated
         except Exception as e:
             print("Read Error", e)
             self.restart_connector()
@@ -173,8 +175,9 @@ class AttachRenderer(Renderer):
             "grid_attr": grid_attr
         }
         self.send(message)
-        image, stats, grid_image = self.read(resolution)
-        res["2D Grid"] = grid_image
+        image, stats, grid_image, attributes_activated = self.read(resolution)
+        res["grid_image"] = grid_image
+        res["attributes_activated"] = attributes_activated
         if len(stats.keys()) > 0:
             res.training_stats = stats
             res.error = res.training_stats["error"]
