@@ -132,6 +132,9 @@ python run_main.py \
 </tr>
 </table>
 
+In some cases you will have to add this variable so that opengl uses the correct version:
+`export MESA_GL_VERSION_OVERRIDE=3.3`
+
 ## Widgets
 
 <div align="justify"> 
