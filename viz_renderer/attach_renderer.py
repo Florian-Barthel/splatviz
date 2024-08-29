@@ -126,6 +126,7 @@ class AttachRenderer(Renderer):
         img_normalize=False,
         save_ply_path=None,
         grid_attr = None,
+        grid_sh_index = None,
         **other_args,
     ):
         self.socket = self.connector.socket
@@ -172,7 +173,8 @@ class AttachRenderer(Renderer):
             "slider": slider,
             "single_training_step": single_training_step,
             "stop_at_value": stop_at_value,
-            "grid_attr": grid_attr
+            "grid_attr": grid_attr,
+            "grid_sh_index": grid_sh_index,
         }
         self.send(message)
         image, stats, grid_image, attributes_activated = self.read(resolution)
