@@ -5,10 +5,11 @@ from widgets.widget import Widget
 
 
 class LoadWidget(Widget):
-    def __init__(self, viz, root):
+    def __init__(self, viz, root, file_ending):
         super().__init__(viz, "Load")
         self.root = root
         self.filter = ""
+        self.file_ending = file_ending
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
             raise FileNotFoundError(f"No .pkl found in '{root}' with filter 'f{self.filter}'")
@@ -39,7 +40,7 @@ class LoadWidget(Widget):
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
-                if file.endswith(".pkl"):
+                if file.endswith(self.file_ending):
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(str(current_path))

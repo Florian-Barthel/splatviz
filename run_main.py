@@ -4,7 +4,7 @@ from splatviz import Splatviz
 
 @click.command()
 @click.option("--data_path", help="root path for .ply files", metavar="PATH", default="./resources/sample_scenes")
-@click.option("--mode", help="[default, decoder, attach]", default="default")
+@click.option("--mode", help="[default, decoder, attach, gan, ffhq]", default="default")
 @click.option("--host", help="host address", default="127.0.0.1")
 @click.option("--port", help="port", default=6009)
 @click.option("--ggd_path", help="path to Gaussian GAN Decoder project", default="", type=click.Path())

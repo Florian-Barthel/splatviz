@@ -10,7 +10,9 @@ np.set_printoptions(precision=2)
 from renderer.renderer_wrapper import RendererWrapper
 from renderer.gaussian_renderer import GaussianRenderer
 from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from renderer.gan_renderer import GANRenderer
 from renderer.attach_renderer import AttachRenderer
+from renderer.ffhq_renderer import FFHQRenderer
 from splatviz_utils.gui_utils import imgui_window
 from splatviz_utils.gui_utils import imgui_utils
 from splatviz_utils.gui_utils import gl_utils
@@ -21,7 +23,7 @@ from widgets import (
     edit_widget,
     eval_widget,
     performance_widget,
-    load_widget_pkl,
+    load_widget,
     load_widget_ply,
     video_widget,
     cam_widget,
@@ -29,6 +31,7 @@ from widgets import (
     latent_widget,
     render_widget,
     training_widget,
+    annotation_widget
 )
 
 
@@ -68,7 +71,7 @@ class Splatviz(imgui_window.ImguiWindow):
             renderer = GaussianRenderer()
         elif mode == "decoder":
             self.widgets = [
-                load_widget_pkl.LoadWidget(self, data_path),
+                load_widget.LoadWidget(self, data_path, file_ending=".pkl"),
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
                 video_widget.VideoWidget(self),
@@ -94,6 +97,28 @@ class Splatviz(imgui_window.ImguiWindow):
             ]
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
+        elif mode == "gan":
+            self.widgets = [
+                load_widget.LoadWidget(self, data_path, file_ending=".pkl"),
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                eval_widget.EvalWidget(self),
+                latent_widget.LatentWidget(self),
+            ]
+            sys.path.append(ggd_path)
+            renderer = GANRenderer()
+        elif mode == "ffhq":
+            self.widgets = [
+                load_widget.LoadWidget(self, data_path, file_ending=".png"),
+                render_widget.RenderWidget(self),
+                annotation_widget.AnnotationWidget(self),
+                eval_widget.EvalWidget(self),
+            ]
+            renderer = FFHQRenderer()
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
 

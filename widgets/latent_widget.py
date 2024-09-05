@@ -10,6 +10,8 @@ class LatentWidget(Widget):
     def __init__(self, viz):
         super().__init__(viz, "Latent")
         self.latent = EasyDict(x=0, y=0)
+        self.truncation_psi = 1.0
+        self.c_gen_conditioning_zero = True
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000
@@ -31,5 +33,15 @@ class LatentWidget(Widget):
             if dragging:
                 self.drag(dx, dy)
 
+            label("Truncation PSI")
+            _changed, self.truncation_psi = imgui.slider_float(
+                "##truncation", self.truncation_psi, 0.0, 1.0
+            )
+
+            label("c_gen_conditioning_zero")
+            _changed, self.c_gen_conditioning_zero = imgui.checkbox("##c_gen_conditioning_zero", self.c_gen_conditioning_zero)
+
+        viz.args.truncation_psi = self.truncation_psi
         viz.args.latent_x = self.latent.x
         viz.args.latent_y = self.latent.y
+        viz.args.c_gen_conditioning_zero = self.c_gen_conditioning_zero

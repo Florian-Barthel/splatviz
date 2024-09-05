@@ -1,3 +1,4 @@
+import os
 import re
 import traceback
 import torch
@@ -86,3 +87,10 @@ class Renderer:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
         img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
         res.image = img
+
+    @staticmethod
+    def save_ply(gaussian, save_ply_path):
+        os.makedirs(save_ply_path, exist_ok=True)
+        save_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
+        print("Model saved in", save_path)
+        gaussian.save_ply(save_path)
