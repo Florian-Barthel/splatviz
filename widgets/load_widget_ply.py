@@ -63,7 +63,7 @@ class LoadWidget(Widget):
         self.items = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
-                if file.endswith(".ply") or file.endswith("compression_config.yml"):
+                if file.endswith(".ply") or file.endswith("compression_config.yml") or file.endswith(".npz"):
                     current_path = os.path.join(root, file)
                     if all([filter in current_path for filter in self.filter.split(",")]):
                         self.items.append(str(current_path))

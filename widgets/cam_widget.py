@@ -90,7 +90,7 @@ class CamWidget(Widget):
                 self.lookat_point = torch.tensor(look_at_point_tuple)
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
-                    self.lookat_point = viz.result.mean_xyz
+                    self.lookat_point = viz.result.mean_xyz.cpu()
             imgui.pop_item_width()
 
             label("Invert X", viz.label_w)

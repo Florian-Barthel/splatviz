@@ -12,7 +12,7 @@ class RenderWidget(Widget):
         self.render_alpha = False
         self.render_depth = False
         self.render_gan_image = False
-        self.resolution = 1024
+        self.resolution = 512
         self.background_color = torch.tensor([0.0, 0.0, 0.0])
 
     @imgui_utils.scoped_by_object_id
@@ -21,6 +21,8 @@ class RenderWidget(Widget):
         if show:
             label("Resolution", viz.label_w)
             _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
+            if self.resolution <= 0:
+                self.resolution = 16
 
             label("Render Alpha", viz.label_w)
             alpha_changed, self.render_alpha = imgui.checkbox("##RenderAlpha", self.render_alpha)

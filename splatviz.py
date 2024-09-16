@@ -10,6 +10,7 @@ np.set_printoptions(precision=2)
 from renderer.renderer_wrapper import RendererWrapper
 from renderer.gaussian_renderer import GaussianRenderer
 from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from renderer.gaussian_compressed_renderer import GaussianRenderer as CompressedGaussianRenderer
 from renderer.attach_renderer import AttachRenderer
 from splatviz_utils.gui_utils import imgui_window
 from splatviz_utils.gui_utils import imgui_utils
@@ -83,6 +84,18 @@ class Splatviz(imgui_window.ImguiWindow):
             sys.path.append(ggd_path + "/PanoHead")
             sys.path.append(ggd_path + "/main")
             renderer = GaussianDecoderRenderer()
+        elif mode == "compressed":
+            self.widgets = [
+                load_widget_ply.LoadWidget(self, data_path),
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                eval_widget.EvalWidget(self),
+            ]
+            renderer = CompressedGaussianRenderer()
         elif mode == "attach":
             self.widgets = [
                 cam_widget.CamWidget(self),
