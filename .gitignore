@@ -13,3 +13,4 @@ history.json
 *.npz
 *.pdf
 *.code-workspace
+c3dgs/submodules/*
