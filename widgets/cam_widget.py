@@ -162,6 +162,10 @@ class CamWidget(Widget):
                 self.cam_pos -= self.forward * self.wasd_move_speed
             if imgui.is_key_down(imgui.Key.right_arrow) or "d" in self.viz.current_pressed_keys:
                 self.cam_pos += self.sideways * self.wasd_move_speed
+            if "q" in self.viz.current_pressed_keys:
+                self.cam_pos += self.up_vector * self.wasd_move_speed
+            if "e" in self.viz.current_pressed_keys:
+                self.cam_pos -= self.up_vector * self.wasd_move_speed
 
         elif self.control_modes[self.current_control_mode] == "Orbit":
             self.cam_pos = get_origin(
