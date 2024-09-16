@@ -13,4 +13,6 @@ history.json
 *.npz
 *.pdf
 *.code-workspace
-c3dgs/submodules/*
+c3dgs/submodules/diff-gaussian-rasterization/build
+*.egg-info
+c3dgs/submodules/diff-gaussian-rasterization/third_party/glm
