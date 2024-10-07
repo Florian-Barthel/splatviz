@@ -12,7 +12,7 @@ from renderer.gaussian_renderer import GaussianRenderer
 from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
 from renderer.gan_renderer import GANRenderer
 from renderer.attach_renderer import AttachRenderer
-from renderer.ffhq_renderer import FFHQRenderer
+# from renderer.ffhq_renderer import FFHQRenderer
 from splatviz_utils.gui_utils import imgui_window
 from splatviz_utils.gui_utils import imgui_utils
 from splatviz_utils.gui_utils import gl_utils
@@ -95,6 +95,7 @@ class Splatviz(imgui_window.ImguiWindow):
                 edit_widget.EditWidget(self),
                 training_widget.TrainingWidget(self),
             ]
+            sys.path.append(ggd_path)
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
         elif mode == "gan":
@@ -112,13 +113,14 @@ class Splatviz(imgui_window.ImguiWindow):
             sys.path.append(ggd_path)
             renderer = GANRenderer()
         elif mode == "ffhq":
-            self.widgets = [
-                load_widget.LoadWidget(self, data_path, file_ending=".png"),
-                render_widget.RenderWidget(self),
-                annotation_widget.AnnotationWidget(self),
-                eval_widget.EvalWidget(self),
-            ]
-            renderer = FFHQRenderer()
+            pass
+            # self.widgets = [
+            #     load_widget.LoadWidget(self, data_path, file_ending=".png"),
+            #     render_widget.RenderWidget(self),
+            #     annotation_widget.AnnotationWidget(self),
+            #     eval_widget.EvalWidget(self),
+            # ]
+            # renderer = FFHQRenderer()
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
 

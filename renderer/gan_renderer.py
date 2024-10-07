@@ -4,7 +4,9 @@ import numpy as np
 import torch
 import torch.nn
 from scene import GaussianModel
+from gaussian_renderer import render_simple
 from renderer.base_renderer import Renderer
+from scene.cameras import CustomCam
 from splatviz_utils.cam_utils import fov_to_intrinsics
 from splatviz_utils.dict_utils import EasyDict
 
@@ -19,8 +21,9 @@ class GANRenderer(Renderer):
         self.latent_map = torch.randn([1, 512, 10, 10], device=self._device, dtype=torch.float)
         self.reload_model = True
         self._current_pkl_file_path = ""
-        self.gaussian_model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
+        self.gaussian_model = GaussianModel(sh_degree=3, disable_xyz_log_activation=True)
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device="cuda")
+        self.last_gan_result = None
 
     def _render_impl(
         self,
@@ -39,7 +42,6 @@ class GANRenderer(Renderer):
         img_normalize=False,
         latent_x=0.0,
         latent_y=0.0,
-        render_gan_image=False,
         save_ply_path=None,
         truncation_psi=1.0,
         c_gen_conditioning_zero=True,
@@ -49,27 +51,36 @@ class GANRenderer(Renderer):
         cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
         self.load(ply_file_paths[0])
-
         self.generator.rendering_kwargs["c_gen_conditioning_zero"] = c_gen_conditioning_zero
 
         # create camera
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
         fov_rad = fov / 360 * 2 * np.pi
-        gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
         z = self.create_z(latent_x, latent_y)
-        if not torch.equal(self.last_z, z) or self.reload_model or render_gan_image:
-            result = self.generator(z, gan_camera_params, truncation_psi=truncation_psi)
+        if not torch.equal(self.last_z, z) or self.reload_model:
+            gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+            self.last_gan_result = self.generator(z, gan_camera_params, truncation_psi=truncation_psi)
             self.last_z = z
 
-        gs = copy.deepcopy(self.gaussian_model)
+        gan_model = EasyDict(self.last_gan_result["gaussian_params"])
+        self.gaussian_model._xyz = gan_model._xyz
+        self.gaussian_model._features_dc = gan_model._features_dc
+        self.gaussian_model._features_rest = gan_model._features_rest
+        self.gaussian_model._scaling = gan_model._scaling
+        self.gaussian_model._rotation = gan_model._rotation
+        self.gaussian_model._opacity = gan_model._opacity
+
+        gs = self.gaussian_model
         exec(self.sanitize_command(edit_text))
 
         if save_ply_path is not None:
             self.save_ply(gs, save_ply_path)
 
-        img = result["image"][0]
-        img = (img + 1) / 2
+        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
+        result = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
+        img = result["render"]
+        #img = (img + 1) / 2
         self._return_image(img, res, normalize=img_normalize)
 
         if len(eval_text) > 0:
