@@ -12,6 +12,7 @@ from scene.cameras import CustomCam
 from renderer.gaussian_renderer import GaussianRenderer
 from scene.gaussian_model import GaussianModel
 from widgets.widget import Widget
+import math
 
 default_preset = """gaussian._xyz = gaussian._xyz
 gaussian._rotation = gaussian._rotation
@@ -34,13 +35,18 @@ def get_description(obj):
 
 
 class Slider(object):
-    def __init__(self, key, value, min_value, max_value, _id=None):
+    def __init__(self, key, value, min_value, max_value, animating=False, loop_animation=True, animation_duration_sec=5,_id=None):
         if _id is None:
             _id = str(uuid.uuid4())
         self.key = key
         self.value = value
         self.min_value = min_value
         self.max_value = max_value
+
+        self.animating = animating
+        self.loop_animation = loop_animation
+        self.animation_duration_sec = animation_duration_sec
+
         self._id = _id
 
     def render(self, viz):
@@ -52,14 +58,46 @@ class Slider(object):
         )
         with imgui_utils.item_width(viz.font_size * 4):
             imgui.same_line()
-            min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value, )
+            min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value)
             imgui.same_line()
             max_changed, self.max_value = imgui.input_float(f"##max-{self._id}", self.max_value)
             imgui.same_line()
             text_changed, self.key = imgui.input_text(f"##text-{self._id}", self.key)
+            imgui.same_line()
+            _, self.loop_animation = imgui.checkbox(f"Loop##{self._id}", self.loop_animation)
+            imgui.same_line()
+            if self.animating:
+                stop_animation = imgui_utils.button(f"Stop##{self._id}")
+                if stop_animation:
+                    self.animating = False
+            else:
+                if imgui_utils.button(f"Animate##{self._id}"):
+
+                    self._animation_start_time = time.time()
+                    
+                    # start animation from currently selected value (don't jump to min value)
+                    self._phase_offset = math.asin(2 * (self.value - self.min_value) / (self.max_value - self.min_value) - 1)
+
+                    self.animating = True
+            
+            if self.animating:
+                self.animate()
+
         if min_changed or max_changed:
             self.value = min(self.value, self.max_value)
             self.value = max(self.value, self.min_value)
+
+    def animate(self):
+        elapsed_time = time.time() - self._animation_start_time
+        phase = (elapsed_time / self.animation_duration_sec) * (2 * math.pi)
+        if phase > 2 * math.pi and not self.loop_animation:
+            self.animating = False
+
+        phase += self._phase_offset
+
+        # Compute the next value using a sine wave for easing
+        self.value = self.min_value + (self.max_value - self.min_value) * (0.5 * (1 + math.sin(phase)))
+
 
 
 class EditWidget(Widget):
