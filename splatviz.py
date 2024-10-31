@@ -18,17 +18,18 @@ from splatviz_utils.gui_utils import text_utils
 from splatviz_utils.gui_utils.constants import *
 from splatviz_utils.dict_utils import EasyDict
 from widgets import (
+    camera_circle_widget,
     edit_widget,
     eval_widget,
     performance_widget,
     load_widget_pkl,
     load_widget_ply,
-    video_widget,
     cam_widget,
     capture_widget,
     latent_widget,
     render_widget,
     training_widget,
+    video_recording_widget,
 )
 
 
@@ -52,14 +53,14 @@ class Splatviz(imgui_window.ImguiWindow):
         # Internals.
         self._last_error_print = None
 
-        self.widgets = []
+        pre_render_widgets = []
         update_all_the_time = False
         if mode == "default":
-            self.widgets = [
+            pre_render_widgets = [
                 load_widget_ply.LoadWidget(self, data_path),
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
+                camera_circle_widget.CameraCircleWidget(self),
                 capture_widget.CaptureWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
@@ -67,11 +68,11 @@ class Splatviz(imgui_window.ImguiWindow):
             ]
             renderer = GaussianRenderer()
         elif mode == "decoder":
-            self.widgets = [
+            pre_render_widgets = [
                 load_widget_pkl.LoadWidget(self, data_path),
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
+                camera_circle_widget.CameraCircleWidget(self),
                 capture_widget.CaptureWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
@@ -84,10 +85,10 @@ class Splatviz(imgui_window.ImguiWindow):
             sys.path.append(ggd_path + "/main")
             renderer = GaussianDecoderRenderer()
         elif mode == "attach":
-            self.widgets = [
+            pre_render_widgets = [
                 cam_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
+                camera_circle_widget.CameraCircleWidget(self),
                 render_widget.RenderWidget(self),
                 edit_widget.EditWidget(self),
                 training_widget.TrainingWidget(self),
@@ -96,6 +97,12 @@ class Splatviz(imgui_window.ImguiWindow):
             update_all_the_time = True
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
+
+        self.pre_render_widgets = pre_render_widgets
+
+        self.post_render_widgets = [
+            video_recording_widget.VideoRecordingWidget(self),
+        ]
 
         self.renderer = RendererWrapper(renderer, update_all_the_time)
         self._tex_img = None
@@ -112,8 +119,12 @@ class Splatviz(imgui_window.ImguiWindow):
         self.skip_frame()
 
     def close(self):
-        for widget in self.widgets:
+        for widget in self.pre_render_widgets:
             widget.close()
+        
+        for widget in self.post_render_widgets:
+            widget.close()
+
         super().close()
 
     def print_error(self, error):
@@ -147,7 +158,7 @@ class Splatviz(imgui_window.ImguiWindow):
         imgui.begin("##control_pane", p_open=True, flags=control_pane_flags)
 
         # Widgets
-        for widget in self.widgets:
+        for widget in self.pre_render_widgets:
             expanded, _visible = imgui_utils.collapsing_header(widget.name, default=widget.name == "Load")
             imgui.indent()
             widget(expanded)
@@ -163,6 +174,14 @@ class Splatviz(imgui_window.ImguiWindow):
             result = self.renderer.result
             if result is not None:
                 self.result = result
+
+        # Widgets
+        for widget in self.post_render_widgets:
+            expanded, _visible = imgui_utils.collapsing_header(widget.name, default=widget.name == "Load")
+            imgui.indent()
+            widget(expanded)
+            imgui.unindent()
+
 
         # Display
         max_w = self.content_width - self.pane_w

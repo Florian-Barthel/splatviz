@@ -8,9 +8,9 @@ from widgets.widget import Widget
 from scene.cameras import CustomCam
 
 
-class VideoWidget(Widget):
+class CameraCircleWidget(Widget):
     def __init__(self, viz):
-        super().__init__(viz, "Video")
+        super().__init__(viz, "Camera Circle")
         self.num_frames = 1000
         self.cam_height = 0.3
         self.radius = 6
