@@ -1,1 +1,247 @@
-{"Default": {"edit_text": "gs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc\ngs._features_rest = gs._features_rest\n", "slider": [{"key": "x", "value": 1, "min_value": 0, "max_value": 10, "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"}]}, "Point Cloud": {"edit_text": "gs._scaling = gs._scaling * 0 - slider.scaling\ngs._opacity = gs._opacity * 0 + 10\n", "slider": [{"key": "scaling", "value": 8.0, "min_value": 1, "max_value": 10, "_id": "6dd9eb75-6bce-445b-9165-dc8dd498d253"}]}, "Only SH": {"edit_text": "gs._features_dc = gs._features_dc * slider.dc_scale\ngs._features_rest = gs._features_rest * slider.sh_scale\n", "slider": [{"key": "dc_scale", "value": 0.0, "min_value": -3, "max_value": 3, "_id": "3c0f6f8c-516b-4303-957e-65a3bebbd8bd"}, {"key": "sh_scale", "value": 1.0, "min_value": -3, "max_value": 3, "_id": "4ae54ccd-b28c-49d9-a514-fd7d6fdfb831"}]}, "Filter Opacity": {"edit_text": "mask = torch.linalg.norm(gs._opacity, dim=-1) < slider.opacity\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n", "slider": [{"key": "opacity", "value": 10.0, "min_value": 0, "max_value": 20, "_id": "12364012634"}]}, "Highlight Large gs": {"edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ncolor = [slider.r, slider.g ,slider.b]\ngs._features_dc[mask] = gs._features_dc[mask] * 0 + torch.tensor(color, device=\"cuda\")\n\n", "slider": [{"key": "scaling", "value": 5.0, "min_value": -10, "max_value": 10, "_id": "bcb1fb24-fae7-4bde-b9f1-3368a3ccf6bd"}, {"key": "r", "value": 1.0, "min_value": -1, "max_value": 1, "_id": "610356120935721"}, {"key": "g", "value": 0.0, "min_value": -1, "max_value": 1, "_id": "19161646843249846"}, {"key": "b", "value": 0.0, "min_value": -1, "max_value": 1, "_id": "12+92+17+174+9174+5"}]}, "Sin(xyz)": {"edit_text": "gs._xyz = torch.sin(gs._xyz/3+slider.x) + gs._xyz\n", "slider": [{"key": "x", "value": 0.0, "min_value": -10, "max_value": 10, "_id": "28971294217951247"}]}, "Random Colors": {"edit_text": "torch.manual_seed(0)\ngs._features_dc = torch.rand_like(gs._features_dc) * slider.intensity - slider.intensity / 2\ngs._features_rest = gs._features_rest * 0\n\n", "slider": [{"key": "intensity", "value": 5.0, "min_value": 0, "max_value": 10, "_id": "9f3fd0c1-67a5-4b38-9ec4-36d27aceddda"}]}, "Recoloring": {"edit_text": "selected_color = torch.tensor([slider.r, slider.g, slider.b], device=\"cuda\")\n\ngs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc + selected_color\ngs._features_rest = gs._features_rest\n", "slider": [{"key": "r", "value": 0.0, "min_value": -10, "max_value": 10, "_id": "9419751979747546"}, {"key": "g", "value": 0.0, "min_value": -10, "max_value": 10, "_id": "52795+7+5+4959597"}, {"key": "b", "value": 0.0, "min_value": -10, "max_value": 10, "_id": "47954795627648945"}]}, "Filter Small gs": {"edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n", "slider": [{"key": "scaling", "value": 10.0, "min_value": 0, "max_value": 20, "_id": "8769fe63-c073-4b0f-b83d-dc519024a0bb"}]}, "Wobbel": {"edit_text": "gs._xyz[:,2] = torch.sin(gs._xyz[:,2]+slider.x)/5 + gs._xyz[:,2]\ngs._xyz[:,0] = torch.sin(gs._xyz[:,0]+slider.x)/5 + gs._xyz[:,0]", "slider": [{"key": "x", "value": -10.0, "min_value": -10.0, "max_value": 10.0, "_id": "28971294217951247"}]}, "Slice Scene": {"edit_text": "mask_x = gs._xyz[:, 0] < slider.x\nmask_y =gs._xyz[:, 1] < slider.y\nmask_z =gs._xyz[:, 2] < slider.z\n\nmask = mask_x & mask_y & mask_z\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n", "slider": [{"key": "x", "value": -0.0010000000474974513, "min_value": -5.0, "max_value": 5.0, "_id": "12364012634"}, {"key": "y", "value": 0.0, "min_value": -5.0, "max_value": 5.0, "_id": "197e4266-82ba-417d-b276-536e465f4fc0"}, {"key": "z", "value": -0.0, "min_value": -5.0, "max_value": 5.0, "_id": "636299d8-5d63-4e7c-8ce4-d192aa019d95"}]}}
+{
+  "Default": {
+    "edit_text": "gs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc\ngs._features_rest = gs._features_rest\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 1,
+        "min_value": 0,
+        "max_value": 10,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      }
+    ]
+  },
+  "Point Cloud": {
+    "edit_text": "gs._scaling = gs._scaling * 0 - slider.scaling\ngs._opacity = gs._opacity * 0 + 10\n",
+    "slider": [
+      {
+        "key": "scaling",
+        "value": 8.0,
+        "min_value": 1,
+        "max_value": 10,
+        "_id": "6dd9eb75-6bce-445b-9165-dc8dd498d253"
+      }
+    ]
+  },
+  "Only SH": {
+    "edit_text": "gs._features_dc = gs._features_dc * slider.dc_scale\ngs._features_rest = gs._features_rest * slider.sh_scale\n",
+    "slider": [
+      {
+        "key": "dc_scale",
+        "value": 0.0,
+        "min_value": -3,
+        "max_value": 3,
+        "_id": "3c0f6f8c-516b-4303-957e-65a3bebbd8bd"
+      },
+      {
+        "key": "sh_scale",
+        "value": 1.0,
+        "min_value": -3,
+        "max_value": 3,
+        "_id": "4ae54ccd-b28c-49d9-a514-fd7d6fdfb831"
+      }
+    ]
+  },
+  "Filter Opacity": {
+    "edit_text": "mask = torch.linalg.norm(gs._opacity, dim=-1) < slider.opacity\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
+    "slider": [
+      {
+        "key": "opacity",
+        "value": 10.0,
+        "min_value": 0,
+        "max_value": 20,
+        "_id": "12364012634"
+      }
+    ]
+  },
+  "Highlight Large gs": {
+    "edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ncolor = [slider.r, slider.g ,slider.b]\ngs._features_dc[mask] = gs._features_dc[mask] * 0 + torch.tensor(color, device=\"cuda\")\n\n",
+    "slider": [
+      {
+        "key": "scaling",
+        "value": 5.0,
+        "min_value": -10,
+        "max_value": 10,
+        "_id": "bcb1fb24-fae7-4bde-b9f1-3368a3ccf6bd"
+      },
+      {
+        "key": "r",
+        "value": 1.0,
+        "min_value": -1,
+        "max_value": 1,
+        "_id": "610356120935721"
+      },
+      {
+        "key": "g",
+        "value": 0.0,
+        "min_value": -1,
+        "max_value": 1,
+        "_id": "19161646843249846"
+      },
+      {
+        "key": "b",
+        "value": 0.0,
+        "min_value": -1,
+        "max_value": 1,
+        "_id": "12+92+17+174+9174+5"
+      }
+    ]
+  },
+  "Sin(xyz)": {
+    "edit_text": "gs._xyz = torch.sin(gs._xyz/3+slider.x) + gs._xyz\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 0.0,
+        "min_value": -10,
+        "max_value": 10,
+        "_id": "28971294217951247"
+      }
+    ]
+  },
+  "Random Colors": {
+    "edit_text": "torch.manual_seed(0)\ngs._features_dc = torch.rand_like(gs._features_dc) * slider.intensity - slider.intensity / 2\ngs._features_rest = gs._features_rest * 0\n\n",
+    "slider": [
+      {
+        "key": "intensity",
+        "value": 5.0,
+        "min_value": 0,
+        "max_value": 10,
+        "_id": "9f3fd0c1-67a5-4b38-9ec4-36d27aceddda"
+      }
+    ]
+  },
+  "Recoloring": {
+    "edit_text": "selected_color = torch.tensor([slider.r, slider.g, slider.b], device=\"cuda\")\n\ngs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc + selected_color\ngs._features_rest = gs._features_rest\n",
+    "slider": [
+      {
+        "key": "r",
+        "value": 0.0,
+        "min_value": -10,
+        "max_value": 10,
+        "_id": "9419751979747546"
+      },
+      {
+        "key": "g",
+        "value": 0.0,
+        "min_value": -10,
+        "max_value": 10,
+        "_id": "52795+7+5+4959597"
+      },
+      {
+        "key": "b",
+        "value": 0.0,
+        "min_value": -10,
+        "max_value": 10,
+        "_id": "47954795627648945"
+      }
+    ]
+  },
+  "Filter Small gs": {
+    "edit_text": "mask = torch.linalg.norm(gs._scaling, dim=-1) < slider.scaling\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
+    "slider": [
+      {
+        "key": "scaling",
+        "value": 10.0,
+        "min_value": 0,
+        "max_value": 20,
+        "_id": "8769fe63-c073-4b0f-b83d-dc519024a0bb"
+      }
+    ]
+  },
+  "Wobbel": {
+    "edit_text": "gs._xyz[:,2] = torch.sin(gs._xyz[:,2]+slider.x)/5 + gs._xyz[:,2]\ngs._xyz[:,0] = torch.sin(gs._xyz[:,0]+slider.x)/5 + gs._xyz[:,0]",
+    "slider": [
+      {
+        "key": "x",
+        "value": -10.0,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "28971294217951247"
+      }
+    ]
+  },
+  "Slice Scene": {
+    "edit_text": "mask_x = gs._xyz[:, 0] < slider.x\nmask_y =gs._xyz[:, 1] < slider.y\nmask_z =gs._xyz[:, 2] < slider.z\n\nmask = mask_x & mask_y & mask_z\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": -0.0010000000474974513,
+        "min_value": -5.0,
+        "max_value": 5.0,
+        "_id": "12364012634"
+      },
+      {
+        "key": "y",
+        "value": 0.0,
+        "min_value": -5.0,
+        "max_value": 5.0,
+        "_id": "197e4266-82ba-417d-b276-536e465f4fc0"
+      },
+      {
+        "key": "z",
+        "value": -0.0,
+        "min_value": -5.0,
+        "max_value": 5.0,
+        "_id": "636299d8-5d63-4e7c-8ce4-d192aa019d95"
+      }
+    ]
+  },
+  "1 inspect a single gaussian": {
+    "edit_text": "index = int(slider.x)\n\ngs._xyz = gs._xyz[index:index+1, ...] * 0\ngs._rotation = gs._rotation[index:index+1, ...]\ngs._scaling = gs._scaling[index:index+1, ...]+4\ngs._opacity = gs._opacity[index:index+1, ...]\ngs._features_dc = gs._features_dc[index:index+1, ...]+2\ngs._features_rest = gs._features_rest[index:index+1, ...]\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 85.10600280761719,
+        "min_value": 0.0,
+        "max_value": 1000.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      }
+    ]
+  },
+  "select by color": {
+    "edit_text": "compare = torch.tensor([slider.r, slider.g, slider.b]).to(\"cuda\")\nmask = torch.linalg.norm(gs._features_dc[:, 0, :] - compare[None, :], dim=1) < slider.threshold\nmask = mask.to(\"cuda\")\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\n\ngs.features_rest = gs._features_rest[mask] if len(gs._features_rest) > 0 else gs._features_rest\n",
+    "slider": [
+      {
+        "key": "r",
+        "value": -1.0,
+        "min_value": -1.0,
+        "max_value": 1.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      },
+      {
+        "key": "g",
+        "value": -1.0,
+        "min_value": -1.0,
+        "max_value": 1.0,
+        "_id": "32067de4-1035-42cc-8060-6c527b3e5b62"
+      },
+      {
+        "key": "b",
+        "value": 1.0,
+        "min_value": -1.0,
+        "max_value": 1.0,
+        "_id": "85340c60-bf11-4d0f-9c7a-700d2c93e27b"
+      },
+      {
+        "key": "threshold",
+        "value": 1.593000054359436,
+        "min_value": -2.0,
+        "max_value": 2.0,
+        "_id": "ece9ee3e-e348-44d6-b759-098f4542a405"
+      }
+    ]
+  },
+  "luma_ai": {
+    "edit_text": "mask = torch.linalg.norm(gs._xyz - torch.tensor([0,0,0])[None, :].to(\"cuda\"), dim=1) > slider.x\n\ngs._scaling[mask] = gs._scaling[mask] - 10\ngs._opacity[mask] = gs._opacity[mask] - 2\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 0.0,
+        "min_value": 0.0,
+        "max_value": 20.0,
+        "_id": "12364012634"
+      }
+    ]
+  }
+}

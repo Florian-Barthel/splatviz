@@ -12,6 +12,7 @@ class LatentWidget(Widget):
         self.latent = EasyDict(x=0, y=0)
         self.truncation_psi = 1.0
         self.c_gen_conditioning_zero = True
+        self.render_seg = False
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000
@@ -41,7 +42,12 @@ class LatentWidget(Widget):
             label("c_gen_conditioning_zero")
             _changed, self.c_gen_conditioning_zero = imgui.checkbox("##c_gen_conditioning_zero", self.c_gen_conditioning_zero)
 
+            label("render segmentation")
+            _changed, self.render_seg = imgui.checkbox("##render_segmentation", self.render_seg)
+
         viz.args.truncation_psi = self.truncation_psi
         viz.args.latent_x = self.latent.x
         viz.args.latent_y = self.latent.y
         viz.args.c_gen_conditioning_zero = self.c_gen_conditioning_zero
+        viz.args.render_seg = self.render_seg
+

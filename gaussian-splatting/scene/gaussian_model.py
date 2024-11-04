@@ -122,10 +122,8 @@ class GaussianModel:
     @property
     def get_features(self):
         features_dc = self._features_dc
-        if self.active_sh_degree == 0:
-            return features_dc
         features_rest = self._features_rest.to(features_dc.device)
-        return torch.cat((features_dc, features_rest), dim=1)
+        return torch.cat((features_dc, features_rest), dim=1).contiguous()
     
     @property
     def get_opacity(self):
