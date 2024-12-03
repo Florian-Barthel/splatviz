@@ -1,3 +1,5 @@
+import numpy as np
+import torch
 from imgui_bundle import imgui
 
 from splatviz_utils.gui_utils import imgui_utils
@@ -13,6 +15,14 @@ class LatentWidget(Widget):
         self.truncation_psi = 1.0
         self.c_gen_conditioning_zero = True
         self.render_seg = False
+
+        self.cond_hat = False
+        self.cond_glasses = False
+        self.cond_microphone = False
+        self.cond_hand = False
+        self.cond_multi_id = False
+        self.cond_misc_group = False
+
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000
@@ -45,6 +55,34 @@ class LatentWidget(Widget):
             label("render segmentation")
             _changed, self.render_seg = imgui.checkbox("##render_segmentation", self.render_seg)
 
+
+            # conditional input
+            label("cond hat")
+            _changed, self.cond_hat = imgui.checkbox("##cond_hat", self.cond_hat)
+
+            label("cond glasses")
+            _changed, self.cond_glasses = imgui.checkbox("##cond_glasses", self.cond_glasses)
+
+            label("cond microphone")
+            _changed, self.cond_microphone = imgui.checkbox("##cond_microphone", self.cond_microphone)
+
+            label("cond hand")
+            _changed, self.cond_hand = imgui.checkbox("##cond_hand", self.cond_hand)
+
+            label("cond multi_id")
+            _changed, self.cond_multi_id = imgui.checkbox("##cond_multi_id", self.cond_multi_id)
+
+            label("cond misc_group")
+            _changed, self.cond_misc_group = imgui.checkbox("##cond_misc_group", self.cond_misc_group)
+
+        viz.args.conditional_vector = torch.tensor([[
+            self.cond_hat,
+            self.cond_glasses,
+            self.cond_microphone,
+            self.cond_hand,
+            self.cond_multi_id,
+            self.cond_misc_group,
+        ]]).int().to("cuda")
         viz.args.truncation_psi = self.truncation_psi
         viz.args.latent_x = self.latent.x
         viz.args.latent_y = self.latent.y

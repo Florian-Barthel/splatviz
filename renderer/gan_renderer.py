@@ -1,4 +1,3 @@
-import copy
 import pickle
 import numpy as np
 import torch
@@ -23,11 +22,9 @@ class GANRenderer(Renderer):
         self.reload_model = True
         self._current_pkl_file_path = ""
         self.gghead = False
-        sh_degree = 0
-        if self.gghead:
-            sh_degree = 1
+        sh_degree = 1 if self.gghead else 0
         self.gaussian_model = GaussianModel(sh_degree=sh_degree, disable_xyz_log_activation=True)
-        self.gaussian_model.active_sh_degree = 0
+        self.gaussian_model.active_sh_degree = sh_degree
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device="cuda")
         self.last_gan_result = None
         self.segmentation_model = SegmentationModel()
@@ -53,6 +50,7 @@ class GANRenderer(Renderer):
         save_ply_path=None,
         truncation_psi=1.0,
         c_gen_conditioning_zero=True,
+        conditional_vector=None,
         slider={},
         **other_args
     ):
@@ -67,7 +65,11 @@ class GANRenderer(Renderer):
 
         z = self.create_z(latent_x, latent_y)
         if not torch.equal(self.last_z, z) or self.reload_model:
-            gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+            # if not self.gghead:
+            gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9), conditional_vector], 1)
+            # else:
+            # gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+
             self.last_gan_result = self.generator(z, gan_camera_params, truncation_psi=truncation_psi, noise_mode='const')
             self.last_z = z
 
@@ -98,12 +100,17 @@ class GANRenderer(Renderer):
             self.save_ply(gs, save_ply_path)
 
         render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
-        result = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda")) #, override_color=gan_model._features_dc)
+        if self.gghead:
+            result = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda")) #, override_color=gan_model._features_dc)
+        else:
+            result = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"), override_color=gan_model._features_dc) #, override_color=gan_model._features_dc)
+
         # img = self.last_gan_result.images[0]
         img = result["render"]
 
+        #img = img * 2 - 1
         # img = (img + 1) / 2
-        # img = img * 2 - 1
+        # img = torch.clip(img, 0.0, 1.0)
 
         if render_seg:
             img = self.segmentation_model(img)
