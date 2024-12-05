@@ -85,7 +85,7 @@ class GANRenderer(Renderer):
             self.gaussian_model._rotation = gan_model["ROTATION"][0].contiguous()
             self.gaussian_model._opacity = gan_model["OPACITY"][0]
         else:
-            gan_model = EasyDict(self.last_gan_result["gaussian_params"])
+            gan_model = EasyDict(self.last_gan_result["gaussian_params"][0])
             self.gaussian_model._xyz = gan_model._xyz
             self.gaussian_model._features_dc = gan_model._features_dc
             # self.gaussian_model._features_rest = gan_model._features_rest

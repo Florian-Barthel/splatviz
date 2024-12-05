@@ -55,13 +55,12 @@ class LatentWidget(Widget):
             label("render segmentation")
             _changed, self.render_seg = imgui.checkbox("##render_segmentation", self.render_seg)
 
-
             # conditional input
-            label("cond hat")
-            _changed, self.cond_hat = imgui.checkbox("##cond_hat", self.cond_hat)
-
             label("cond glasses")
             _changed, self.cond_glasses = imgui.checkbox("##cond_glasses", self.cond_glasses)
+
+            label("cond hat")
+            _changed, self.cond_hat = imgui.checkbox("##cond_hat", self.cond_hat)
 
             label("cond microphone")
             _changed, self.cond_microphone = imgui.checkbox("##cond_microphone", self.cond_microphone)
@@ -76,8 +75,8 @@ class LatentWidget(Widget):
             _changed, self.cond_misc_group = imgui.checkbox("##cond_misc_group", self.cond_misc_group)
 
         viz.args.conditional_vector = torch.tensor([[
-            self.cond_hat,
             self.cond_glasses,
+            self.cond_hat,
             self.cond_microphone,
             self.cond_hand,
             self.cond_multi_id,
