@@ -1,4 +1,4 @@
-name: gs-view
+name: gs-view-fix
 channels:
   - pytorch
   - nvidia

@@ -21,7 +21,7 @@ class CamWidget(Widget):
         self.radius = 3
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0))
         self.cam_pos = torch.tensor([0.0, 0.0, 1.0])
-        self.up_vector = torch.tensor([0.0, -1.0, 0.0])
+        self.up_vector = torch.tensor([0.0, 1.0, 0.0])
         self.forward = torch.tensor([0.0, 0.0, -1.0])
 
         # controls

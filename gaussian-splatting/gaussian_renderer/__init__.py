@@ -145,8 +145,6 @@ def render_simple(viewpoint_camera, pc: GaussianModel, bg_color: torch.Tensor, s
 
     # If precomputed 3d covariance is provided, use it. If not, then it will be computed from
     # scaling / rotation by the rasterizer.
-    scales = None
-    rotations = None
     cov3D_precomp = None
     scales = pc.get_scaling
     rotations = pc.get_rotation

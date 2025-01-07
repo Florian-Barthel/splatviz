@@ -26,6 +26,8 @@ class LookAtPoseSampler:
         forward_vector=None,
     ):
         camera_origins = get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector)
+        if len(camera_origins.shape) == 1:
+            camera_origins = camera_origins.unsqueeze(0)
         if forward_vector is None:
             forward_vector = get_forward_vector(
                 lookat_position, horizontal_mean, vertical_mean, radius, up_vector, camera_origins

@@ -6,9 +6,12 @@ from scene import GaussianModel
 from gaussian_renderer import render_simple
 from renderer.base_renderer import Renderer
 from scene.cameras import CustomCam
-from splatviz_utils.cam_utils import fov_to_intrinsics
+from splatviz_utils.cam_utils import fov_to_intrinsics, LookAtPoseSampler
 from splatviz_utils.dict_utils import EasyDict
-from face_parsing.face_segment import SegmentationModel
+from utils.graphics_utils import focal2fov
+
+
+# from face_parsing.face_segment import SegmentationModel
 
 
 class GANRenderer(Renderer):
@@ -27,7 +30,7 @@ class GANRenderer(Renderer):
         self.gaussian_model.active_sh_degree = sh_degree
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device="cuda")
         self.last_gan_result = None
-        self.segmentation_model = SegmentationModel()
+        # self.segmentation_model = SegmentationModel()
 
     def _render_impl(
         self,
@@ -49,15 +52,17 @@ class GANRenderer(Renderer):
         latent_y=0.0,
         save_ply_path=None,
         truncation_psi=1.0,
-        c_gen_conditioning_zero=True,
+        mapping_conditioning="frontal",
         conditional_vector=None,
         slider={},
         **other_args
     ):
         cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
+        assert mapping_conditioning in ["frontal", "zero", "current"]
+
         self.load(ply_file_paths[0])
-        self.generator.rendering_kwargs["c_gen_conditioning_zero"] = c_gen_conditioning_zero
+        self.generator.rendering_kwargs["c_gen_conditioning_zero"] = mapping_conditioning == "zero"
 
         # create camera
         intrinsics = fov_to_intrinsics(fov, device=self._device)[None, :]
@@ -66,15 +71,34 @@ class GANRenderer(Renderer):
         z = self.create_z(latent_x, latent_y)
         if not torch.equal(self.last_z, z) or self.reload_model:
             # if not self.gghead:
-            gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9), conditional_vector], 1)
+            gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
             # else:
             # gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
-            self.last_gan_result = self.generator(z, gan_camera_params, truncation_psi=truncation_psi, noise_mode='const')
+            if mapping_conditioning == "zero":
+                mapping_camera_params = torch.zeros_like(gan_camera_params)
+            elif mapping_conditioning == "current":
+                mapping_camera_params = gan_camera_params
+            elif mapping_conditioning == "frontal":
+                cam = LookAtPoseSampler.sample(horizontal_mean=-np.pi/2, vertical_mean=np.pi/2, up_vector=torch.tensor([0, 1, 0.]), radius=2.7, lookat_position=torch.tensor([0, 0, 0.2]))
+                cam = cam.to("cuda")
+                intrinsics[0, 0, 0] = 12.96# 4.2647
+                intrinsics[0, 1, 1] = 12.96# 4.2647
+                mapping_camera_params = torch.concat([cam.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+            else:
+                raise NotImplementedError
+
+            # gan_camera_params = torch.concat([mapping_camera_params, conditional_vector], 1)
+            # gan_camera_params = mapping_camera_params
+
+
+            ws = self.generator.mapping(z, mapping_camera_params, truncation_psi=truncation_psi)
+
+            self.last_gan_result = self.generator.synthesis(ws, gan_camera_params, noise_mode='const')
             self.last_z = z
 
         if self.gghead:
-            self.generator.rendering_config.c_gen_conditioning_zero = c_gen_conditioning_zero
+            self.generator.rendering_config.c_gen_conditioning_zero = mapping_conditioning == "zero"
             gan_model = self.last_gan_result.gaussian_attribute_output.gaussian_attributes
             num_gaussians = gan_model["POSITION"].shape[1]
             self.gaussian_model._xyz = gan_model["POSITION"][0]
@@ -85,7 +109,7 @@ class GANRenderer(Renderer):
             self.gaussian_model._rotation = gan_model["ROTATION"][0].contiguous()
             self.gaussian_model._opacity = gan_model["OPACITY"][0]
         else:
-            gan_model = EasyDict(self.last_gan_result["gaussian_params"][0])
+            gan_model = EasyDict(self.last_gan_result["gaussian_params"])
             self.gaussian_model._xyz = gan_model._xyz
             self.gaussian_model._features_dc = gan_model._features_dc
             # self.gaussian_model._features_rest = gan_model._features_rest
@@ -99,7 +123,8 @@ class GANRenderer(Renderer):
         if save_ply_path is not None:
             self.save_ply(gs, save_ply_path)
 
-        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
+        # fov_rad = 12.96 #focal2fov(4.2647, 1)
+        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)# cam.reshape(4, 4)
         if self.gghead:
             result = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda")) #, override_color=gan_model._features_dc)
         else:
@@ -109,7 +134,7 @@ class GANRenderer(Renderer):
         img = result["render"]
 
         #img = img * 2 - 1
-        # img = (img + 1) / 2
+        img = (img + 1) / 2
         # img = torch.clip(img, 0.0, 1.0)
 
         if render_seg:

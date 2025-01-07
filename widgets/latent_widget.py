@@ -22,7 +22,8 @@ class LatentWidget(Widget):
         self.cond_hand = False
         self.cond_multi_id = False
         self.cond_misc_group = False
-
+        self.mapping_conditioning_modes = ["frontal", "zero", "current"]
+        self.mapping_conditioning = 0
 
     def drag(self, dx, dy):
         self.latent.x += dx / 1000
@@ -49,13 +50,14 @@ class LatentWidget(Widget):
                 "##truncation", self.truncation_psi, 0.0, 1.0
             )
 
-            label("c_gen_conditioning_zero")
-            _changed, self.c_gen_conditioning_zero = imgui.checkbox("##c_gen_conditioning_zero", self.c_gen_conditioning_zero)
+            label("Mapping Conditioning")
+            _, self.mapping_conditioning = imgui.combo("##mapping_modes", self.mapping_conditioning, self.mapping_conditioning_modes)
 
             label("render segmentation")
             _changed, self.render_seg = imgui.checkbox("##render_segmentation", self.render_seg)
 
-            # conditional input
+            imgui.text("Conditional")
+
             label("cond glasses")
             _changed, self.cond_glasses = imgui.checkbox("##cond_glasses", self.cond_glasses)
 
@@ -85,6 +87,6 @@ class LatentWidget(Widget):
         viz.args.truncation_psi = self.truncation_psi
         viz.args.latent_x = self.latent.x
         viz.args.latent_y = self.latent.y
-        viz.args.c_gen_conditioning_zero = self.c_gen_conditioning_zero
+        viz.args.mapping_conditioning = self.mapping_conditioning_modes[self.mapping_conditioning]
         viz.args.render_seg = self.render_seg
 
