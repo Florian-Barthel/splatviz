@@ -11,7 +11,7 @@
 
 import torch
 import math
-from diff_gauss import GaussianRasterizationSettings, GaussianRasterizer
+from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer
 from scene.gaussian_model import GaussianModel
 from utils.sh_utils import eval_sh
 
@@ -169,7 +169,7 @@ def render_simple(viewpoint_camera, pc: GaussianModel, bg_color: torch.Tensor, s
     # Rasterize visible Gaussians to image, obtain their radii (on screen).
 
     #rendered_image, radii
-    rendered_image, rendered_depth, rendered_alpha, radii = rasterizer(
+    rendered_image, radii, rendered_depth, rendered_alpha = rasterizer(
         means3D=means3D,
         means2D=means2D,
         shs=shs,

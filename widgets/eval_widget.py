@@ -69,11 +69,19 @@ class EvalWidget(Widget):
                 imgui.text(pprint.pformat(result, compact=True))
 
     def handle_tensor(self, result, depth, var_name):
-        imgui.text(pprint.pformat(result, compact=True))
+        imgui.text(f"min:  {pprint.pformat(result.min(), compact=True)}")
+        imgui.text(f"mean: {pprint.pformat(result.mean(), compact=True)}")
+        imgui.text(f"max:  {pprint.pformat(result.max(), compact=True)}")
+        imgui.text(f"std:  {pprint.pformat(result.std(), compact=True)}")
+        imgui.text(f"shape:{pprint.pformat(result.shape, compact=True)}")
+
+
+        # imgui.text(pprint.pformat(result, compact=True))
         orig_var_name = var_name
         var_name += self.viz.args.ply_file_paths[0]
         if var_name not in self.use_cache_dict.keys():
             self.use_cache_dict[var_name] = True
+
         imgui.new_line()
         imgui.same_line(depth)
         label("Cache")

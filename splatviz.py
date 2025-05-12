@@ -10,7 +10,9 @@ np.set_printoptions(precision=2)
 from renderer.renderer_wrapper import RendererWrapper
 from renderer.gaussian_renderer import GaussianRenderer
 from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+# from renderer.gan_renderer import GANRenderer
 from renderer.gan_renderer import GANRenderer
+
 from renderer.attach_renderer import AttachRenderer
 # from renderer.ffhq_renderer import FFHQRenderer
 from splatviz_utils.gui_utils import imgui_window

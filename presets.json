@@ -243,5 +243,287 @@
         "_id": "12364012634"
       }
     ]
+  },
+  "2d grid": {
+    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\ngrid_us = (grid_ids % grid_sidelen) / grid_sidelen - 0.5\ngrid_vs = grid_ids // grid_sidelen / grid_sidelen - 0.5\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\n\ngrid_xyz[:, 0] = grid_us\ngrid_xyz[:, 1] = grid_vs.flip(dims=(0,))\ngrid_xyz[:, 2] = 0\n\n\ngs._xyz = grid_xyz\ngs._scaling = gs._scaling * 0 - 5\ngs._features_dc = grid_xyz[:, None, :]*5\ngs._opacity = gs._opacity+10",
+    "slider": [
+      {
+        "key": "x",
+        "value": 1.0,
+        "min_value": 0.0,
+        "max_value": 10.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      },
+      {
+        "key": "size",
+        "value": 1.0,
+        "min_value": 1.0,
+        "max_value": 2.0,
+        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
+      },
+      {
+        "key": "phase",
+        "value": 0.0,
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
+      },
+      {
+        "key": "grid_scale",
+        "value": 2.802000045776367,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
+      },
+      {
+        "key": "grid_opacity",
+        "value": -8.680999755859375,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
+      }
+    ]
+  },
+  "2dgrid_fix": {
+    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\ngrid_us = ((grid_ids % grid_sidelen) / grid_sidelen - 0.5) * 2\ngrid_vs = (grid_ids // grid_sidelen / grid_sidelen - 0.5) * 2\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\n\ngrid_xyz[:, 0] = grid_us * slider.k\ngrid_xyz[:, 1] = grid_vs.flip(dims=(0,)) * slider.l\ngrid_xyz[:, 2] = 0\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 5\ngs._features_dc = grid_xyz[:, None, :]*5\ngs._opacity = gs._opacity+10\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 1.0,
+        "min_value": 0.0,
+        "max_value": 10.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      },
+      {
+        "key": "size",
+        "value": 1.0,
+        "min_value": 1.0,
+        "max_value": 2.0,
+        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
+      },
+      {
+        "key": "phase",
+        "value": 0.0,
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
+      },
+      {
+        "key": "grid_scale",
+        "value": 2.802000045776367,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
+      },
+      {
+        "key": "grid_opacity",
+        "value": -8.680999755859375,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
+      },
+      {
+        "key": "k",
+        "value": 1.8960000276565552,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
+      },
+      {
+        "key": "l",
+        "value": 1.4279999732971191,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
+      }
+    ]
+  },
+  "2dgrid_rand": {
+    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\ngrid_xyz[:, 0] = gs._xyz[:, 0] * slider.l\ngrid_xyz[:, 1] = gs._xyz[:, 1] * slider.l\ngrid_xyz[:, 2] = -0\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 6\ngs._features_dc = grid_xyz[:, None, :]\ngs._opacity = gs._opacity+10\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 4.296000003814697,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      },
+      {
+        "key": "size",
+        "value": 1.0,
+        "min_value": 1.0,
+        "max_value": 2.0,
+        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
+      },
+      {
+        "key": "phase",
+        "value": 0.0,
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
+      },
+      {
+        "key": "grid_scale",
+        "value": 2.802000045776367,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
+      },
+      {
+        "key": "grid_opacity",
+        "value": -8.680999755859375,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
+      },
+      {
+        "key": "k",
+        "value": 7.039999961853027,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
+      },
+      {
+        "key": "l",
+        "value": 1.9859999418258667,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
+      }
+    ]
+  },
+  "rotation_mask": {
+    "edit_text": "rotation_yaw = torch.eye(n=4, device=\"cuda\")\nrotation_yaw[0, 0] = np.cos(slider.alpha)\nrotation_yaw[0, 1] = -np.sin(slider.alpha)\nrotation_yaw[1, 0] = np.sin(slider.alpha)\nrotation_yaw[1, 1] = np.cos(slider.alpha)\n\nrotation_pitch = torch.eye(n=4, device=\"cuda\")\nrotation_pitch[0, 0] = np.cos(slider.beta)\nrotation_pitch[0, 2] = np.sin(slider.beta)\nrotation_pitch[2, 0] = -np.sin(slider.beta)\nrotation_pitch[2, 2] = np.cos(slider.beta)\n\nrotation_roll = torch.eye(n=4, device=\"cuda\")\nrotation_roll[1, 1] = np.cos(slider.gamma)\nrotation_roll[1, 2] = -np.sin(slider.gamma)\nrotation_roll[2, 1] = np.sin(slider.gamma)\nrotation_roll[2, 2] = np.cos(slider.gamma)\n\n\nrotation = rotation_yaw @ rotation_pitch @ rotation_roll\n\npoints_h = torch.ones([gs._xyz.shape[0], 4], device=\"cuda\")\npoints_h[:, :3] = torch.clone(gs._xyz)\npoints_h = (rotation @ points_h.T).T\npoints_h = points_h / points_h[:, 3:4]\nrotated_points = points_h[:, :3]\n\nmask_x = rotated_points[:, 0] < slider.x\nmask_y =rotated_points[:, 1] < slider.y\nmask_z =rotated_points[:, 2] < slider.z\n\nmask = mask_x & mask_y & mask_z\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 0.7689999938011169,
+        "min_value": -5.0,
+        "max_value": 5.0,
+        "_id": "12364012634"
+      },
+      {
+        "key": "y",
+        "value": 4.959000110626221,
+        "min_value": -5.0,
+        "max_value": 5.0,
+        "_id": "197e4266-82ba-417d-b276-536e465f4fc0"
+      },
+      {
+        "key": "z",
+        "value": 10.0,
+        "min_value": -5.0,
+        "max_value": 10.0,
+        "_id": "636299d8-5d63-4e7c-8ce4-d192aa019d95"
+      },
+      {
+        "key": "alpha",
+        "value": -6.263000011444092,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "329616ed-3e7b-4989-91c3-6a20f34c8bb2"
+      },
+      {
+        "key": "beta",
+        "value": -0.6050000190734863,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "a2db36a0-1911-4f29-8927-665649dc26a4"
+      },
+      {
+        "key": "gamma",
+        "value": 0.0,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "5ccd3b07-475b-4119-a004-f0f4109f92c9"
+      }
+    ]
+  },
+  "2d_grid_translate": {
+    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\ngrid_xyz[:, 0] = gs._xyz[:, 0] + slider.l\ngrid_xyz[:, 1] = gs._xyz[:, 1] + slider.k\ngrid_xyz[:, 2] = -2\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 6\ngs._features_dc = grid_xyz[:, None, :]\ngs._opacity = gs._opacity+10\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 4.296000003814697,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      },
+      {
+        "key": "size",
+        "value": 1.0,
+        "min_value": 1.0,
+        "max_value": 2.0,
+        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
+      },
+      {
+        "key": "phase",
+        "value": 0.0,
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
+      },
+      {
+        "key": "grid_scale",
+        "value": 2.802000045776367,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
+      },
+      {
+        "key": "grid_opacity",
+        "value": -8.680999755859375,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
+      },
+      {
+        "key": "k",
+        "value": 0.035999998450279236,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
+      },
+      {
+        "key": "l",
+        "value": -0.035999998450279236,
+        "min_value": -10.0,
+        "max_value": 10.0,
+        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
+      }
+    ]
+  },
+  "recolor": {
+    "edit_text": "torch.manual_seed(0)\ngs._features_dc = torch.rand_like(gs._features_dc) *torch.rand_like(gs._features_dc)*torch.rand_like(gs._features_dc)* torch.tensor([slider.x, slider.y, slider.z], device=\"cuda\") /slider.i\ngs._features_rest = gs._features_rest * 0\n\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 1.0,
+        "min_value": -1.0,
+        "max_value": 1.0,
+        "_id": "9f3fd0c1-67a5-4b38-9ec4-36d27aceddda"
+      },
+      {
+        "key": "y",
+        "value": 1.0,
+        "min_value": -1.0,
+        "max_value": 1.0,
+        "_id": "ff4ea574-8c1d-4b56-9c3a-2cd62225e573"
+      },
+      {
+        "key": "z",
+        "value": 2.0,
+        "min_value": 0.0,
+        "max_value": 2.0,
+        "_id": "950424e3-2c1a-47ee-a07b-06d62bbd0d80"
+      },
+      {
+        "key": "i",
+        "value": 0.16300000250339508,
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "_id": "baf07f97-8b62-4b3f-b61f-1d805d71b3dd"
+      }
+    ]
   }
 }

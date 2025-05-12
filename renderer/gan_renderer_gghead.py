@@ -8,6 +8,7 @@ from renderer.base_renderer import Renderer
 from scene.cameras import CustomCam
 from splatviz_utils.cam_utils import fov_to_intrinsics, LookAtPoseSampler
 from splatviz_utils.dict_utils import EasyDict
+from utils.graphics_utils import focal2fov
 
 
 # from face_parsing.face_segment import SegmentationModel
@@ -23,27 +24,13 @@ class GANRenderer(Renderer):
         self.latent_map = torch.randn([1, 512, 10, 10], device=self._device, dtype=torch.float)
         self.reload_model = True
         self._current_pkl_file_path = ""
-        sh_degree = 0
+        sh_degree = 1
         self.gaussian_model = GaussianModel(sh_degree=sh_degree, disable_xyz_log_activation=True)
         self.gaussian_model.active_sh_degree = sh_degree
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device="cuda")
         self.last_gan_result = None
         self.fov_rad = None
-        self.upscale_factor = 1
         # self.segmentation_model = SegmentationModel()
-        self.gs_params_default = {
-            "rendering_scale": 0, # should be zero for training
-            "res_visualize": None, # [0, 1, 2, ...], visualizing gaussians in those block indices
-            "disable_background": False,
-            'opacity_ones': False,
-            'point_index': [],
-            'num_init_near_point': -1,
-            'save_ply': None,
-            'visualize_anchor': False,
-            'camera_cond': None,
-            'cam_interp_ratio': 0., # always not use center-oriented camera [0, 1]
-            'cam_dir_swap_p': 0.,
-        }
 
     def _render_impl(
         self,
@@ -83,7 +70,11 @@ class GANRenderer(Renderer):
 
         z = self.create_z(latent_x, latent_y)
         if not torch.equal(self.last_z, z) or self.reload_model:
+            # if not self.gghead:
             gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+            # else:
+            # gan_camera_params = torch.concat([cam_params.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+
             if mapping_conditioning == "zero":
                 mapping_camera_params = torch.zeros_like(gan_camera_params)
             elif mapping_conditioning == "current":
@@ -91,30 +82,28 @@ class GANRenderer(Renderer):
             elif mapping_conditioning == "frontal":
                 cam = LookAtPoseSampler.sample(horizontal_mean=-np.pi/2, vertical_mean=np.pi/2, up_vector=torch.tensor([0, 1, 0.]), radius=2.7, lookat_position=torch.tensor([0, 0, 0.2]))
                 cam = cam.to("cuda")
+                # intrinsics[0, 0, 0] = 12.96# 4.2647
+                # intrinsics[0, 1, 1] = 12.96# 4.2647
                 mapping_camera_params = torch.concat([cam.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
             else:
                 raise NotImplementedError
 
-            # gan_camera_params = torch.concat([mapping_camera_params, conditional_vector], 1)
-            # gan_camera_params = mapping_camera_params
+            ws = self.generator.mapping(z, mapping_camera_params, truncation_psi=truncation_psi)
 
-            if False:
-                ws = torch.tensor(np.load("/home/barthel/projects/3d-multiview-inversion/main/out/2025.01.20-15:13000.pkl/final_projected_w.npz")["w"], device=self._device)
-            else:
-                ws = self.generator.mapping(z, mapping_camera_params, truncation_psi=truncation_psi)
-
-
-            self.last_gan_result = self.generator.synthesis(ws, gan_camera_params, noise_mode='const', gs_params=self.gs_params_default)
+            self.last_gan_result = self.generator.synthesis(ws, gan_camera_params, noise_mode='const')
             self.last_z = z
 
+        self.generator.rendering_config.c_gen_conditioning_zero = mapping_conditioning == "zero"
+        gan_model = self.last_gan_result.gaussian_attribute_output.gaussian_attributes
+        num_gaussians = gan_model["POSITION"].shape[1]
+        self.gaussian_model._xyz = gan_model["POSITION"][0]
+        color = gan_model["COLOR"][0].reshape(num_gaussians, -1, 3)
+        self.gaussian_model._features_dc = color[:, :1]
+        self.gaussian_model._features_rest = color[:, 1:]
+        self.gaussian_model._scaling = gan_model["SCALE"][0]
+        self.gaussian_model._rotation = gan_model["ROTATION"][0].contiguous()
+        self.gaussian_model._opacity = gan_model["OPACITY"][0]
 
-        gan_model = EasyDict(self.last_gan_result["gaussian_params"])
-        self.gaussian_model._xyz = gan_model._xyz
-        self.gaussian_model._features_dc = gan_model._features_dc
-        self.gaussian_model._features_rest = gan_model._features_dc[:, 0:0]
-        self.gaussian_model._scaling = gan_model._scaling
-        self.gaussian_model._rotation = gan_model._rotation
-        self.gaussian_model._opacity = gan_model._opacity
 
         gs = self.gaussian_model
         exec(self.sanitize_command(edit_text))
@@ -139,6 +128,7 @@ class GANRenderer(Renderer):
         latent_x = torch.tensor(latent_x, device="cuda", dtype=torch.float)
         latent_y = torch.tensor(latent_y, device="cuda", dtype=torch.float)
         position = torch.stack([latent_x, latent_y]).reshape(1, 1, 1, 2)
+        # todo: interpolate in w
         z = torch.nn.functional.grid_sample(self.latent_map, position, padding_mode="reflection")
         return z.reshape(1, 512)
 
@@ -148,5 +138,35 @@ class GANRenderer(Renderer):
                 with open(pkl_file_path, "rb") as input_file:
                     save_file = pickle.load(input_file)
                     self.generator = save_file["G_ema"]
-                    self.generator = self.generator.to("cuda")
                     self._current_pkl_file_path = pkl_file_path
+                    self.generator.rendering_kwargs["c_gen_conditioning_zero"] = True
+                    self.generator = self.generator.to("cuda")
+
+                    # Backward compatibility
+                    if not hasattr(self.generator, '_n_uv_channels_background'):
+                        self.generator._n_uv_channels_background = 0
+
+                    if self.generator._config.use_initial_scales and not hasattr(self.generator, '_initial_gaussian_scales_head'):
+                        self.generator.register_buffer(
+                            "_initial_gaussian_scales_head", self.generator._initial_gaussian_scales, persistent=False
+                        )
+
+                    if not hasattr(self.generator, '_n_uv_channels_per_shell'):
+                        # n_uv_channels was renamed into n_uv_channels_per_shell
+                        self.generator._n_uv_channels_per_shell = self.generator._n_uv_channels
+
+                    if not hasattr(self.generator, '_n_uv_channels_decoded'):
+                        self.generator._n_uv_channels_decoded = self.generator._n_uv_channels
+
+                    if not hasattr(self.generator, '_n_uv_channels_per_shell_decoded'):
+                        self.generator._n_uv_channels_per_shell_decoded = self.generator._n_uv_channels_per_shell
+
+                    if not hasattr(self.generator._config, 'template_update_attributes'):
+                        # template_update_attributes was added to config and used in forward pass
+                        self.generator._config.template_update_attributes = []
+
+                    if (self.generator._config.super_resolution_config.use_superresolution
+                            and self.generator._config.super_resolution_config.superresolution_version == 2
+                            and not hasattr(self.generator.super_resolution, 'n_downsampling_layers')):
+                        # Number of downsampling layers was made variable
+                        self.generator.super_resolution.n_downsampling_layers = 1
