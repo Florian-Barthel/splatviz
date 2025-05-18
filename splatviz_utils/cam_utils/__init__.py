@@ -12,6 +12,8 @@
 Helper functions for constructing camera parameter matrices. Primarily used in visualization and inference scripts.
 """
 import math
+
+import numpy as np
 import torch
 
 
@@ -111,3 +113,19 @@ def fov_to_intrinsics(fov_degrees, imsize=1, device="cpu"):
     focal_length = float(imsize / (2 * math.tan(fov_rad / 2)))
     intrinsics = torch.tensor([[focal_length, 0, 0.5], [0, focal_length, 0.5], [0, 0, 1.0]], device=device)
     return intrinsics
+
+def get_default_intrinsics():
+    return torch.tensor([
+        4.2647, 0.0, 0.5,
+        0.0, 4.2647, 0.5,
+        0.0, 0.0, 1.0
+    ], device="cuda")
+
+def get_default_extrinsics():
+    return LookAtPoseSampler.sample(
+        horizontal_mean=-np.pi / 2,
+        vertical_mean=np.pi / 2,
+        up_vector=torch.tensor([0, 1, 0.]),
+        radius=2.7,
+        lookat_position=torch.tensor([0, 0, 0])
+    )

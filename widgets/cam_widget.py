@@ -25,7 +25,7 @@ class CamWidget(Widget):
         self.forward = torch.tensor([0.0, 0.0, 1.0])
 
         # controls
-        self.pose = EasyDict(yaw=0, pitch=0)
+        self.pose = EasyDict(yaw=np.pi, pitch=0)
         self.invert_x = False
         self.invert_y = False
         self.move_speed = 0.02

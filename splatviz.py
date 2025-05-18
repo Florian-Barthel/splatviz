@@ -33,7 +33,6 @@ from widgets import (
     latent_widget,
     render_widget,
     training_widget,
-    annotation_widget
 )
 
 
@@ -114,15 +113,6 @@ class Splatviz(imgui_window.ImguiWindow):
             ]
             sys.path.append(ggd_path)
             renderer = GANRenderer()
-        elif mode == "ffhq":
-            pass
-            # self.widgets = [
-            #     load_widget.LoadWidget(self, data_path, file_ending=".png"),
-            #     render_widget.RenderWidget(self),
-            #     annotation_widget.AnnotationWidget(self),
-            #     eval_widget.EvalWidget(self),
-            # ]
-            # renderer = FFHQRenderer()
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
 
