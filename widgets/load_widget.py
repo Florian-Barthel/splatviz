@@ -12,7 +12,7 @@ class LoadWidget(Widget):
         self.file_ending = file_ending
         self.items = self.list_runs_and_pkls()
         if len(self.items) == 0:
-            raise FileNotFoundError(f"No .pkl found in '{root}' with filter 'f{self.filter}'")
+            raise FileNotFoundError(f"No .pkl found in '{root}'")
         self.ply = self.items[0]
 
     @imgui_utils.scoped_by_object_id

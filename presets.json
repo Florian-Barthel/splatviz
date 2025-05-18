@@ -523,6 +523,15 @@
         "min_value": 0.0,
         "max_value": 1.0,
         "_id": "baf07f97-8b62-4b3f-b61f-1d805d71b3dd"
+  "show layers": {
+    "edit_text": "start=512+ 512*4+ 4*4*512+ 4*4*4*512*2\nend=  512+ 512*4+ 4*4*512+ 4*4*4*512*2 + 4*4*4*512*2*2\n\ngs._xyz = gs._xyz[start:end]\ngs._rotation = gs._rotation[start:end]\ngs._scaling = gs._scaling[start:end]\ngs._opacity = gs._opacity[start:end]\ngs._features_dc = gs._features_dc[start:end]\ngs._features_rest = gs._features_rest[start:end]\n",
+    "slider": [
+      {
+        "key": "opacity",
+        "value": 10.0,
+        "min_value": 0.0,
+        "max_value": 20.0,
+        "_id": "12364012634"
       }
     ]
   }
