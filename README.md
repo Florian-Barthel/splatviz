@@ -19,7 +19,7 @@ at the same time by **comparing them side by side** or in a splitscreen view.
 See some example editings in this  <a href="https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel">
 video</a>.
 
-**NEW UPDATE:** splatviz supports rendering the output of 3D GAN and allows for exploring the latent space.
+**NEW UPDATE:** splatviz supports rendering the output of 3D GANs and allows for exploring the latent space.
 
 </div>
 <div align="center">
