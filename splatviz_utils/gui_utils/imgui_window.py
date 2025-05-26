@@ -21,7 +21,7 @@ from splatviz_utils.gui_utils import style
 
 
 class ImguiWindow(glfw_window.GlfwWindow):
-    def __init__(self, *, title="ImguiWindow", font=None, code_font=None, font_sizes=range(16, 28), **glfw_kwargs):
+    def __init__(self, *, title="ImguiWindow", font=None, code_font=None, font_sizes=range(16, 64), **glfw_kwargs):
         if font is None:
             font = text_utils.get_default_font()
             code_font = text_utils.get_default_font()
