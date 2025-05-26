@@ -13,7 +13,8 @@ class RenderWidget(Widget):
         self.render_depth = False
         self.render_gan_image = False
         self.resolution = 1024
-        self.background_color = torch.tensor([0.0, 0.0, 0.0])
+        self.background_color = torch.tensor([1.0, 1.0, 1.0])
+        self.img_normalize = False
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True, decoder=False):
@@ -21,6 +22,9 @@ class RenderWidget(Widget):
         if show:
             label("Resolution", viz.label_w)
             _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
+
+            label("Normalize", viz.label_w)
+            _changed, self.img_normalize = imgui.checkbox("##Normalize", self.img_normalize)
 
             label("Render Alpha", viz.label_w)
             alpha_changed, self.render_alpha = imgui.checkbox("##RenderAlpha", self.render_alpha)
@@ -46,3 +50,4 @@ class RenderWidget(Widget):
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
         viz.args.render_gan_image = self.render_gan_image
+        viz.args.img_normalize = self.img_normalize

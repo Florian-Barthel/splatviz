@@ -9,7 +9,8 @@ np.set_printoptions(precision=2)
 
 from renderer.renderer_wrapper import RendererWrapper
 from renderer.gaussian_renderer import GaussianRenderer
-from renderer.gaussian_decoder_renderer import GaussianDecoderRenderer
+from renderer.gan_renderer import GANRenderer
+
 from renderer.attach_renderer import AttachRenderer
 from splatviz_utils.gui_utils import imgui_window
 from splatviz_utils.gui_utils import imgui_utils
@@ -21,7 +22,7 @@ from widgets import (
     edit_widget,
     eval_widget,
     performance_widget,
-    load_widget_pkl,
+    load_widget,
     load_widget_ply,
     video_widget,
     cam_widget,
@@ -33,7 +34,7 @@ from widgets import (
 
 
 class Splatviz(imgui_window.ImguiWindow):
-    def __init__(self, data_path, mode, host, port, ggd_path=""):
+    def __init__(self, data_path, mode, host, port, gan_path=""):
         self.code_font_path = "resources/fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "resources/fonts/source_sans_pro/SourceSansPro-Regular.otf"
 
@@ -66,23 +67,6 @@ class Splatviz(imgui_window.ImguiWindow):
                 eval_widget.EvalWidget(self),
             ]
             renderer = GaussianRenderer()
-        elif mode == "decoder":
-            self.widgets = [
-                load_widget_pkl.LoadWidget(self, data_path),
-                cam_widget.CamWidget(self),
-                performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
-                capture_widget.CaptureWidget(self),
-                render_widget.RenderWidget(self),
-                edit_widget.EditWidget(self),
-                eval_widget.EvalWidget(self),
-                latent_widget.LatentWidget(self),
-            ]
-            sys.path.append(ggd_path)
-            # sys.path.append(ggd_path + "/eg3d") # switch between EG3D and PanoHead
-            sys.path.append(ggd_path + "/PanoHead")
-            sys.path.append(ggd_path + "/main")
-            renderer = GaussianDecoderRenderer()
         elif mode == "attach":
             self.widgets = [
                 cam_widget.CamWidget(self),
@@ -92,8 +76,23 @@ class Splatviz(imgui_window.ImguiWindow):
                 edit_widget.EditWidget(self),
                 training_widget.TrainingWidget(self),
             ]
+            sys.path.append(gan_path)
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
+        elif mode == "gan":
+            self.widgets = [
+                load_widget.LoadWidget(self, data_path, file_ending=".pkl"),
+                cam_widget.CamWidget(self),
+                performance_widget.PerformanceWidget(self),
+                video_widget.VideoWidget(self),
+                capture_widget.CaptureWidget(self),
+                render_widget.RenderWidget(self),
+                edit_widget.EditWidget(self),
+                eval_widget.EvalWidget(self),
+                latent_widget.LatentWidget(self),
+            ]
+            sys.path.append(gan_path)
+            renderer = GANRenderer()
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
 

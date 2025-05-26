@@ -17,15 +17,15 @@ from widgets.widget import Widget
 class CamWidget(Widget):
     def __init__(self, viz):
         super().__init__(viz, "Camera")
-        self.fov = 45
-        self.radius = 3
+        self.fov = 15
+        self.radius = 2.7
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0))
-        self.cam_pos = torch.tensor([0.0, 0.0, 1.0])
-        self.up_vector = torch.tensor([0.0, -1.0, 0.0])
-        self.forward = torch.tensor([0.0, 0.0, -1.0])
+        self.cam_pos = torch.tensor([0.0, 0.0, -1.0])
+        self.up_vector = torch.tensor([0.0, 1.0, 0.0])
+        self.forward = torch.tensor([0.0, 0.0, 1.0])
 
         # controls
-        self.pose = EasyDict(yaw=0, pitch=0)
+        self.pose = EasyDict(yaw=np.pi, pitch=0)
         self.invert_x = False
         self.invert_y = False
         self.move_speed = 0.02
@@ -74,12 +74,19 @@ class CamWidget(Widget):
             if imgui_utils.button("Flip", width=viz.button_w):
                 self.up_vector = -self.up_vector
 
-            label("FOV", viz.label_w)
-            self.fov = slider(self.fov, "##fov", 1, 180, format="%.1f °")
+            label("FOV")
+            self.fov = slider(self.fov, "##fov", 1, 180, format="%.2f °")
+            imgui.same_line()
+            changed, self.fov = imgui.input_float("##fov_input", self.fov)
+
+            label("Camera Pos", viz.label_w)
+            _, (self.pose.yaw, self.pose.pitch) = imgui.input_float2("##yaw_ptich", [self.pose.yaw, self.pose.pitch], format="%.1f")
 
             if self.control_modes[self.current_control_mode] == "Orbit":
-                label("Radius", viz.label_w)
-                self.radius = slider(self.radius, "##radius", 1, 20, format="%.1f °")
+                label("Radius")
+                self.radius = slider(self.radius, "##radius", 1, 20, format="%.2f")
+                imgui.same_line()
+                changed, self.radius = imgui.input_float("##radius_input", self.radius)
 
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz stddev", width=viz.button_large_w) and "std_xyz" in viz.result.keys():
