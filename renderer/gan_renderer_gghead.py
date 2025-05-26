@@ -21,7 +21,10 @@ class GANRenderer(Renderer):
         self.gaussian_model.active_sh_degree = 1
         self.last_gan_result = None
         self.latent_map = LatentMap()
-        self.last_z = torch.zeros([1, 512], device=self._device)
+        self.device = torch.device("cuda")
+        self.last_mapping_conditioning = "frontal"
+        self.last_truncation_psi = 1.0
+        self.last_latent = torch.zeros([1, 512], device=self._device)
 
     def _render_impl(
         self,
@@ -36,24 +39,35 @@ class GANRenderer(Renderer):
         img_normalize,
         latent_x,
         latent_y,
+        latent_space="W",
         save_ply_path=None,
         truncation_psi=1.0,
         mapping_conditioning="frontal",
         slider={},
         **other_args
     ):
-        cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
+        cam_params = cam_params.to(self.device)
+        mapping_conditioning_changed = mapping_conditioning != self.last_mapping_conditioning
+        self.last_mapping_conditioning = mapping_conditioning
 
         # generator
-        z = self.latent_map.get_latent(latent_x, latent_y, "W")
-        latent_changed = not torch.equal(self.last_z, z)
         model_changed = self.load(ply_file_paths[0])
-        if latent_changed or model_changed:
+        truncation_psi_changed = self.last_truncation_psi != truncation_psi
+        if truncation_psi_changed and latent_space == "W":
+            self.latent_map.load_w_map(self.generator.mapping, truncation_psi)
+
+        latent = self.latent_map.get_latent(latent_x, latent_y, latent_space=latent_space)
+        latent_changed = not torch.equal(self.last_latent, latent)
+
+        if latent_changed or model_changed or truncation_psi_changed or mapping_conditioning_changed or mapping_conditioning == "current":
             gan_camera_params, mapping_camera_params = view_conditioning(cam_params, fov, mapping_conditioning)
-            ws = self.generator.mapping(z, mapping_camera_params, truncation_psi=truncation_psi)
-            gan_result = self.generator.synthesis(ws, gan_camera_params, noise_mode='const')
-            self.last_z = z
+            if latent_space == "Z":
+                mapped_latent = self.generator.mapping(latent, mapping_camera_params, truncation_psi=truncation_psi)
+            elif latent_space == "W":
+                mapped_latent = latent[:, None, :].repeat(1, self.generator.backbone.mapping.num_ws, 1)
+            gan_result = self.generator.synthesis(mapped_latent, gan_camera_params, noise_mode="const")
+            self.last_latent = latent
             self.extract_gaussians(gan_result)
 
         # edit 3DGS scene
@@ -73,7 +87,7 @@ class GANRenderer(Renderer):
             res.eval = eval(eval_text)
 
     def extract_gaussians(self, gan_result):
-        gan_model = gan_result.gaussian_attribute_output.gaussian_attributes
+        gan_model = gan_result.gaussian_attributes
         num_gaussians = gan_model["POSITION"].shape[1]
         self.gaussian_model._xyz = gan_model["POSITION"][0]
         color = gan_model["COLOR"][0].reshape(num_gaussians, -1, 3)
@@ -116,4 +130,5 @@ class GANRenderer(Renderer):
                 and not hasattr(self.generator.super_resolution, 'n_downsampling_layers')):
             # Number of downsampling layers was made variable
             self.generator.super_resolution.n_downsampling_layers = 1
+        self.latent_map.load_w_map(self.generator.mapping, self.last_truncation_psi)
         return True

@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import torch
 import torch.nn
+from tqdm import tqdm
 
 from scene import GaussianModel
 from gaussian_renderer import render_simple
@@ -23,6 +24,7 @@ class GANRenderer(Renderer):
         self.device = torch.device("cuda")
         self.last_truncation_psi = 1.0
         self.last_mapping_conditioning = "frontal"
+        self.last_seed = 0
 
     def _render_impl(
         self,
@@ -42,13 +44,22 @@ class GANRenderer(Renderer):
         save_ply_path=None,
         truncation_psi=1.0,
         mapping_conditioning="frontal",
+        save_ply_grid_path=None,
+        seed=0,
         slider={},
         **other_args
     ):
         slider = EasyDict(slider)
         cam_params = cam_params.to(self.device)
         mapping_conditioning_changed = mapping_conditioning != self.last_mapping_conditioning
+        seed_changed = seed != self.last_seed
         self.last_mapping_conditioning = mapping_conditioning
+        if seed_changed:
+            torch.manual_seed(seed)
+            np.random.seed(seed)
+            self.latent_map = LatentMap()
+            self.latent_map.load_w_map(self.generator.mapping, truncation_psi)
+            self.last_seed = seed
 
         # generator
         model_changed = self.load(ply_file_paths[0])
@@ -59,13 +70,13 @@ class GANRenderer(Renderer):
         latent = self.latent_map.get_latent(latent_x, latent_y, latent_space=latent_space)
         latent_changed = not torch.equal(self.last_latent, latent)
 
-        if latent_changed or model_changed or truncation_psi_changed or mapping_conditioning_changed or mapping_conditioning == "current":
+        if seed_changed or latent_changed or model_changed or truncation_psi_changed or mapping_conditioning_changed or mapping_conditioning == "current":
             gan_camera_params, mapping_camera_params = view_conditioning(cam_params, fov, mapping_conditioning)
             if latent_space == "Z":
                 mapped_latent = self.generator.mapping(latent, mapping_camera_params, truncation_psi=truncation_psi)
             elif latent_space == "W":
                 mapped_latent = latent[:, None, :] .repeat(1, self.generator.mapping_network.num_ws, 1)
-            gan_result = self.generator.synthesis(mapped_latent, gan_camera_params)
+            gan_result = self.generator.synthesis(mapped_latent, gan_camera_params, render_output=False)
             self.last_latent = latent
             self.extract_gaussians(gan_result)
 
@@ -85,8 +96,28 @@ class GANRenderer(Renderer):
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 
+        if save_ply_grid_path is not None:
+            self.save_ply_grid(cam_params, fov, latent_space, mapped_latent, mapping_conditioning, truncation_psi)
+
+    def save_ply_grid(self, cam_params, fov, latent_space, mapped_latent, mapping_conditioning, truncation_psi, steps=16):
+        xs, ys = np.meshgrid(np.linspace(-0.5, 0.5, steps), np.linspace(-0.5, 0.5, steps))
+        for i in tqdm(range(steps)):
+            for j in range(steps):
+                x = xs[i, j]
+                y = ys[i, j]
+                latent = self.latent_map.get_latent(x, y, latent_space=latent_space)
+                gan_camera_params, mapping_camera_params = view_conditioning(cam_params, fov, mapping_conditioning)
+                if latent_space == "Z":
+                    mapped_latent = self.generator.mapping(latent, mapping_camera_params, truncation_psi=truncation_psi)
+                elif latent_space == "W":
+                    mapped_latent = latent[:, None, :].repeat(1, self.generator.mapping_network.num_ws, 1)
+                gan_result = self.generator.synthesis(mapped_latent, gan_camera_params)
+                self.last_latent = latent
+                self.extract_gaussians(gan_result)
+                self.save_ply(self.gaussian_model, f"./_ply_grid/model_c{i:02d}_r{j:02d}.ply")
+
     def extract_gaussians(self, gan_result):
-        gan_model = EasyDict(gan_result["gaussian_params"])
+        gan_model = EasyDict(gan_result["gaussian_params"][0])
         self.gaussian_model._xyz = gan_model._xyz
         self.gaussian_model._features_dc = gan_model._features_dc
         self.gaussian_model._features_rest = gan_model._features_dc[:, 0:0]

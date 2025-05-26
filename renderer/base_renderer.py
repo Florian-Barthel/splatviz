@@ -90,7 +90,8 @@ class Renderer:
 
     @staticmethod
     def save_ply(gaussian, save_ply_path):
-        os.makedirs(save_ply_path, exist_ok=True)
-        save_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
-        print("Model saved in", save_path)
-        gaussian.save_ply(save_path)
+        if not save_ply_path.endswith(".ply"):
+            os.makedirs(save_ply_path, exist_ok=True)
+            save_ply_path = os.path.join(save_ply_path, f"model_{len(os.listdir(save_ply_path))}.ply")
+        print("Model saved in", save_ply_path)
+        gaussian.save_ply(save_ply_path)
