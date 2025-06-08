@@ -99,12 +99,12 @@ python run_main.py --mode=gan --data_path=dir/with/network_pkl/files --gan_path=
 <div align="justify"> 
 
 
-### <span style="color:red;">NEW</span> Latent Widget
+### Latent Widget
 Running splatviz in GAN mode (using --mode=gan), allows you to render and manipulate the results of <a href="https://fraunhoferhhi.github.io/cgs-gan/">CGS-GAN</a>. Simply drag the white dot across the 2D plane to interpolate in the latent space of the GAN.
 <br>
 <img src="resources/images/gan_mode.png" style="width: 600px;">
 
-<summary><h3>🗃️ Load Widget</h3></summary>
+### 🗃️ Load Widget
 Once you run the `run_main.py` file, the viewer will directly load the first scene that is found in the data
 directory you have specified. You can change the scene by clicking the **Browse** button. You will be displayed a list
 of available _.ply_ files (or _.yml_ files that correspond to compressed gaussian scenes using
@@ -124,7 +124,7 @@ from: https://fraunhoferhhi.github.io/Self-Organizing-Gaussians.
 <br>
 <img src="resources/images/load.png" style="width: 600px;">
 
-<summary><h3>🛠️ Edit Widget</h3></summary>
+### 🛠️ Edit Widget
 The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian
 python object during runtime. The code that you type in this text area will be executed just before the gaussian object
 is
@@ -160,7 +160,7 @@ closing the application. Those presets are stored in a .json file (presets.json)
 <br>
 <img src="resources/images/edit.png" style="width: 600px;">
 
-<summary><h3>🔍 Eval Widget</h3></summary>
+### 🔍 Eval Widget
 The evaluate widget can be used to debug the gaussian splatting object. By typing
 python code, which is executed after the rendering, you can access any variable
 from the rendering context and visualize them in a histogram. Some useful variables might be:
@@ -175,7 +175,7 @@ You can also access variables that you have defined in the editor of the Edit Wi
 <img src="resources/images/eval.png" style="width: 600px;">
 
 
-<summary><h3>🎥 Camera Widget</h3></summary>
+### 🎥 Camera Widget
 In the camera widget you can define the type and parameters of the camera. Most importantly, you can choose between the
 two modes **Orbit** and **WASD**.
 
@@ -193,7 +193,7 @@ If you were looking down, you will have to press the **Flip** button, since the 
 <img src="resources/images/camera.png" style="width: 600px;">
 
 
-<summary><h3>🎞️ Video Widget</h3></summary>
+### 🎞️ Video Widget
 
 The video widget creates a video sequence of a full rotation around the current object.
 Simply define the height of the camera and the rendering resolution. While the video is
@@ -205,7 +205,7 @@ position is only defined by the <b>Camera Height</b> parameter. This will be cha
 <img src="resources/images/video.png" style="width: 600px;">
 
 
-<summary><h3>📈 Performance Widget</h3></summary>
+### 📈 Performance Widget
 In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
 limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
 skips some editing and evaluation calculations.
@@ -213,14 +213,14 @@ skips some editing and evaluation calculations.
 <img src="resources/images/performance.png" style="width: 600px;">
 
 
-<summary><h3>🖥️ Render Widget</h3></summary>
+### 🖥️ Render Widget
 In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering
 mode. Next to RGB, you can also render the image 3D depth and the alpha
 <br>
 <img src="resources/images/render.png" style="width: 600px;">
 
 
-<summary><h3>💾 Save Widget</h3></summary>
+### 💾 Save Widget
 To save the .ply file or a rendering of the current (edited) 3D scene press the respective button in the
 save widget. Those files will be saved under _screenshots or _ply_files. The viewer might be frozen for a short
 while, after saving a ply file.

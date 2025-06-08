@@ -15,13 +15,13 @@ from widgets.widget import Widget
 
 
 class CamWidget(Widget):
-    def __init__(self, viz):
+    def __init__(self, viz, fov=60, radius=1, up_direction=-1):
         super().__init__(viz, "Camera")
-        self.fov = 15
-        self.radius = 2.7
+        self.fov = fov
+        self.radius = radius
         self.lookat_point = torch.tensor((0.0, 0.0, 0.0))
         self.cam_pos = torch.tensor([0.0, 0.0, -1.0])
-        self.up_vector = torch.tensor([0.0, 1.0, 0.0])
+        self.up_vector = torch.tensor([0.0, up_direction, 0.0])
         self.forward = torch.tensor([0.0, 0.0, 1.0])
 
         # controls
@@ -31,10 +31,13 @@ class CamWidget(Widget):
         self.move_speed = 0.02
         self.wasd_move_speed = 0.1
         self.drag_speed = 0.005
-        self.rotate_speed = 0.02
+        self.rotate_speed = 0.002
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
         self.last_drag_delta = imgui.ImVec2(0, 0)
+        self.momentum_x = 0.0
+        self.momentum_y = 0.0
+        self.momentum_dropoff = 0.85
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show: bool):
@@ -54,6 +57,9 @@ class CamWidget(Widget):
 
             label("Drag Speed", viz.label_w)
             self.drag_speed = slider(self.drag_speed, "drag_speed", 0.001, 0.1, log=True)
+
+            label("Momentum", viz.label_w)
+            self.momentum_dropoff = slider(self.momentum_dropoff, "momentum_dropoff", 0.0, 1.0)
 
             label("Rotate Speed", viz.label_w)
             self.rotate_speed = slider(self.rotate_speed, "rot_speed", 0.001, 0.1, log=True)
@@ -124,13 +130,15 @@ class CamWidget(Widget):
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
-                self.pose.yaw += x_dir * delta.x * self.rotate_speed * 0.1
-                self.pose.pitch += y_dir * delta.y * self.rotate_speed * 0.1
+                x_velocity = x_dir * delta.x * self.rotate_speed
+                y_velocity = y_dir * delta.y * self.rotate_speed
+                self.pose.yaw   += x_velocity
+                self.pose.pitch += y_velocity
                 self.pose.pitch = np.clip(self.pose.pitch, -np.pi / 2, np.pi / 2)
-        elif imgui.is_mouse_dragging(1):  # middle mouse button
-            # TODO: dragging with the middle mouse button could be used for yet another purpose
-            pass
-        elif imgui.is_mouse_dragging(2):  # right mouse button
+                self.momentum_x = x_velocity
+                self.momentum_y = y_velocity
+
+        elif imgui.is_mouse_dragging(2) or imgui.is_mouse_dragging(1):  # right mouse button or middle mouse button
             new_delta = imgui.get_mouse_drag_delta(2)
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
@@ -150,6 +158,12 @@ class CamWidget(Widget):
                     self.lookat_point += y_change
         else:
             self.last_drag_delta = imgui.ImVec2(0, 0)
+
+        # handle mouse momentum
+        self.pose.yaw += self.momentum_x
+        self.pose.pitch += self.momentum_y
+        self.momentum_x *= self.momentum_dropoff
+        self.momentum_y *= self.momentum_dropoff
 
     def handle_wasd(self):
         if self.control_modes[self.current_control_mode] == "WASD":

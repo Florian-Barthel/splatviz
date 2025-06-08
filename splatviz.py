@@ -25,7 +25,7 @@ from widgets import (
     load_widget,
     load_widget_ply,
     video_widget,
-    cam_widget,
+    camera_widget,
     capture_widget,
     latent_widget,
     render_widget,
@@ -58,7 +58,7 @@ class Splatviz(imgui_window.ImguiWindow):
         if mode == "default":
             self.widgets = [
                 load_widget_ply.LoadWidget(self, data_path),
-                cam_widget.CamWidget(self),
+                camera_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
                 video_widget.VideoWidget(self),
                 capture_widget.CaptureWidget(self),
@@ -69,7 +69,7 @@ class Splatviz(imgui_window.ImguiWindow):
             renderer = GaussianRenderer()
         elif mode == "attach":
             self.widgets = [
-                cam_widget.CamWidget(self),
+                camera_widget.CamWidget(self),
                 performance_widget.PerformanceWidget(self),
                 video_widget.VideoWidget(self),
                 render_widget.RenderWidget(self),
@@ -82,7 +82,7 @@ class Splatviz(imgui_window.ImguiWindow):
         elif mode == "gan":
             self.widgets = [
                 load_widget.LoadWidget(self, data_path, file_ending=".pkl"),
-                cam_widget.CamWidget(self),
+                camera_widget.CamWidget(self, fov=12, radius=2.7, up_direction=1),
                 performance_widget.PerformanceWidget(self),
                 video_widget.VideoWidget(self),
                 capture_widget.CaptureWidget(self),
