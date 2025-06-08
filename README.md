@@ -69,6 +69,8 @@ The default mode loads and renders standard 3DGS scenes stored in ply files or c
 python run_main.py --data_path=parent/path/with/ply/files
 ```
 
+[Download Example Scenes](https://drive.google.com/drive/folders/1RNMis5ibSrl2a87ZX614ZPsHKaY6ams6?usp=sharing)
+
 ### Attach to Training
 The _attach_ mode allows you to view and edit a running 3DGS training. This works with the default implementation of
 3DGS. In order to edit the scene during the training and to view some extra information, follow the simple steps
