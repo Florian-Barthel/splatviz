@@ -38,13 +38,6 @@ class Renderer:
             self._is_timing = False
         return res
 
-    @staticmethod
-    def sanitize_command(edit_text):
-        command = re.sub(";+", ";", edit_text.replace("\n", ";"))
-        while command.startswith(";"):
-            command = command[1:]
-        return command
-
     def _render_impl(self, **args):
         raise NotImplementedError
 

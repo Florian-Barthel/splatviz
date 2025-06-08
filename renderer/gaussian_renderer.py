@@ -69,7 +69,7 @@ class GaussianRenderer(Renderer):
             # Edit
             gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
             try:
-                exec(self.sanitize_command(edit_text))
+                exec(edit_text)
             except Exception as e:
                 error = traceback.format_exc()
                 error += str(e)

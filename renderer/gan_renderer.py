@@ -82,7 +82,7 @@ class GANRenderer(Renderer):
 
         # edit 3DGS scene
         gs = self.gaussian_model
-        exec(self.sanitize_command(edit_text))
+        exec(edit_text)
 
         # render 3DGS scene
         fov_rad = fov / 360 * 2 * np.pi

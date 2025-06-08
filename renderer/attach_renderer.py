@@ -142,7 +142,7 @@ class AttachRenderer(Renderer):
             "scaling_modifier": 1,
             "view_matrix": world_view_transform.cpu().numpy().flatten().tolist(),
             "view_projection_matrix": full_proj_transform.cpu().numpy().flatten().tolist(),
-            "edit_text": self.sanitize_command(edit_text),
+            "edit_text": edit_text,
             "slider": slider,
             "single_training_step": single_training_step,
             "stop_at_value": stop_at_value,
