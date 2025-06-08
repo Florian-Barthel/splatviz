@@ -1,6 +1,3 @@
 [submodule "gaussian-splatting/submodules/diff-gaussian-rasterization"]
 	path = gaussian-splatting/submodules/diff-gaussian-rasterization
 	url = https://github.com/slothfulxtx/diff-gaussian-rasterization.git
-[submodule "gaussian-splatting/submodules/simple-knn"]
-	path = gaussian-splatting/submodules/simple-knn
-	url = https://gitlab.inria.fr/bkerbl/simple-knn.git

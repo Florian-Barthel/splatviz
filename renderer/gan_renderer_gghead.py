@@ -5,7 +5,7 @@ import torch.nn
 
 from gan_helper.latent_vector import LatentMap
 from gan_helper.view_conditioning import view_conditioning
-from scene import GaussianModel
+from scene.gaussian_model import GaussianModel
 from gaussian_renderer import render_simple
 from renderer.base_renderer import Renderer
 from scene.cameras import CustomCam

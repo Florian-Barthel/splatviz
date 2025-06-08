@@ -4,7 +4,7 @@ import torch
 import torch.nn
 from tqdm import tqdm
 
-from scene import GaussianModel
+from scene.gaussian_model import GaussianModel
 from gaussian_renderer import render_simple
 from renderer.base_renderer import Renderer
 from scene.cameras import CustomCam

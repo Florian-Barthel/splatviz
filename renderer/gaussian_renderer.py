@@ -11,7 +11,7 @@ from pathlib import Path
 
 from compression.compression_exp import run_single_decompression
 from gaussian_renderer import render_simple
-from scene import GaussianModel
+from scene.gaussian_model import GaussianModel
 from scene.cameras import CustomCam
 from renderer.base_renderer import Renderer
 from splatviz_utils.dict_utils import EasyDict
