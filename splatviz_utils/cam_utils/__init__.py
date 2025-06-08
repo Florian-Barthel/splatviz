@@ -37,12 +37,12 @@ class LookAtPoseSampler:
         return create_cam2world_matrix(forward_vector, camera_origins, up_vector)
 
 
-def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector):
-    h = torch.tensor(horizontal_mean)
-    v = torch.tensor(vertical_mean)
+def get_origin(horizontal_mean, vertical_mean, radius, lookat_position, up_vector, device="cuda"):
+    h = torch.tensor(horizontal_mean, device=device)
+    v = torch.tensor(vertical_mean, device=device)
     v = torch.clamp(v, 1e-5, math.pi - 1e-5)
 
-    camera_origins = torch.zeros(3)
+    camera_origins = torch.zeros(3, device=device)
     camera_origins[0] = radius * torch.sin(v) * torch.cos(math.pi - h)
     camera_origins[2] = radius * torch.sin(v) * torch.sin(math.pi - h)
     camera_origins[1] = radius * torch.cos(v)
@@ -102,7 +102,7 @@ def normalize_vecs(vectors: torch.Tensor) -> torch.Tensor:
     return vectors / (torch.norm(vectors, dim=-1, keepdim=True))
 
 
-def fov_to_intrinsics(fov_degrees, imsize=1, device="cpu"):
+def fov_to_intrinsics(fov_degrees, imsize=1, device="cuda"):
     """
     Creates a 3x3 camera intrinsics matrix from the camera field of view, specified in degrees.
     Note the intrinsics are returned as normalized by image size, rather than in pixel units.
@@ -125,7 +125,7 @@ def get_default_extrinsics():
     return LookAtPoseSampler.sample(
         horizontal_mean=-np.pi / 2,
         vertical_mean=np.pi / 2,
-        up_vector=torch.tensor([0, 1, 0.]),
+        up_vector=torch.tensor([0, 1, 0.], device="cuda"),
         radius=2.7,
-        lookat_position=torch.tensor([0, 0, 0])
+        lookat_position=torch.tensor([0, 0, 0], device="cuda")
     )
