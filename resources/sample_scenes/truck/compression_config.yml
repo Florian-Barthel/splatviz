@@ -1,36 +1,42 @@
-active_sh_degree: 0
+active_sh_degree: 3
 attributes:
-- contract: false
-  method: exr
+- method: jpeg-xl
   name: _xyz
-  normalize: false
+  normalize: true
   params:
-    compression: zip
-  quantize: 13
+    level: 101
+  quantize: 14
 - method: jpeg-xl
   name: _features_dc
   normalize: true
   params:
-    level: 90
+    level: 100
+- method: jpeg-xl
+  name: _features_rest
+  normalize: true
+  params:
+    level: 101
+  quantize: 5
 - contract: false
-  method: exr
+  method: jpeg-xl
   name: _scaling
   normalize: false
   params:
-    compression: none
+    level: 101
   quantize: 6
-- method: exr
+- method: jpeg-xl
   name: _rotation
-  normalize: false
+  normalize: true
   params:
-    compression: zip
+    level: 101
   quantize: 6
 - contract: false
-  method: exr
+  method: jpeg-xl
   name: _opacity
   normalize: true
   params:
-    compression: none
-  quantize: 5
-max_sh_degree: 0
-name: exr_jxl_quant
+    level: 101
+  quantize: 6
+disable_xyz_log_activation: false
+max_sh_degree: 3
+name: jxl_quant_sh

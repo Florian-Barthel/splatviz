@@ -1,6 +1,7 @@
 ,min,max,file
-_xyz,,,_xyz.exr
+_xyz,-6.5795717,5.7037706,_xyz.jxl
 _features_dc,-2,4,_features_dc.jxl
-_scaling,,,_scaling.exr
-_rotation,,,_rotation.exr
-_opacity,-6,12,_opacity.exr
+_features_rest,-1,1,_features_rest.jxl
+_scaling,,,_scaling.jxl
+_rotation,-1,2,_rotation.jxl
+_opacity,-6,12,_opacity.jxl
