@@ -23,6 +23,11 @@ class RenderWidget(Widget):
             label("Resolution", viz.label_w)
             _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
 
+            label("Background Color", viz.label_w)
+            _changed, background_color = imgui.input_float3("##background_color", v=self.background_color.tolist(), format="%.1f")
+            if _changed:
+                self.background_color = torch.tensor(background_color)
+
             label("Normalize", viz.label_w)
             _changed, self.img_normalize = imgui.checkbox("##Normalize", self.img_normalize)
 
@@ -39,11 +44,6 @@ class RenderWidget(Widget):
                 self.render_depth = False
             if self.render_depth and depth_changed:
                 self.render_alpha = False
-
-            label("Background Color", viz.label_w)
-            _changed, background_color = imgui.input_float3("##background_color", v=self.background_color.tolist(), format="%.1f")
-            if _changed:
-                self.background_color = torch.tensor(background_color)
 
         viz.args.background_color = self.background_color
         viz.args.resolution = self.resolution
