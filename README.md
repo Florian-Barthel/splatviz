@@ -37,14 +37,14 @@ git clone https://github.com/Florian-Barthel/splatviz.git --recursive
 
 ### 2. Install
 
-Create conda environment with <b>conda</b>:
+Create environment with <b>conda</b>:
 
 ```bash
 conda env create -f environment.yml
 conda activate gs-view
 ```
 
-Alternatively, create the environment with <b>micromamba</b>:
+Alternatively, use <b>micromamba</b>:
 
 ```bash
 micromamba env create --file environment.yml --channel-priority flexible -y
