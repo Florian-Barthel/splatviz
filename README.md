@@ -21,9 +21,8 @@ video</a>.
 **NEW UPDATE:** splatviz supports rendering the output of 3D GANs and allows for exploring the latent space.
 
 </div>
-<div align="center">
-  <img src="resources/images/teaser.png" width="650">
-</div>
+
+![](resources/images/teaser.gif)
 
 ## Install
 
