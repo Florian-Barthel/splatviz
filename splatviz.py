@@ -19,17 +19,16 @@ from splatviz_utils.gui_utils import text_utils
 from splatviz_utils.gui_utils.constants import *
 from splatviz_utils.dict_utils import EasyDict
 from widgets import (
-    edit_widget,
-    eval_widget,
-    performance_widget,
-    load_widget,
-    load_widget_ply,
-    video_widget,
-    camera_widget,
-    capture_widget,
-    latent_widget,
-    render_widget,
-    training_widget,
+    edit,
+    eval,
+    performance,
+    load_pkl,
+    load_ply,
+    camera,
+    save,
+    latent,
+    render,
+    training,
 )
 
 
@@ -57,39 +56,36 @@ class Splatviz(imgui_window.ImguiWindow):
         update_all_the_time = False
         if mode == "default":
             self.widgets = [
-                load_widget_ply.LoadWidget(self, data_path),
-                camera_widget.CamWidget(self),
-                performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
-                capture_widget.CaptureWidget(self),
-                render_widget.RenderWidget(self),
-                edit_widget.EditWidget(self),
-                eval_widget.EvalWidget(self),
+                load_ply.LoadWidget(self, data_path),
+                camera.CamWidget(self),
+                performance.PerformanceWidget(self),
+                save.CaptureWidget(self),
+                render.RenderWidget(self),
+                edit.EditWidget(self),
+                eval.EvalWidget(self),
             ]
             renderer = GaussianRenderer()
         elif mode == "attach":
             self.widgets = [
-                camera_widget.CamWidget(self),
-                performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
-                render_widget.RenderWidget(self),
-                edit_widget.EditWidget(self),
-                training_widget.TrainingWidget(self),
+                camera.CamWidget(self),
+                performance.PerformanceWidget(self),
+                render.RenderWidget(self),
+                edit.EditWidget(self),
+                training.TrainingWidget(self),
             ]
             sys.path.append(gan_path)
             renderer = AttachRenderer(host=host, port=port)
             update_all_the_time = True
         elif mode == "gan":
             self.widgets = [
-                load_widget.LoadWidget(self, data_path, file_ending=".pkl"),
-                camera_widget.CamWidget(self, fov=12, radius=2.7, up_direction=1),
-                performance_widget.PerformanceWidget(self),
-                video_widget.VideoWidget(self),
-                capture_widget.CaptureWidget(self),
-                render_widget.RenderWidget(self),
-                edit_widget.EditWidget(self),
-                eval_widget.EvalWidget(self),
-                latent_widget.LatentWidget(self),
+                load_pkl.LoadWidget(self, data_path, file_ending=".pkl"),
+                camera.CamWidget(self, fov=12, radius=2.7, up_direction=1),
+                performance.PerformanceWidget(self),
+                save.CaptureWidget(self),
+                render.RenderWidget(self),
+                edit.EditWidget(self),
+                eval.EvalWidget(self),
+                latent.LatentWidget(self),
             ]
             sys.path.append(gan_path)
             renderer = GANRenderer()
@@ -99,11 +95,11 @@ class Splatviz(imgui_window.ImguiWindow):
         self.renderer = RendererWrapper(renderer, update_all_the_time)
         self._tex_img = None
         self._tex_obj = None
-        self.eval_result = ""
 
         # Widget interface.
         self.args = EasyDict()
         self.result = EasyDict()
+        self.eval_result = ""
 
         # Initialize window.
         self.set_position(0, 0)

@@ -12,9 +12,8 @@ This interactive viewer allows you to display and edit 3D Gaussian Splatting sce
 library (<a href="https://pyimgui.readthedocs.io/en/latest/guide/first-steps.html">pyimgui</a>) we can directly manipulate
 the Gaussian python object **just before rendering**. This enables endless editing and visualization possibilities. 
 
-You can also evaluate python expressions just after the 
-rendering, allowing you to access and debug the 3D scene just in time. Additionally, you can visualize multiple scenes
-at the same time by **comparing them side by side** or in a splitscreen view.
+Additionally, you can visualize multiple scenes
+at the same time by **comparing them side by side** or in a splitscreen view or evaluate python expressions on the resulting scene.
 
 See some example editings in this  <a href="https://www.youtube.com/watch?v=AJGSa_wnZS8&ab_channel=FlorianBarthel">
 video</a>.
@@ -107,37 +106,25 @@ Running splatviz in GAN mode (using --mode=gan), allows you to render and manipu
 ### 🗃️ Load Widget
 Once you run the `run_main.py` file, the viewer will directly load the first scene that is found in the data
 directory you have specified. You can change the scene by clicking the **Browse** button. You will be displayed a list
-of available _.ply_ files (or _.yml_ files that correspond to compressed gaussian scenes using
-<a href="https://fraunhoferhhi.github.io/Self-Organizing-Gaussians/">this</a> compression method). If you have a lot of
-scenes to chose from, you can also use the **Filter** textfield providing comma separated keywords (eg.
-_lego,30000,baseline_).
+of available _.ply_ or _.yml_ files. If you have a lot of
+scenes, you can also use the **Filter** textfield and provide comma separated keywords (eg. _lego,30000_).
 You will then only see those scenes that contain all keywords.
 
 Additionally, you can also view multiple 3D scenes at once. Simply click **Add Scene**, which loads the same scene as
 before and then change the respective scene to another .ply file using the new browse button. The scenes are either
 rendered next to each other or in a split screen mode when activating the **Splitscreen** checkbox.
-
-You can download some example
-scenes [here](https://drive.google.com/drive/folders/1RNMis5ibSrl2a87ZX614ZPsHKaY6ams6?usp=sharing).
-They were created using the gaussian splatting compression method
-from: https://fraunhoferhhi.github.io/Self-Organizing-Gaussians.
 <br>
 <img src="resources/images/load.png" style="width: 600px;">
 
 ### 🛠️ Edit Widget
 The edit widget is the core functionality of this 3D viewer. It allows for real time editing of the gaussian
-python object during runtime. The code that you type in this text area will be executed just before the gaussian object
-is
-forwarded to the cuda renderer. This means, the editing capabilities are unlimited. As long as the provided code
-is executable, you can type any kind of python code and also import new libraries. An example could look like this,
-where
-all scales are set to -8 (before activating with _exp()_) and all opacity values are set to 10 (before activating with
+python object during runtime. The python code that you type in this text area will be executed just before rendering.
+An example could look like this, where all scales are set to -8 (before activating with _exp()_) and all opacity values are set to 10 (before activating with
 _sigmoid()_), while also the background is set to 1, which corresponds to white.
 
 ```python
 gaussian._scaling = gaussian._scaling * 0 - 8
 gaussian._opacity = gaussian._opacity * 0 + 10
-self.bg_color[:] = 1
 ```
 
 To enable smooth editing transitions, you can create sliders (press **Add Slider**) which you can access in the
@@ -177,54 +164,14 @@ You can also access variables that you have defined in the editor of the Edit Wi
 
 ### 🎥 Camera Widget
 In the camera widget you can define the type and parameters of the camera. Most importantly, you can choose between the
-two modes **Orbit** and **WASD**.
-
+two modes Orbit and WASD.
 In **Orbit** mode, the camera is looking at a specific point in 3D space, and you control the pitch and yaw of the
-camera
-rotating on a sphere around that point by dragging with the mouse over the rendered view.
-
-In **WASD** mode, you fly through the scene using the mouse and the WASD keys similar to the camera controls in Unity.
+camera rotating on a sphere around that point by dragging with the mouse over the rendered view. And in **WASD** mode, 
+you fly through the scene using the mouse and the WASD keys similar to the camera controls in Unity.
 
 **Important**: If the loaded scene is rotated incorrectly, you can adjust that by steering the camera so that it is
 looking straight up or down. Then set the up-vector to the current viewing direction by pressing **Set Current Direction
 **.
-If you were looking down, you will have to press the **Flip** button, since the scene is now upside down.
-<br>
-<img src="resources/images/camera.png" style="width: 600px;">
-
-
-### 🎞️ Video Widget
-
-The video widget creates a video sequence of a full rotation around the current object.
-Simply define the height of the camera and the rendering resolution. While the video is
-rendering, the UI is frozen. A loading screen is shown in the terminal output.
-
-🚧This feature is still under construction 🚧. Currently, it is not very intuitive to generate videos, as the camera
-position is only defined by the <b>Camera Height</b> parameter. This will be changed in the future.
-<br>
-<img src="resources/images/video.png" style="width: 600px;">
-
-
-### 📈 Performance Widget
-In the performance widget, you can track the FPS of the viewer and the FPS of the renderer. You can also specify 
-limits for FPS and enable vertical synchronisation. In the future, there will also be a performance mode which 
-skips some editing and evaluation calculations.
-<br>
-<img src="resources/images/performance.png" style="width: 600px;">
-
-
-### 🖥️ Render Widget
-In the render tab, you can specify the rendering resolution (at the moment only squared resolutions) and the rendering
-mode. Next to RGB, you can also render the image 3D depth and the alpha
-<br>
-<img src="resources/images/render.png" style="width: 600px;">
-
-
-### 💾 Save Widget
-To save the .ply file or a rendering of the current (edited) 3D scene press the respective button in the
-save widget. Those files will be saved under _screenshots or _ply_files. The viewer might be frozen for a short
-while, after saving a ply file.
-
 </div>
 
 ## ⭐ Recent Features

@@ -49,8 +49,9 @@ class LoadWidget(Widget):
             if imgui_utils.button("Add Scene", width=viz.button_w):
                 self.plys.append(self.plys[-1])
 
-            use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
-            highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
+            if len(self.plys) > 1:
+                use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
+                highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
 
         viz.args.highlight_border = self.highlight_border
         viz.args.use_splitscreen = self.use_splitscreen

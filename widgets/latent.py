@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 from imgui_bundle import imgui
 from imgui_bundle._imgui_bundle import implot
 

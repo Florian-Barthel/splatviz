@@ -28,8 +28,7 @@ class EvalWidget(Widget):
             imgui.new_line()
             with style.eval_color():
                 with imgui_utils.change_font(self.viz._imgui_fonts_code[self.viz._cur_font_size]):
-                    self.handle_type_rec(self.viz.eval_result, depth=20, obj_name="")
-
+                    self.handle_type_rec(self.viz.eval_result, depth=0, obj_name="")
             viz.args.eval_text = self.text
 
     def handle_type_rec(self, result, depth, obj_name):
@@ -53,12 +52,10 @@ class EvalWidget(Widget):
                     imgui.new_line()
                     imgui.same_line(depth)
                     imgui.text(info)
-                    # expanded, _visible = imgui_utils.collapsing_header(info, default=False, visible=False)
                 else:
                     expanded, _visible = imgui_utils.collapsing_header(info, default=False)
                     if expanded:
                         self.handle_type_rec(result[key], depth=depth + 20, obj_name=key)
-
         else:
             # write a non-primitive object that is not an object with __dict__
             if isinstance(result, torch.Tensor):
@@ -69,31 +66,19 @@ class EvalWidget(Widget):
                 imgui.text(pprint.pformat(result, compact=True))
 
     def handle_tensor(self, result, depth, var_name):
-        imgui.text(f"min:  {pprint.pformat(result.min(), compact=True)}")
-        imgui.text(f"mean: {pprint.pformat(result.mean(), compact=True)}")
-        imgui.text(f"max:  {pprint.pformat(result.max(), compact=True)}")
-        imgui.text(f"std:  {pprint.pformat(result.std(), compact=True)}")
-        imgui.text(f"shape:{pprint.pformat(result.shape, compact=True)}")
-
-
-        # imgui.text(pprint.pformat(result, compact=True))
         orig_var_name = var_name
         var_name += self.viz.args.ply_file_paths[0]
+
+        bins = 100
+        if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:
+            hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=bins)
+            self.hist_cache[var_name] = hist
         if var_name not in self.use_cache_dict.keys():
             self.use_cache_dict[var_name] = True
 
         imgui.new_line()
         imgui.same_line(depth)
-        label("Cache")
-        _, self.use_cache_dict[var_name] = imgui.checkbox(f"##cache{var_name}", self.use_cache_dict[var_name])
-        bins = 50
-        if var_name not in self.hist_cache.keys() or not self.use_cache_dict[var_name]:
-            hist = np.histogram(result.cpu().detach().numpy().reshape(-1), bins=bins)
-            self.hist_cache[var_name] = hist
-
-        imgui.new_line()
-        imgui.same_line(depth)
-        plot_size = imgui.ImVec2(self.viz.pane_w - 100, 200)
+        plot_size = imgui.ImVec2(self.viz.pane_w - 150, 150)
         if implot.begin_plot(f"{orig_var_name}", plot_size):
             bar_size = (
                 max(self.hist_cache[var_name][1].astype(np.float32))
@@ -106,6 +91,32 @@ class EvalWidget(Widget):
                 bar_size=bar_size,
             )
             implot.end_plot()
+
+        imgui.same_line()
+        label("Cache")
+        _, self.use_cache_dict[var_name] = imgui.checkbox(f"##cache{var_name}", self.use_cache_dict[var_name])
+
+        if np.prod(result.shape) > 0:
+            with imgui_utils.item_width(int(self.viz.pane_w  * 0.1)):
+                imgui.new_line()
+                imgui.same_line(depth)
+                label("min")
+                imgui.input_float(f"##min_{var_name}", result.min().cpu().numpy())
+                imgui.same_line()
+                label("mean")
+                imgui.input_float(f"##mean_{var_name}", result.mean().cpu().numpy())
+                imgui.same_line()
+                label("max")
+                imgui.input_float(f"##max_{var_name}", result.max().cpu().numpy())
+                imgui.same_line()
+                label("std")
+                imgui.input_float(f"##std_{var_name}", result.std().cpu().numpy())
+
+                imgui.new_line()
+                imgui.same_line(depth)
+                label("shape")
+                imgui.text(str(list(result.shape)))
+
 
     @staticmethod
     def get_short_info(key, value):

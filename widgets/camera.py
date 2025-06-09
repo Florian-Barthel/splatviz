@@ -15,14 +15,17 @@ from widgets.widget import Widget
 
 
 class CamWidget(Widget):
-    def __init__(self, viz, fov=60, radius=1, up_direction=-1):
+    def __init__(self, viz, fov=60, radius=1, up_direction=-1, device="cuda"):
         super().__init__(viz, "Camera")
+        self.device = device
+
+        # cam params
         self.fov = fov
         self.radius = radius
-        self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device="cuda")
-        self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device="cuda")
-        self.up_vector = torch.tensor([0.0, up_direction, 0.0], device="cuda")
-        self.forward = torch.tensor([0.0, 0.0, 1.0], device="cuda")
+        self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device=device)
+        self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device=device)
+        self.up_vector = torch.tensor([0.0, up_direction, 0.0], device=device)
+        self.forward = torch.tensor([0.0, 0.0, 1.0], device=device)
 
         # controls
         self.pose = EasyDict(yaw=np.pi, pitch=0)
@@ -84,7 +87,7 @@ class CamWidget(Widget):
             label("Up Vector", viz.label_w)
             _changed, up_vector_tuple = imgui.input_float3("##up_vector", v=self.up_vector.tolist(), format="%.1f")
             if _changed:
-                self.up_vector = torch.tensor(up_vector_tuple, device="cuda")
+                self.up_vector = torch.tensor(up_vector_tuple, device=self.device)
             imgui.same_line()
             if imgui_utils.button("Set current direction", width=viz.button_large_w):
                 self.up_vector = -self.forward
@@ -114,15 +117,20 @@ class CamWidget(Widget):
 
                 label("Look at Point", viz.label_w)
                 _, look_at_point_tuple = imgui.input_float3("##lookat", self.lookat_point.tolist(), format="%.1f")
-                self.lookat_point = torch.tensor(look_at_point_tuple, device="cuda")
+                self.lookat_point = torch.tensor(look_at_point_tuple, device=self.device)
                 imgui.same_line()
                 if imgui_utils.button("Set to xyz mean", width=viz.button_large_w) and "mean_xyz" in viz.result.keys():
                     self.lookat_point = viz.result.mean_xyz
             imgui.pop_item_width()
 
-
-
         self.cam_params = create_cam2world_matrix(self.forward, self.cam_pos, self.up_vector)[0]
+        if show:
+            imgui.text("\nExtrinsics Matrix")
+            imgui.input_float4("##extr0", self.cam_params.cpu().numpy().tolist()[0])
+            imgui.input_float4("##extr1", self.cam_params.cpu().numpy().tolist()[1])
+            imgui.input_float4("##extr2", self.cam_params.cpu().numpy().tolist()[2])
+            imgui.input_float4("##extr3", self.cam_params.cpu().numpy().tolist()[3])
+
         viz.args.yaw = self.pose.yaw
         viz.args.pitch = self.pose.pitch
         viz.args.fov = self.fov

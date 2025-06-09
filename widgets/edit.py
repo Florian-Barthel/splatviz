@@ -44,22 +44,25 @@ class Slider(object):
         self._id = _id
 
     def render(self, viz):
-        _changed, self.value = imgui.slider_float(
-            f"##slider-{self.key}-{self._id}",
-            self.value,
-            self.min_value,
-            self.max_value,
-        )
-        with imgui_utils.item_width(viz.font_size * 4):
+        with imgui_utils.item_width(int(viz.pane_w  * 0.1)):
+            text_changed, self.key = imgui.input_text(f"##text-{self._id}", self.key)
+
+        with imgui_utils.item_width(int(viz.pane_w  * 0.5)):
+            imgui.same_line()
+            _changed, self.value = imgui.slider_float(
+                f"##slider-{self.key}-{self._id}",
+                self.value,
+                self.min_value,
+                self.max_value,
+            )
+        with imgui_utils.item_width(int(viz.pane_w  * 0.1)):
             imgui.same_line()
             min_changed, self.min_value = imgui.input_float(f"##min-{self._id}", self.min_value, )
             imgui.same_line()
             max_changed, self.max_value = imgui.input_float(f"##max-{self._id}", self.max_value)
-            imgui.same_line()
-            text_changed, self.key = imgui.input_text(f"##text-{self._id}", self.key)
-        if min_changed or max_changed:
-            self.value = min(self.value, self.max_value)
-            self.value = max(self.value, self.min_value)
+            if min_changed or max_changed:
+                self.value = min(self.value, self.max_value)
+                self.value = max(self.value, self.min_value)
 
 
 class EditWidget(Widget):
@@ -200,22 +203,22 @@ class EditWidget(Widget):
         for i in delete_keys[::-1]:
             del self.sliders[i]
 
-        imgui.push_item_width(70)
-        label("Var name")
-        _, self._cur_name_slider = imgui.input_text("##input_name", self._cur_name_slider)
+        with imgui_utils.item_width(int(self.viz.pane_w * 0.1)):
 
-        imgui.same_line()
-        label("min")
-        _, self._cur_min_slider = imgui.input_int("##input_min", self._cur_min_slider, 0)
+            label("Var name")
+            _, self._cur_name_slider = imgui.input_text("##input_name", self._cur_name_slider)
 
-        imgui.same_line()
-        label("val")
-        _, self._cur_val_slider = imgui.input_int("##input_val", self._cur_val_slider, 0)
+            imgui.same_line()
+            label("min")
+            _, self._cur_min_slider = imgui.input_int("##input_min", self._cur_min_slider, 0)
 
-        imgui.same_line()
-        label("max")
-        _, self._cur_max_slider = imgui.input_int("##input_max", self._cur_max_slider, 0)
-        imgui.pop_item_width()
+            imgui.same_line()
+            label("val")
+            _, self._cur_val_slider = imgui.input_int("##input_val", self._cur_val_slider, 0)
+
+            imgui.same_line()
+            label("max")
+            _, self._cur_max_slider = imgui.input_int("##input_max", self._cur_max_slider, 0)
 
         imgui.same_line()
         if imgui_utils.button("Add Slider", width=self.viz.button_w):

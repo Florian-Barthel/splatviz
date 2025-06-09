@@ -187,19 +187,7 @@
       }
     ]
   },
-  "1 inspect a single gaussian": {
-    "edit_text": "index = int(slider.x)\n\ngs._xyz = gs._xyz[index:index+1, ...] * 0\ngs._rotation = gs._rotation[index:index+1, ...]\ngs._scaling = gs._scaling[index:index+1, ...]+4\ngs._opacity = gs._opacity[index:index+1, ...]\ngs._features_dc = gs._features_dc[index:index+1, ...]+2\ngs._features_rest = gs._features_rest[index:index+1, ...]\n",
-    "slider": [
-      {
-        "key": "x",
-        "value": 85.10600280761719,
-        "min_value": 0.0,
-        "max_value": 1000.0,
-        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
-      }
-    ]
-  },
-  "select by color": {
+  "Select by color": {
     "edit_text": "compare = torch.tensor([slider.r, slider.g, slider.b]).to(\"cuda\")\nmask = torch.linalg.norm(gs._features_dc[:, 0, :] - compare[None, :], dim=1) < slider.threshold\nmask = mask.to(\"cuda\")\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\n\ngs.features_rest = gs._features_rest[mask] if len(gs._features_rest) > 0 else gs._features_rest\n",
     "slider": [
       {
@@ -232,7 +220,7 @@
       }
     ]
   },
-  "luma_ai": {
+  "Luma_ai": {
     "edit_text": "mask = torch.linalg.norm(gs._xyz - torch.tensor([0,0,0])[None, :].to(\"cuda\"), dim=1) > slider.x\n\ngs._scaling[mask] = gs._scaling[mask] - 10\ngs._opacity[mask] = gs._opacity[mask] - 2\n",
     "slider": [
       {
@@ -244,155 +232,7 @@
       }
     ]
   },
-  "2d grid": {
-    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\ngrid_us = (grid_ids % grid_sidelen) / grid_sidelen - 0.5\ngrid_vs = grid_ids // grid_sidelen / grid_sidelen - 0.5\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\n\ngrid_xyz[:, 0] = grid_us\ngrid_xyz[:, 1] = grid_vs.flip(dims=(0,))\ngrid_xyz[:, 2] = 0\n\n\ngs._xyz = grid_xyz\ngs._scaling = gs._scaling * 0 - 5\ngs._features_dc = grid_xyz[:, None, :]*5\ngs._opacity = gs._opacity+10",
-    "slider": [
-      {
-        "key": "x",
-        "value": 1.0,
-        "min_value": 0.0,
-        "max_value": 10.0,
-        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
-      },
-      {
-        "key": "size",
-        "value": 1.0,
-        "min_value": 1.0,
-        "max_value": 2.0,
-        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
-      },
-      {
-        "key": "phase",
-        "value": 0.0,
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
-      },
-      {
-        "key": "grid_scale",
-        "value": 2.802000045776367,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
-      },
-      {
-        "key": "grid_opacity",
-        "value": -8.680999755859375,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
-      }
-    ]
-  },
-  "2dgrid_fix": {
-    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\ngrid_us = ((grid_ids % grid_sidelen) / grid_sidelen - 0.5) * 2\ngrid_vs = (grid_ids // grid_sidelen / grid_sidelen - 0.5) * 2\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\n\ngrid_xyz[:, 0] = grid_us * slider.k\ngrid_xyz[:, 1] = grid_vs.flip(dims=(0,)) * slider.l\ngrid_xyz[:, 2] = 0\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 5\ngs._features_dc = grid_xyz[:, None, :]*5\ngs._opacity = gs._opacity+10\n",
-    "slider": [
-      {
-        "key": "x",
-        "value": 1.0,
-        "min_value": 0.0,
-        "max_value": 10.0,
-        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
-      },
-      {
-        "key": "size",
-        "value": 1.0,
-        "min_value": 1.0,
-        "max_value": 2.0,
-        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
-      },
-      {
-        "key": "phase",
-        "value": 0.0,
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
-      },
-      {
-        "key": "grid_scale",
-        "value": 2.802000045776367,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
-      },
-      {
-        "key": "grid_opacity",
-        "value": -8.680999755859375,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
-      },
-      {
-        "key": "k",
-        "value": 1.8960000276565552,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
-      },
-      {
-        "key": "l",
-        "value": 1.4279999732971191,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
-      }
-    ]
-  },
-  "2dgrid_rand": {
-    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\ngrid_xyz[:, 0] = gs._xyz[:, 0] * slider.l\ngrid_xyz[:, 1] = gs._xyz[:, 1] * slider.l\ngrid_xyz[:, 2] = -0\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 6\ngs._features_dc = grid_xyz[:, None, :]\ngs._opacity = gs._opacity+10\n",
-    "slider": [
-      {
-        "key": "x",
-        "value": 4.296000003814697,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
-      },
-      {
-        "key": "size",
-        "value": 1.0,
-        "min_value": 1.0,
-        "max_value": 2.0,
-        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
-      },
-      {
-        "key": "phase",
-        "value": 0.0,
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
-      },
-      {
-        "key": "grid_scale",
-        "value": 2.802000045776367,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
-      },
-      {
-        "key": "grid_opacity",
-        "value": -8.680999755859375,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
-      },
-      {
-        "key": "k",
-        "value": 7.039999961853027,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
-      },
-      {
-        "key": "l",
-        "value": 1.9859999418258667,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
-      }
-    ]
-  },
-  "rotation_mask": {
+  "Rotation Mask": {
     "edit_text": "rotation_yaw = torch.eye(n=4, device=\"cuda\")\nrotation_yaw[0, 0] = np.cos(slider.alpha)\nrotation_yaw[0, 1] = -np.sin(slider.alpha)\nrotation_yaw[1, 0] = np.sin(slider.alpha)\nrotation_yaw[1, 1] = np.cos(slider.alpha)\n\nrotation_pitch = torch.eye(n=4, device=\"cuda\")\nrotation_pitch[0, 0] = np.cos(slider.beta)\nrotation_pitch[0, 2] = np.sin(slider.beta)\nrotation_pitch[2, 0] = -np.sin(slider.beta)\nrotation_pitch[2, 2] = np.cos(slider.beta)\n\nrotation_roll = torch.eye(n=4, device=\"cuda\")\nrotation_roll[1, 1] = np.cos(slider.gamma)\nrotation_roll[1, 2] = -np.sin(slider.gamma)\nrotation_roll[2, 1] = np.sin(slider.gamma)\nrotation_roll[2, 2] = np.cos(slider.gamma)\n\n\nrotation = rotation_yaw @ rotation_pitch @ rotation_roll\n\npoints_h = torch.ones([gs._xyz.shape[0], 4], device=\"cuda\")\npoints_h[:, :3] = torch.clone(gs._xyz)\npoints_h = (rotation @ points_h.T).T\npoints_h = points_h / points_h[:, 3:4]\nrotated_points = points_h[:, :3]\n\nmask_x = rotated_points[:, 0] < slider.x\nmask_y =rotated_points[:, 1] < slider.y\nmask_z =rotated_points[:, 2] < slider.z\n\nmask = mask_x & mask_y & mask_z\n\ngs._xyz = gs._xyz[mask]\ngs._rotation = gs._rotation[mask]\ngs._scaling = gs._scaling[mask]\ngs._opacity = gs._opacity[mask]\ngs._features_dc = gs._features_dc[mask]\ngs._features_rest = gs._features_rest[mask]\n",
     "slider": [
       {
@@ -439,61 +279,7 @@
       }
     ]
   },
-  "2d_grid_translate": {
-    "edit_text": "num_gaussians = gs._xyz.shape[0]\ngrid_sidelen = int(np.sqrt(num_gaussians))\ngrid_ids = torch.arange(num_gaussians, device=gs._xyz.device)\n\n\ngrid_xyz = torch.zeros((num_gaussians, 3), device=gs._xyz.device)\ngrid_xyz[:, 0] = gs._xyz[:, 0] + slider.l\ngrid_xyz[:, 1] = gs._xyz[:, 1] + slider.k\ngrid_xyz[:, 2] = -2\n\nxyzh = torch.ones([grid_xyz.shape[0], 4], device=\"cuda\")\nxyzh[:, :3] = grid_xyz\nxyzh = (cam_params @ xyzh.T).T\nxyzh = xyzh / xyzh[:, 3:4]\ngrid_xyz = xyzh[:, :3]\n\ngs._xyz = -grid_xyz\ngs._scaling = gs._scaling * 0 - 6\ngs._features_dc = grid_xyz[:, None, :]\ngs._opacity = gs._opacity+10\n",
-    "slider": [
-      {
-        "key": "x",
-        "value": 4.296000003814697,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
-      },
-      {
-        "key": "size",
-        "value": 1.0,
-        "min_value": 1.0,
-        "max_value": 2.0,
-        "_id": "e504dbe2-7535-4dab-bb21-502f303d69b0"
-      },
-      {
-        "key": "phase",
-        "value": 0.0,
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "_id": "f494bf84-7c68-466c-9905-8057232d3b5d"
-      },
-      {
-        "key": "grid_scale",
-        "value": 2.802000045776367,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "916a965e-ca98-4c45-a567-d5be42714ef7"
-      },
-      {
-        "key": "grid_opacity",
-        "value": -8.680999755859375,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "79251fe2-1263-4c78-8002-7cdbbcbb9c63"
-      },
-      {
-        "key": "k",
-        "value": 0.035999998450279236,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "d6104e8f-f8d3-4fe1-b308-0f0cb969daa5"
-      },
-      {
-        "key": "l",
-        "value": -0.035999998450279236,
-        "min_value": -10.0,
-        "max_value": 10.0,
-        "_id": "bbbecdd2-5fed-4249-aa57-9cfaa609f3b4"
-      }
-    ]
-  },
-  "recolor": {
+  "Recolor": {
     "edit_text": "torch.manual_seed(0)\ngs._features_dc = torch.rand_like(gs._features_dc) *torch.rand_like(gs._features_dc)*torch.rand_like(gs._features_dc)* torch.tensor([slider.x, slider.y, slider.z], device=\"cuda\") /slider.i\ngs._features_rest = gs._features_rest * 0\n\n",
     "slider": [
       {
