@@ -30,10 +30,10 @@ dependencies:
 
   - pip:
     - gaussian-splatting/submodules/diff-gaussian-rasterization
-    - gaussian-splatting/submodules/simple-knn
     - imgui_bundle==1.5.2
     - imgui==2.0.0
     - scikit-image==0.24
     - imagecodecs[all]==2024.6.1
     - pynvml
     - GPUtil
+    - ninja
