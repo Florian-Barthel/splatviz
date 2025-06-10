@@ -58,7 +58,7 @@ micromamba activate gs-view
 In some cases you will have to add this variable so that opengl uses the correct version:
 `export MESA_GL_VERSION_OVERRIDE=3.3`
 
-### View .ply Files
+### View 3D scenes
 The default mode loads and renders standard 3DGS scenes stored in ply files or compressed yml files.
 
 ```bash
@@ -68,8 +68,8 @@ python run_main.py --data_path=parent/path/with/ply/files
 Download example scenes [here](https://drive.google.com/drive/folders/1RNMis5ibSrl2a87ZX614ZPsHKaY6ams6?usp=sharing).
 
 ### Attach to Training
-Attach to a running 3DGS training.
 
+Attaches to a running training (local or remote). By default the splatviz listens to the local host _127.0.0.1:6007_, which is used by 3DGS. Modify the host and port with `--host` and `--port`.
 ```bash
 python run_main.py --mode=attach
 ```
