@@ -1,6 +1,8 @@
 import os
 import re
 import traceback
+
+import cv2
 import torch
 import torch.nn
 
@@ -27,7 +29,7 @@ class Renderer:
             res.error += str(e)
         self._end_event.record(torch.cuda.current_stream(self._device))
         if "image" in res:
-            res.image = res.image.cpu().detach().numpy()
+            res.image = res.image
         if "stats" in res:
             res.stats = res.stats.cpu().detach().numpy()
         if "error" in res:
@@ -52,6 +54,8 @@ class Renderer:
         use_splitscreen: bool = False,
         highlight_border: bool = False,
         on_top: bool = False,
+        colormap = None,
+        invert = False
     ) -> None:
 
         if not isinstance(images, list):
@@ -79,6 +83,11 @@ class Renderer:
         if normalize:
             img = img / img.norm(float("inf"), dim=[1, 2], keepdim=True).clip(1e-8, 1e8)
         img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
+        if invert:
+            img = 255 - img
+        img = img.cpu().numpy()
+        if colormap is not None:
+            img = cv2.applyColorMap(img, colormap)
         res.image = img
 
     @staticmethod

@@ -44,6 +44,8 @@ class GaussianRenderer(Renderer):
         use_splitscreen=False,
         highlight_border=False,
         save_ply_path=None,
+        colormap=None,
+        invert=False,
         slider={},
         **other_args,
     ):
@@ -86,7 +88,7 @@ class GaussianRenderer(Renderer):
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:
-                images.append(render["depth"] / render["depth"].max())
+                images.append((render["depth"] - render["depth"].min()) / (render["depth"].max()))
             else:
                 images.append(render["render"])
 
@@ -100,6 +102,8 @@ class GaussianRenderer(Renderer):
             normalize=img_normalize,
             use_splitscreen=use_splitscreen,
             highlight_border=highlight_border,
+            colormap=colormap,
+            invert=invert
         )
 
         res.mean_xyz = torch.mean(gs.get_xyz, dim=0)
