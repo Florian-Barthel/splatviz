@@ -12,8 +12,13 @@ def view_conditioning(cam_params, fov, mapping_conditioning, device="cuda"):
     elif mapping_conditioning == "current":
         mapping_camera_params = gan_camera_params
     elif mapping_conditioning == "frontal":
-        cam = LookAtPoseSampler.sample(horizontal_mean=-np.pi / 2, vertical_mean=np.pi / 2, up_vector=torch.tensor([0, 1, 0.]), radius=2.7,
-                                       lookat_position=torch.tensor([0, 0, 0.2]))
+        cam = LookAtPoseSampler.sample(
+            horizontal_mean=-np.pi / 2,
+            vertical_mean=np.pi / 2,
+            up_vector=torch.tensor([0, 1, 0.], device=device),
+            radius=2.7,
+            lookat_position=torch.tensor([0, 0, 0.2], device=device)
+        )
         cam = cam.to("cuda")
         mapping_camera_params = torch.concat([cam.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
     else:
