@@ -53,7 +53,7 @@ class RenderWidget(Widget):
             _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
 
             label("Background Color", viz.label_w)
-            _changed, background_color = imgui.input_float3("##background_color", v=self.background_color.tolist(), format="%.1f")
+            _changed, background_color = imgui.color_edit3("##background_color_edit", self.background_color.tolist())
             if _changed:
                 self.background_color = torch.tensor(background_color)
 

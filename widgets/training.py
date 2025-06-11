@@ -11,9 +11,6 @@ from widgets.widget import Widget
 class TrainingWidget(Widget):
     def __init__(self, viz):
         super().__init__(viz, "Training")
-        self.text = "gaussian"
-        self.hist_cache = dict()
-        self.use_cache_dict = dict()
         self.iterations = []
         self.plots = EasyDict(
             num_gaussians=dict(values=[], dtype=int),
