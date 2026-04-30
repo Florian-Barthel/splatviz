@@ -37,7 +37,6 @@ class RenderWidget(Widget):
         self.render_alpha = False
         self.render_depth = False
         self.render_gan_image = False
-        self.resolution = 1024
         self.background_color = torch.tensor([1.0, 1.0, 1.0])
         self.img_normalize = False
         self.current_colormap = 0
@@ -49,9 +48,6 @@ class RenderWidget(Widget):
     def __call__(self, show=True, decoder=False):
         viz = self.viz
         if show:
-            label("Resolution", viz.label_w)
-            _changed, self.resolution = imgui.input_int("##Resolution", self.resolution, 64)
-
             label("Background Color", viz.label_w)
             _changed, background_color = imgui.color_edit3("##background_color_edit", self.background_color.tolist())
             if _changed:
@@ -78,7 +74,6 @@ class RenderWidget(Widget):
                 self.render_alpha = False
 
         viz.args.background_color = self.background_color
-        viz.args.resolution = self.resolution
         viz.args.render_alpha = self.render_alpha
         viz.args.render_depth = self.render_depth
         viz.args.colormap = self.colormap_dict[self.colormaps_names[self.current_colormap]]

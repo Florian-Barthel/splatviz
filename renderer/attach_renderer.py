@@ -53,10 +53,10 @@ class AttachRenderer(Renderer):
     def restart_connector(self):
         self.connector = AsyncConnector(1, self.host, self.port)
 
-    def read(self, resolution):
+    def read(self, width, height):
         try:
             current_bytes = 0
-            expected_bytes = resolution * resolution * 3
+            expected_bytes = width * height * 3
             try_counter = 100
             counter = 0
             message = bytes()
@@ -76,14 +76,14 @@ class AttachRenderer(Renderer):
             except Exception:
                 verify_dict = {}
 
-            image = np.frombuffer(message, dtype=np.uint8).reshape(resolution, resolution, 3)
+            image = np.frombuffer(message, dtype=np.uint8).reshape(height, width, 3)
             image = torch.from_numpy(np.array(image)) / 255.0
             image = image.permute(2, 0, 1)
             return image, verify_dict
         except Exception as e:
             print("Read Error", e)
             self.restart_connector()
-            return torch.zeros([3, resolution, resolution]), {}
+            return torch.zeros([3, height, width]), {}
 
     def send(self, message):
         try:
@@ -99,7 +99,8 @@ class AttachRenderer(Renderer):
         res,
         fov,
         edit_text,
-        resolution,
+        render_width,
+        render_height,
         cam_params,
         do_training,
         stop_at_value=-1,
@@ -120,7 +121,10 @@ class AttachRenderer(Renderer):
 
         # slider = EasyDict(slider)
         fov_rad = fov / 360 * 2 * np.pi
-        render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
+        render_width = max(int(render_width), 1)
+        render_height = max(int(render_height), 1)
+        fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * render_width / render_height)
+        render_cam = CustomCam(render_width, render_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
 
         # Invert all operations from network_gui.py
         world_view_transform = render_cam.world_view_transform
@@ -130,11 +134,11 @@ class AttachRenderer(Renderer):
         full_proj_transform = render_cam.full_proj_transform
         full_proj_transform[:, 1] = -full_proj_transform[:, 1]
         message = {
-            "resolution_x": resolution,
-            "resolution_y": resolution,
+            "resolution_x": render_width,
+            "resolution_y": render_height,
             "train": do_training,
             "fov_y": fov_rad,
-            "fov_x": fov_rad,
+            "fov_x": fov_x,
             "z_near": 0.01,
             "z_far": 10.0,
             "shs_python": False,
@@ -150,7 +154,7 @@ class AttachRenderer(Renderer):
             "render_grad": render_grad
         }
         self.send(message)
-        image, stats = self.read(resolution)
+        image, stats = self.read(render_width, render_height)
         if len(stats.keys()) > 0:
             res.training_stats = stats
             res.error = res.training_stats["error"]

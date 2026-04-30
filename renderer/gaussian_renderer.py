@@ -32,7 +32,8 @@ class GaussianRenderer(Renderer):
         fov,
         edit_text,
         eval_text,
-        resolution,
+        render_width,
+        render_height,
         ply_file_paths,
         cam_params,
         current_ply_names,
@@ -83,7 +84,10 @@ class GaussianRenderer(Renderer):
 
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
-            render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
+            render_width = max(int(render_width), 1)
+            render_height = max(int(render_height), 1)
+            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * render_width / render_height)
+            render_cam = CustomCam(render_width, render_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
             render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
             if render_alpha:
                 images.append(render["alpha"])

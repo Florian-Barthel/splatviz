@@ -81,8 +81,14 @@ class Texture:
             gl.glTexParameterf(
                 gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR if self.bilinear else gl.GL_NEAREST
             )
+            if self.mipmap:
+                min_filter = gl.GL_LINEAR_MIPMAP_LINEAR if self.bilinear else gl.GL_NEAREST_MIPMAP_NEAREST
+            else:
+                min_filter = gl.GL_LINEAR if self.bilinear else gl.GL_NEAREST
             gl.glTexParameterf(
-                gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR if self.mipmap else gl.GL_NEAREST
+                gl.GL_TEXTURE_2D,
+                gl.GL_TEXTURE_MIN_FILTER,
+                min_filter,
             )
         self.update(image)
 

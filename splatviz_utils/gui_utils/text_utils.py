@@ -66,25 +66,49 @@ def _get_array_priv(
     offset_y: int = None,
     **kwargs
 ):
-    cur_size = size
-    array = None
-    while True:
+    def render(render_size):
         if dropshadow_radius is not None:
             # separate implementation for dropshadow text rendering
-            array = _get_array_impl_dropshadow(
-                string, size=cur_size, radius=dropshadow_radius, offset_x=offset_x, offset_y=offset_y, **kwargs
+            return _get_array_impl_dropshadow(
+                string, size=render_size, radius=dropshadow_radius, offset_x=offset_x, offset_y=offset_y, **kwargs
             )
-        else:
-            array = _get_array_impl(string, size=cur_size, **kwargs)
+        return _get_array_impl(string, size=render_size, **kwargs)
+
+    def fits(array):
         height, width, _ = array.shape
-        if (
-            (max_width is None or width <= max_width)
-            and (max_height is None or height <= max_height)
-            or (cur_size <= min_size)
-        ):
-            break
-        cur_size = max(int(cur_size * shrink_coef), min_size)
-    return array
+        return (max_width is None or width <= max_width) and (max_height is None or height <= max_height)
+
+    size = max(int(size), int(min_size))
+    if max_width is None and max_height is None:
+        return render(size)
+
+    array = render(size)
+    if fits(array):
+        best_size, best_array = size, array
+        hard_cap = max(size, int(max_width or 0), int(max_height or 0), int(min_size)) * 4
+        hi = size
+        while hi < hard_cap:
+            hi = min(max(hi + 1, int(np.ceil(hi / shrink_coef))), hard_cap)
+            array = render(hi)
+            if not fits(array):
+                break
+            best_size, best_array = hi, array
+        lo = best_size + 1
+    else:
+        best_array = None
+        lo = int(min_size)
+        hi = size
+
+    while lo < hi:
+        mid = (lo + hi) // 2
+        array = render(mid)
+        if fits(array):
+            best_array = array
+            lo = mid + 1
+        else:
+            hi = mid
+
+    return best_array if best_array is not None else render(int(min_size))
 
 
 # ----------------------------------------------------------------------------
@@ -110,7 +134,7 @@ def _get_array_impl(
         alpha = 1 - np.maximum(1 - alpha * outline_coef, 0) ** outline_exp
         alpha = (alpha * 255 + 0.5).clip(0, 255).astype(np.uint8)
         alpha = np.maximum(alpha, mask)
-    return np.stack([mask, alpha], axis=-1)
+    return _compose_text_rgba(mask, alpha, shadow=outline > 0)
 
 
 # ----------------------------------------------------------------------------
@@ -138,7 +162,16 @@ def _get_array_impl_dropshadow(
     alpha = (alpha * 255 + 0.5).clip(0, 255).astype(np.uint8)
     alpha = np.pad(alpha, [(offset_y, 0), (offset_x, 0)], mode="constant")[:-offset_y, :-offset_x]
     alpha = np.maximum(alpha, mask)
-    return np.stack([mask, alpha], axis=-1)
+    return _compose_text_rgba(mask, alpha, shadow=True)
+
+
+def _compose_text_rgba(mask, alpha, *, shadow=False):
+    mask = np.asarray(mask, dtype=np.uint8)
+    alpha = np.asarray(alpha, dtype=np.uint8)
+    rgb = np.full(mask.shape + (3,), 255, dtype=np.uint8)
+    if shadow:
+        rgb[mask == 0] = 0
+    return np.concatenate([rgb, alpha[:, :, np.newaxis]], axis=-1)
 
 
 # ----------------------------------------------------------------------------

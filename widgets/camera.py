@@ -15,7 +15,7 @@ from widgets.widget import Widget
 
 
 class CamWidget(Widget):
-    def __init__(self, viz, fov=60, radius=1, up_direction=-1, device="cuda"):
+    def __init__(self, viz, fov=60, radius=2, up_direction=-1, device="cuda"):
         super().__init__(viz, "Camera")
         self.device = device
 
@@ -37,7 +37,7 @@ class CamWidget(Widget):
         self.drag_speed = 0.005
         self.rotate_speed = 0.002
         self.control_modes = ["Orbit", "WASD"]
-        self.current_control_mode = 1
+        self.current_control_mode = 0
         self.last_drag_delta = imgui.ImVec2(0, 0)
 
         # momentum
@@ -51,7 +51,7 @@ class CamWidget(Widget):
     @imgui_utils.scoped_by_object_id
     def __call__(self, show: bool):
         viz = self.viz
-        active_region = EasyDict(x=viz.pane_w, y=0, width=viz.content_width - viz.pane_w, height=viz.content_height)
+        active_region = EasyDict(x=viz.render_x, y=viz.render_y, width=viz.render_w, height=viz.render_h)
         self.handle_dragging_in_window(**active_region)
         self.handle_mouse_wheel()
         self.handle_wasd()
@@ -234,7 +234,10 @@ class CamWidget(Widget):
 
     def handle_mouse_wheel(self):
         mouse_pos = imgui.get_io().mouse_pos
-        if mouse_pos.x >= self.viz.pane_w:
+        if (
+            self.viz.render_x <= mouse_pos.x <= self.viz.render_x + self.viz.render_w
+            and self.viz.render_y <= mouse_pos.y <= self.viz.render_y + self.viz.render_h
+        ):
             wheel = imgui.get_io().mouse_wheel
             if self.control_modes[self.current_control_mode] == "WASD":
                 self.cam_pos += self.forward * self.move_speed * wheel
