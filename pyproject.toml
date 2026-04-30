@@ -1,9 +1,43 @@
-[tool.black]
-line-length = 120
-exclude = '''
-    /(
-        \.git
-        | \.venv
-        | style\.py
-    )/
-'''
+[project]
+name = "splatviz"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+  "albucore",
+  "click",
+  "gdown",
+  "glfw",
+  "gputil",
+  "imagecodecs[all]>=2025.3.30",
+  "imgui>=2.0.0",
+  "imgui-bundle==1.5.2",
+  "insightface",
+  "lpips",
+  "ninja",
+  "onnxruntime",
+  "opencv-python",
+  "pandas>=2.3.3",
+  "pillow",
+  "plyfile",
+  "pynvml",
+  "pyopengl",
+  "requests",
+  "torch",
+  "tqdm",
+]
+
+[tool.uv.extra-build-dependencies]
+file = ["setuptools"]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
