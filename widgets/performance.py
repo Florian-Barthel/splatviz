@@ -38,7 +38,7 @@ class PerformanceWidget(Widget):
         self.render_FPS_smooth = [0] * self.num_elements
         self.fps_limit = 180
         self.use_vsync = False
-        self.fast_render_mode = False
+        self.render_scale = 1.0
 
         # CUDA
         self.device_properties = torch.cuda.get_device_properties(0)
@@ -81,6 +81,9 @@ class PerformanceWidget(Widget):
                 label("Vertical sync:", viz.label_w)
                 _clicked, self.use_vsync = imgui.checkbox("##Vertical_sync", self.use_vsync)
 
+                label("Render Scale:", viz.label_w)
+                _changed, self.render_scale = imgui.slider_float("##Render_scale", self.render_scale, 0.25, 1.0, "%.2f")
+
             label("FPS GUI:", viz.label_w)
             imgui.text(f"{self.gui_FPS_smooth[-1]:.2f}")
 
@@ -113,6 +116,6 @@ class PerformanceWidget(Widget):
             if imgui.button("Empty Cache"):
                 torch.cuda.empty_cache()
 
-        viz.args.fast_render_mode = self.fast_render_mode
+        viz.args.render_scale = self.render_scale
         viz.set_fps_limit(self.fps_limit)
         viz.set_vsync(self.use_vsync)

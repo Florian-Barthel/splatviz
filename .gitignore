@@ -5,6 +5,7 @@ _screenshots
 _videos
 _ply_files
 history.json
+.splatviz_settings.json
 *.tar
 *.pkl
 *.npy

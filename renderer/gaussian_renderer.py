@@ -2,11 +2,9 @@ import copy
 import os
 import traceback
 from typing import List
-import imageio
 import numpy as np
 import torch
 import torch.nn
-from tqdm import tqdm
 from pathlib import Path
 
 from compression.compression_exp import run_single_decompression
@@ -23,6 +21,7 @@ class GaussianRenderer(Renderer):
         self.num_parallel_scenes = num_parallel_scenes
         self.gaussian_models: List[GaussianModel | None] = [None] * num_parallel_scenes
         self._current_ply_file_paths: List[str | None] = [None] * num_parallel_scenes
+        self._model_stats: List[EasyDict | None] = [None] * num_parallel_scenes
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
         self._last_num_scenes = 0
 
@@ -32,7 +31,8 @@ class GaussianRenderer(Renderer):
         fov,
         edit_text,
         eval_text,
-        resolution,
+        render_width,
+        render_height,
         ply_file_paths,
         cam_params,
         current_ply_names,
@@ -42,6 +42,7 @@ class GaussianRenderer(Renderer):
         render_alpha=False,
         img_normalize=False,
         use_splitscreen=False,
+        layout="side_by_side",
         highlight_border=False,
         save_ply_path=None,
         colormap=None,
@@ -50,16 +51,45 @@ class GaussianRenderer(Renderer):
         **other_args,
     ):
         cam_params = cam_params.to("cuda")
+        background_color = background_color.to("cuda")
         slider = EasyDict(slider)
+        ply_file_paths = [path for path in ply_file_paths if path]
         if len(ply_file_paths) == 0:
-            res.error = "Select a .ply file"
+            res.message = "Load a 3D Gaussian Splatting scene by dragging a supported  \n.ply or .yml file into the window, or select Browse to choose one."
             return
 
         # Remove old scenes
         if len(ply_file_paths) < self._last_num_scenes:
-            for i in range(ply_file_paths, self.num_parallel_scenes):
+            for i in range(len(ply_file_paths), self.num_parallel_scenes):
                 self.gaussian_models[i] = None
+                self._current_ply_file_paths[i] = None
+                self._model_stats[i] = None
             self._last_num_scenes = len(ply_file_paths)
+
+        render_width = max(int(render_width), 1)
+        render_height = max(int(render_height), 1)
+        num_scenes = len(ply_file_paths)
+        if use_splitscreen:
+            layout = "splitscreen"
+        if num_scenes <= 1:
+            layout = "side_by_side"
+        use_splitscreen = layout == "splitscreen"
+
+        grid_shape = None
+        if layout == "grid":
+            cols = int(np.ceil(np.sqrt(num_scenes)))
+            rows = int(np.ceil(num_scenes / cols))
+            grid_shape = (rows, cols)
+            col_widths = self._split_extent(render_width, cols)
+            row_heights = self._split_extent(render_height, rows)
+            scene_widths = [col_widths[scene_index % cols] for scene_index in range(num_scenes)]
+            scene_heights = [row_heights[scene_index // cols] for scene_index in range(num_scenes)]
+        elif layout == "splitscreen":
+            scene_widths = [render_width] * num_scenes
+            scene_heights = [render_height] * num_scenes
+        else:
+            scene_widths = self._split_extent(render_width, num_scenes)
+            scene_heights = [render_height] * num_scenes
 
         images = []
         for scene_index, ply_file_path in enumerate(ply_file_paths):
@@ -67,15 +97,19 @@ class GaussianRenderer(Renderer):
             if ply_file_path != self._current_ply_file_paths[scene_index]:
                 self.gaussian_models[scene_index] = self._load_model(ply_file_path)
                 self._current_ply_file_paths[scene_index] = ply_file_path
+                self._model_stats[scene_index] = self._collect_model_stats(self.gaussian_models[scene_index])
 
-            # Edit
-            gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
-            try:
-                exec(edit_text)
-            except Exception as e:
-                error = traceback.format_exc()
-                error += str(e)
-                res.error = error
+            # Edit only needs an isolated copy when user code can mutate the scene.
+            if edit_text.strip():
+                gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
+                try:
+                    exec(edit_text)
+                except Exception as e:
+                    error = traceback.format_exc()
+                    error += str(e)
+                    res.error = error
+            else:
+                gs: GaussianModel = self.gaussian_models[scene_index]
 
             # Render video
             if len(video_cams) > 0:
@@ -83,8 +117,12 @@ class GaussianRenderer(Renderer):
 
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
-            render_cam = CustomCam(resolution, resolution, fovy=fov_rad, fovx=fov_rad, extr=cam_params)
-            render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
+            scene_width = scene_widths[scene_index]
+            scene_height = scene_heights[scene_index]
+            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * scene_width / scene_height)
+            render_cam = CustomCam(scene_width, scene_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
+            with torch.no_grad():
+                render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color)
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:
@@ -96,9 +134,14 @@ class GaussianRenderer(Renderer):
             if save_ply_path is not None:
                 self.save_ply(gs, save_ply_path)
 
+        self._last_num_scenes = len(ply_file_paths)
 
-        res.mean_xyz = torch.mean(gs.get_xyz, dim=0)
-        res.std_xyz = torch.std(gs.get_xyz)
+        if edit_text.strip():
+            stats = self._collect_model_stats(gs)
+        else:
+            stats = self._model_stats[scene_index]
+        res.mean_xyz = stats.mean_xyz
+        res.std_xyz = stats.std_xyz
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 
@@ -107,31 +150,30 @@ class GaussianRenderer(Renderer):
             res,
             normalize=img_normalize,
             use_splitscreen=use_splitscreen,
+            layout=layout,
+            grid_shape=grid_shape,
+            target_size=(render_width, render_height),
             highlight_border=highlight_border,
             colormap=colormap,
             invert=invert
         )
 
     def _load_model(self, ply_file_path):
-        if ply_file_path.endswith(".ply"):
+        ply_file_path_lower = ply_file_path.lower()
+        if ply_file_path_lower.endswith(".ply"):
             model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
             model.load_ply(ply_file_path)
-        elif ply_file_path.endswith("compression_config.yml"):
+        elif ply_file_path_lower.endswith((".yml", ".yaml")):
             model = run_single_decompression(Path(ply_file_path).parent.absolute())
         else:
             raise NotImplementedError("Select a .ply or .yml file.")
         return model
 
-    def render_video(self, save_path, video_cams, gaussian):
-        os.makedirs(save_path, exist_ok=True)
-        filename = f"{save_path}/rotate_{len(os.listdir(save_path))}.mp4"
-        video = imageio.get_writer(filename, mode="I", fps=30, codec="libx264", bitrate="16M", quality=10)
-        for render_cam in tqdm(video_cams):
-            img = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)["render"]
-            img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()
-            video.append_data(img)
-        video.close()
-        print(f"Video saved in {filename}.")
+    @staticmethod
+    def _collect_model_stats(gaussian):
+        xyz = gaussian.get_xyz
+        return EasyDict(mean_xyz=torch.mean(xyz, dim=0), std_xyz=torch.std(xyz))
+
 
     @staticmethod
     def save_ply(gaussian, save_ply_path):

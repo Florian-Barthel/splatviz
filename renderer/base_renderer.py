@@ -28,8 +28,6 @@ class Renderer:
         self._end_event.record(torch.cuda.current_stream(self._device))
         if "image" in res:
             res.image = res.image
-        if "stats" in res:
-            res.stats = res.stats.cpu().detach().numpy()
         if "error" in res:
             res.error = str(res.error)
         if self._is_timing:
@@ -50,6 +48,9 @@ class Renderer:
         res: dict,
         normalize: bool,
         use_splitscreen: bool = False,
+        layout: str = "side_by_side",
+        grid_shape = None,
+        target_size = None,
         highlight_border: bool = False,
         on_top: bool = False,
         colormap = None,
@@ -59,7 +60,9 @@ class Renderer:
         if not isinstance(images, list):
             images = [images]
 
-        if use_splitscreen:
+        if layout == "grid":
+            img = Renderer._compose_grid(images, grid_shape, target_size, highlight_border)
+        elif use_splitscreen:
             img = torch.zeros_like(images[0])
             split_size = img.shape[-1] // len(images)
             offset = 0
@@ -72,10 +75,10 @@ class Renderer:
         elif on_top:
             mask = torch.mean(images[1], dim=0)
             img = images[0] * (1 - mask) + images[1] * mask
+        elif len(images) == 1:
+            img = images[0]
         else:
             img = torch.concat(images, dim=2)
-
-        res.stats = torch.stack([img.mean(), img.std()])
 
         # Scale and convert to uint8.
         if normalize:
@@ -87,6 +90,40 @@ class Renderer:
         if colormap is not None:
             img = cv2.applyColorMap(img, colormap)
         res.image = img
+
+    @staticmethod
+    def _compose_grid(images, grid_shape, target_size, highlight_border):
+        if grid_shape is None or target_size is None:
+            raise ValueError("Grid layout requires grid_shape and target_size.")
+
+        rows, cols = grid_shape
+        target_width, target_height = target_size
+        row_heights = Renderer._split_extent(target_height, rows)
+        col_widths = Renderer._split_extent(target_width, cols)
+        img = images[0].new_zeros((images[0].shape[0], target_height, target_width))
+
+        for scene_index, scene_img in enumerate(images):
+            row = scene_index // cols
+            col = scene_index % cols
+            x = sum(col_widths[:col])
+            y = sum(row_heights[:row])
+            img[..., y : y + row_heights[row], x : x + col_widths[col]] = scene_img
+
+        if highlight_border:
+            for col in range(1, cols):
+                x = sum(col_widths[:col])
+                img[..., :, x - 1 : x] = 1
+            for row in range(1, rows):
+                y = sum(row_heights[:row])
+                img[..., y - 1 : y, :] = 1
+
+        return img
+
+    @staticmethod
+    def _split_extent(extent, parts):
+        base = extent // parts
+        remainder = extent % parts
+        return [base + (1 if index < remainder else 0) for index in range(parts)]
 
     @staticmethod
     def save_ply(gaussian, save_ply_path):

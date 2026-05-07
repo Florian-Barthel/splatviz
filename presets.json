@@ -278,5 +278,17 @@
         "_id": "5ccd3b07-475b-4119-a004-f0f4109f92c9"
       }
     ]
+  },
+  "Init": {
+    "edit_text": "from gaussian_splatting.scene.gaussian_model import GaussianModel\nfrom splatviz_utils.dict_utils import EasyDict\nimport torch\n\nslider: EasyDict\ngs: GaussianModel\n\n\ngs._xyz = gs._xyz\ngs._rotation = gs._rotation\ngs._scaling = gs._scaling\ngs._opacity = gs._opacity\ngs._features_dc = gs._features_dc\ngs._features_rest = gs._features_rest\n",
+    "slider": [
+      {
+        "key": "x",
+        "value": 2.444999933242798,
+        "min_value": 0.0,
+        "max_value": 10.0,
+        "_id": "a8f2a853-17ba-4f7f-9dd8-843d2f0756a1"
+      }
+    ]
   }
 }
