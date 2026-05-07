@@ -26,36 +26,45 @@ video</a>.
 
 ## Install
 
-### 1. Clone the repository
+Install `uv` first if it is not already available. See the official
+[uv installation guide](https://docs.astral.sh/uv/getting-started/installation/), or use the standalone installer:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Install the CUDA Toolkit version that matches the `uv` group you plan to use:
+
+| `uv` group | CUDA Toolkit |
+| --- | --- |
+| `cuda118` | [CUDA Toolkit 11.8.0](https://developer.nvidia.com/cuda-11-8-0-download-archive) |
+| `cuda121` | [CUDA Toolkit 12.1.1](https://developer.nvidia.com/cuda-12-1-1-download-archive) |
+| `cuda124` | [CUDA Toolkit 12.4.1](https://developer.nvidia.com/cuda-12-4-1-download-archive) |
+| `cuda126` | [CUDA Toolkit 12.6.3](https://developer.nvidia.com/cuda-12-6-3-download-archive) |
+| `cuda128` | [CUDA Toolkit 12.8.2](https://developer.nvidia.com/cuda-12-8-2-download-archive) |
+| `cuda129` | [CUDA Toolkit 12.9.1](https://developer.nvidia.com/cuda-12-9-1-download-archive) |
+| `cuda130` | [CUDA Toolkit 13.0.3](https://developer.nvidia.com/cuda-13-0-3-download-archive) |
+
+After installing `uv` and CUDA, clone and install splatviz:
 
 ```bash
 git clone https://github.com/Florian-Barthel/splatviz.git
 cd splatviz
+
+uv sync --group <cuda-group>
 ```
 
-
-### 2. Install Env
-
-Create environment with <b>conda</b>:
+Replace `<cuda-group>` with the `uv` CUDA group that matches your system:
 
 ```bash
-conda env create -f environment.yml
-conda activate splatviz
-
-git clone --recursive https://github.com/ashawkey/diff-gaussian-rasterization
-pip install ./diff-gaussian-rasterization
+uv sync --group cuda118
+uv sync --group cuda121
+uv sync --group cuda124
+uv sync --group cuda126
+uv sync --group cuda128
+uv sync --group cuda129
+uv sync --group cuda130
 ```
-
-Alternatively, use <b>micromamba</b>:
-
-```bash
-micromamba env create --file environment.yml --channel-priority flexible -y
-micromamba activate splatviz
-
-git clone --recursive https://github.com/ashawkey/diff-gaussian-rasterization
-pip install ./diff-gaussian-rasterization
-```
-
 
 
 ## Launch
