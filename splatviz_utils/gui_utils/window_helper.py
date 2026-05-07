@@ -1,3 +1,4 @@
+import glfw
 from imgui_bundle import imgui
 
 from splatviz_utils.dict_utils import EasyDict
@@ -18,6 +19,10 @@ class WindowHelper:
         self.render_y = 0
         self.render_w = 1
         self.render_h = 1
+        self.is_dragging_splitter = False
+        self._cursor_arrow = glfw.create_standard_cursor(glfw.ARROW_CURSOR)
+        self._cursor_resize_ew = glfw.create_standard_cursor(glfw.HRESIZE_CURSOR)
+        self._is_using_resize_cursor = False
 
     def print_error(self, error):
         error = str(error)
@@ -75,13 +80,25 @@ class WindowHelper:
         imgui.push_style_color(COLOR_WINDOW_BACKGROUND, imgui.ImVec4(0.5, 0.5, 0.5, 1))
         imgui.begin("##widgets_render_splitter", p_open=True, flags=flags)
         imgui.invisible_button("##resize", imgui.ImVec2(self.splitter_w, self.content_height))
-        if imgui.is_item_hovered() or imgui.is_item_active():
+        if imgui.is_item_active():
+            self.is_dragging_splitter = True
+        if self.is_dragging_splitter and not imgui.is_mouse_down(0):
+            self.is_dragging_splitter = False
+        use_resize_cursor = imgui.is_item_hovered() or imgui.is_item_active() or self.is_dragging_splitter
+        if use_resize_cursor:
             imgui.set_mouse_cursor(imgui.MouseCursor_.resize_ew)
+        self.set_resize_cursor(use_resize_cursor)
         if imgui.is_item_active():
             self.pane_w += imgui.get_io().mouse_delta.x
             self.set_sizes()
         imgui.end()
         imgui.pop_style_color()
+
+    def set_resize_cursor(self, enabled):
+        if enabled == self._is_using_resize_cursor:
+            return
+        glfw.set_cursor(self._glfw_window, self._cursor_resize_ew if enabled else self._cursor_arrow)
+        self._is_using_resize_cursor = enabled
 
     def draw_rendering_pane(self):
         imgui.set_next_window_pos(imgui.ImVec2(self.render_x, 0))

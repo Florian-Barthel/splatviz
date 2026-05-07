@@ -39,6 +39,7 @@ class CamWidget(Widget):
         self.control_modes = ["Orbit", "WASD"]
         self.current_control_mode = 0
         self.last_drag_delta = imgui.ImVec2(0, 0)
+        self.drag_started_in_splitter = False
 
         # momentum
         self.momentum_x = 0.0
@@ -158,16 +159,22 @@ class CamWidget(Widget):
 
         if imgui.is_mouse_dragging(0):  # left mouse button
             new_delta = imgui.get_mouse_drag_delta(0)
-            if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
+            if self.did_drag_start_in_splitter(new_delta):
+                self.last_drag_delta = new_delta
+            elif self.is_mouse_dragging_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
                 self.momentum_x = x_dir * delta.x * self.rotate_speed * (1 - self.momentum) + (self.momentum_x * self.momentum)
                 self.momentum_y = y_dir * delta.y * self.rotate_speed * (1 - self.momentum) + (self.momentum_y * self.momentum)
+            else:
+                self.last_drag_delta = new_delta
 
         elif imgui.is_mouse_dragging(2) or imgui.is_mouse_dragging(1):  # middle mouse button or right mouse button
             drag_button = 2 if imgui.is_mouse_dragging(2) else 1
             new_delta = imgui.get_mouse_drag_delta(drag_button)
-            if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
+            if self.did_drag_start_in_splitter(new_delta):
+                self.last_drag_delta = new_delta
+            elif self.is_mouse_dragging_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
 
@@ -183,14 +190,34 @@ class CamWidget(Widget):
                 if self.control_modes[self.current_control_mode] == "Orbit":
                     self.lookat_point += x_change
                     self.lookat_point += y_change
+            else:
+                self.last_drag_delta = new_delta
         else:
             self.last_drag_delta = imgui.ImVec2(0, 0)
+            self.drag_started_in_splitter = False
 
         self.pose.yaw += self.momentum_x
         self.pose.pitch += self.momentum_y
         self.momentum_x *= self.momentum_dropoff
         self.momentum_y *= self.momentum_dropoff
         self.pose.pitch = np.clip(self.pose.pitch, -np.pi / 2, np.pi / 2)
+
+    def is_mouse_dragging_in_window(self, x, y, width, height, drag_delta):
+        mouse_pos = imgui.get_mouse_pos()
+        is_mouse_in_window = x <= mouse_pos.x <= x + width and y <= mouse_pos.y <= y + height
+        return is_mouse_in_window and imgui_utils.did_drag_start_in_window(x, y, width, height, drag_delta)
+
+    def did_drag_start_in_splitter(self, drag_delta):
+        if self.drag_started_in_splitter:
+            return True
+
+        mouse_pos_at_drag_start = imgui.get_mouse_pos() - drag_delta
+        viz = self.viz
+        self.drag_started_in_splitter = (
+            viz.pane_w <= mouse_pos_at_drag_start.x <= viz.pane_w + viz.splitter_w
+            and 0 <= mouse_pos_at_drag_start.y <= viz.content_height
+        )
+        return self.drag_started_in_splitter
 
     def handle_wasd(self):
         if self.control_modes[self.current_control_mode] == "WASD":

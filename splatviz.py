@@ -85,6 +85,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
         super().close()
 
     def draw_frame(self):
+        # main loop
         self.begin_frame()
         self.args = EasyDict()
         self.set_sizes()
