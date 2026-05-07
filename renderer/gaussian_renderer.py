@@ -128,10 +128,11 @@ class GaussianRenderer(Renderer):
         )
 
     def _load_model(self, ply_file_path):
-        if ply_file_path.endswith(".ply"):
+        ply_file_path_lower = ply_file_path.lower()
+        if ply_file_path_lower.endswith(".ply"):
             model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
             model.load_ply(ply_file_path)
-        elif ply_file_path.endswith("compression_config.yml"):
+        elif ply_file_path_lower.endswith((".yml", ".yaml")):
             model = run_single_decompression(Path(ply_file_path).parent.absolute())
         else:
             raise NotImplementedError("Select a .ply or .yml file.")

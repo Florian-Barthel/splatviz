@@ -9,6 +9,7 @@ from widgets.widget import Widget
 
 class LoadWidget(Widget):
     _settings_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".splatviz_settings.json"))
+    _scene_extensions = (".ply", ".yml", ".yaml")
 
     def __init__(self, viz):
         super().__init__(viz, "Load")
@@ -20,6 +21,7 @@ class LoadWidget(Widget):
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
+        self._handle_dropped_files()
         if show:
             plys_to_remove = []
             for i, ply in enumerate(self.plys):
@@ -62,6 +64,23 @@ class LoadWidget(Widget):
             self.last_folder = os.path.dirname(os.path.abspath(files_from_dialog[0]))
             self._save_last_folder()
         return files_from_dialog
+
+    def _handle_dropped_files(self):
+        dropped_paths = self.viz._drag_and_drop_paths
+        if dropped_paths is None:
+            return
+
+        self.viz._drag_and_drop_paths = None
+        scene_paths = [path for path in dropped_paths if self._is_scene_path(path)]
+        if len(scene_paths) == 0:
+            return
+
+        self.plys = scene_paths
+        self.last_folder = os.path.dirname(os.path.abspath(scene_paths[0]))
+        self._save_last_folder()
+
+    def _is_scene_path(self, path):
+        return os.path.isfile(path) and path.lower().endswith(self._scene_extensions)
 
     def _load_last_folder(self):
         try:

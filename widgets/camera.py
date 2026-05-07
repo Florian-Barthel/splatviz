@@ -161,7 +161,7 @@ class CamWidget(Widget):
             new_delta = imgui.get_mouse_drag_delta(0)
             if self.did_drag_start_in_splitter(new_delta):
                 self.last_drag_delta = new_delta
-            elif self.is_mouse_dragging_in_window(x, y, width, height, new_delta):
+            elif self.did_drag_start_in_render_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
                 self.momentum_x = x_dir * delta.x * self.rotate_speed * (1 - self.momentum) + (self.momentum_x * self.momentum)
@@ -174,7 +174,7 @@ class CamWidget(Widget):
             new_delta = imgui.get_mouse_drag_delta(drag_button)
             if self.did_drag_start_in_splitter(new_delta):
                 self.last_drag_delta = new_delta
-            elif self.is_mouse_dragging_in_window(x, y, width, height, new_delta):
+            elif self.did_drag_start_in_render_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
 
@@ -202,10 +202,8 @@ class CamWidget(Widget):
         self.momentum_y *= self.momentum_dropoff
         self.pose.pitch = np.clip(self.pose.pitch, -np.pi / 2, np.pi / 2)
 
-    def is_mouse_dragging_in_window(self, x, y, width, height, drag_delta):
-        mouse_pos = imgui.get_mouse_pos()
-        is_mouse_in_window = x <= mouse_pos.x <= x + width and y <= mouse_pos.y <= y + height
-        return is_mouse_in_window and imgui_utils.did_drag_start_in_window(x, y, width, height, drag_delta)
+    def did_drag_start_in_render_window(self, x, y, width, height, drag_delta):
+        return imgui_utils.did_drag_start_in_window(x, y, width, height, drag_delta)
 
     def did_drag_start_in_splitter(self, drag_delta):
         if self.drag_started_in_splitter:
