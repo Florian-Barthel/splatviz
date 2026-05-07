@@ -53,8 +53,9 @@ class GaussianRenderer(Renderer):
     ):
         cam_params = cam_params.to("cuda")
         slider = EasyDict(slider)
+        ply_file_paths = [path for path in ply_file_paths if path]
         if len(ply_file_paths) == 0:
-            res.error = "Select a .ply file"
+            res.message = "Load a 3D Gaussian Splatting scene by dragging a supported  \n.ply or .yml file into the window, or select Browse to choose one."
             return
 
         # Remove old scenes

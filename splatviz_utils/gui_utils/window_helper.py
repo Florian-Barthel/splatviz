@@ -143,14 +143,20 @@ class WindowHelper:
         self._draw_centered_texture(self._tex_obj, max_w, max_h)
 
     def _draw_result_message(self, max_w, max_h):
+        padding = max(self.font_size, 16)
+        padded_w = max(max_w - padding * 2, 1)
+        padded_h = max(max_h - padding * 2, 1)
         tex = text_utils.get_texture(
             self.result.message,
             size=self.font_size,
-            max_width=max_w,
-            max_height=max_h,
+            max_width=padded_w,
+            max_height=padded_h,
             outline=0,
         )
-        self._draw_centered_texture(tex, max_w, max_h)
+        cursor = imgui.get_cursor_screen_pos()
+        imgui.set_cursor_screen_pos(imgui.ImVec2(cursor.x + padding, cursor.y + padding))
+        self._draw_centered_texture(tex, padded_w, padded_h)
+        imgui.set_cursor_screen_pos(cursor)
         imgui.dummy(imgui.ImVec2(max_w, max_h))
 
     def _draw_centered_texture(self, tex, max_w, max_h):
