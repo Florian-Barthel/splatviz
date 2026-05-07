@@ -130,8 +130,10 @@ class WindowHelper:
         imgui.end()
 
     def update_render_args(self, args: EasyDict):
-        args.render_width = max(int(round(self.render_w)), 1)
-        args.render_height = max(int(round(self.render_h)), 1)
+        render_scale = min(max(float(args.get("render_scale", 1.0)), 0.1), 1.0)
+        args.render_scale = render_scale
+        args.render_width = max(int(round(self.render_w * render_scale)), 1)
+        args.render_height = max(int(round(self.render_h * render_scale)), 1)
 
     def _draw_result_image(self, max_w, max_h):
         if self._tex_img is not self.result.image:

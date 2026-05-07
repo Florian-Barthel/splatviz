@@ -18,8 +18,10 @@ dependencies = [
   "pandas>=2.3.3",
   "pillow",
   "plyfile",
+  "pynvml>=13.0.1",
   "pyopengl",
   "pyyaml",
+  "requests>=2.33.1",
   "setuptools",
   "torch",
 ]

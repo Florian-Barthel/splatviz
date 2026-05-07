@@ -28,8 +28,6 @@ class Renderer:
         self._end_event.record(torch.cuda.current_stream(self._device))
         if "image" in res:
             res.image = res.image
-        if "stats" in res:
-            res.stats = res.stats.cpu().detach().numpy()
         if "error" in res:
             res.error = str(res.error)
         if self._is_timing:
@@ -77,10 +75,10 @@ class Renderer:
         elif on_top:
             mask = torch.mean(images[1], dim=0)
             img = images[0] * (1 - mask) + images[1] * mask
+        elif len(images) == 1:
+            img = images[0]
         else:
             img = torch.concat(images, dim=2)
-
-        res.stats = torch.stack([img.mean(), img.std()])
 
         # Scale and convert to uint8.
         if normalize:

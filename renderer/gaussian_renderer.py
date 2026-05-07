@@ -21,6 +21,7 @@ class GaussianRenderer(Renderer):
         self.num_parallel_scenes = num_parallel_scenes
         self.gaussian_models: List[GaussianModel | None] = [None] * num_parallel_scenes
         self._current_ply_file_paths: List[str | None] = [None] * num_parallel_scenes
+        self._model_stats: List[EasyDict | None] = [None] * num_parallel_scenes
         self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
         self._last_num_scenes = 0
 
@@ -50,6 +51,7 @@ class GaussianRenderer(Renderer):
         **other_args,
     ):
         cam_params = cam_params.to("cuda")
+        background_color = background_color.to("cuda")
         slider = EasyDict(slider)
         ply_file_paths = [path for path in ply_file_paths if path]
         if len(ply_file_paths) == 0:
@@ -58,8 +60,10 @@ class GaussianRenderer(Renderer):
 
         # Remove old scenes
         if len(ply_file_paths) < self._last_num_scenes:
-            for i in range(ply_file_paths, self.num_parallel_scenes):
+            for i in range(len(ply_file_paths), self.num_parallel_scenes):
                 self.gaussian_models[i] = None
+                self._current_ply_file_paths[i] = None
+                self._model_stats[i] = None
             self._last_num_scenes = len(ply_file_paths)
 
         render_width = max(int(render_width), 1)
@@ -93,15 +97,19 @@ class GaussianRenderer(Renderer):
             if ply_file_path != self._current_ply_file_paths[scene_index]:
                 self.gaussian_models[scene_index] = self._load_model(ply_file_path)
                 self._current_ply_file_paths[scene_index] = ply_file_path
+                self._model_stats[scene_index] = self._collect_model_stats(self.gaussian_models[scene_index])
 
-            # Edit
-            gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
-            try:
-                exec(edit_text)
-            except Exception as e:
-                error = traceback.format_exc()
-                error += str(e)
-                res.error = error
+            # Edit only needs an isolated copy when user code can mutate the scene.
+            if edit_text.strip():
+                gs: GaussianModel = copy.deepcopy(self.gaussian_models[scene_index])
+                try:
+                    exec(edit_text)
+                except Exception as e:
+                    error = traceback.format_exc()
+                    error += str(e)
+                    res.error = error
+            else:
+                gs: GaussianModel = self.gaussian_models[scene_index]
 
             # Render video
             if len(video_cams) > 0:
@@ -113,7 +121,8 @@ class GaussianRenderer(Renderer):
             scene_height = scene_heights[scene_index]
             fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * scene_width / scene_height)
             render_cam = CustomCam(scene_width, scene_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
-            render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
+            with torch.no_grad():
+                render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color)
             if render_alpha:
                 images.append(render["alpha"])
             elif render_depth:
@@ -125,9 +134,14 @@ class GaussianRenderer(Renderer):
             if save_ply_path is not None:
                 self.save_ply(gs, save_ply_path)
 
+        self._last_num_scenes = len(ply_file_paths)
 
-        res.mean_xyz = torch.mean(gs.get_xyz, dim=0)
-        res.std_xyz = torch.std(gs.get_xyz)
+        if edit_text.strip():
+            stats = self._collect_model_stats(gs)
+        else:
+            stats = self._model_stats[scene_index]
+        res.mean_xyz = stats.mean_xyz
+        res.std_xyz = stats.std_xyz
         if len(eval_text) > 0:
             res.eval = eval(eval_text)
 
@@ -154,6 +168,11 @@ class GaussianRenderer(Renderer):
         else:
             raise NotImplementedError("Select a .ply or .yml file.")
         return model
+
+    @staticmethod
+    def _collect_model_stats(gaussian):
+        xyz = gaussian.get_xyz
+        return EasyDict(mean_xyz=torch.mean(xyz, dim=0), std_xyz=torch.std(xyz))
 
 
     @staticmethod
