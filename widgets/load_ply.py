@@ -75,7 +75,10 @@ class LoadWidget(Widget):
         if len(scene_paths) == 0:
             return
 
-        self.plys = scene_paths
+        if self.plys == [""]:
+            self.plys = scene_paths
+        else:
+            self.plys.extend(scene_paths)
         self.last_folder = os.path.dirname(os.path.abspath(scene_paths[0]))
         self._save_last_folder()
 
