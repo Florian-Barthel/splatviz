@@ -13,18 +13,15 @@ dependencies = [
   "imageio[ffmpeg]",
   "imgui-bundle==1.5.2",
   "ninja",
-  "numpy<2",
+  "numpy",
   "opencv-python",
   "pandas>=2.3.3",
   "pillow",
   "plyfile",
   "pyopengl",
   "pyyaml",
-  "requests",
-  "scipy",
   "setuptools",
   "torch",
-  "tqdm",
 ]
 
 [tool.uv]

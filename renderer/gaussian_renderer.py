@@ -2,11 +2,9 @@ import copy
 import os
 import traceback
 from typing import List
-import imageio
 import numpy as np
 import torch
 import torch.nn
-from tqdm import tqdm
 from pathlib import Path
 
 from compression.compression_exp import run_single_decompression
@@ -157,16 +155,6 @@ class GaussianRenderer(Renderer):
             raise NotImplementedError("Select a .ply or .yml file.")
         return model
 
-    def render_video(self, save_path, video_cams, gaussian):
-        os.makedirs(save_path, exist_ok=True)
-        filename = f"{save_path}/rotate_{len(os.listdir(save_path))}.mp4"
-        video = imageio.get_writer(filename, mode="I", fps=30, codec="libx264", bitrate="16M", quality=10)
-        for render_cam in tqdm(video_cams):
-            img = render_simple(viewpoint_camera=render_cam, pc=gaussian, bg_color=self.bg_color)["render"]
-            img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()
-            video.append_data(img)
-        video.close()
-        print(f"Video saved in {filename}.")
 
     @staticmethod
     def save_ply(gaussian, save_ply_path):
