@@ -156,6 +156,28 @@ class CamWidget(Widget):
     def handle_dragging_in_window(self, x, y, width, height):
         x_dir = -1 if self.invert_x else 1
         y_dir = -1 if self.invert_y else 1
+        detached_render_window = self.viz.detached_render_window
+
+        if detached_render_window is not None:
+            rotate_delta = detached_render_window.get_mouse_drag_delta(0)
+            pan_delta = detached_render_window.get_mouse_drag_delta(2)
+            if pan_delta is None:
+                pan_delta = detached_render_window.get_mouse_drag_delta(1)
+
+            if rotate_delta is not None:
+                self.momentum_x = (
+                    x_dir * rotate_delta[0] * self.rotate_speed * (1 - self.momentum)
+                    + (self.momentum_x * self.momentum)
+                )
+                self.momentum_y = (
+                    y_dir * rotate_delta[1] * self.rotate_speed * (1 - self.momentum)
+                    + (self.momentum_y * self.momentum)
+                )
+            elif pan_delta is not None:
+                self.pan_camera(pan_delta[0], pan_delta[1], x_dir, y_dir)
+
+            self.apply_momentum()
+            return
 
         if imgui.is_mouse_dragging(0):  # left mouse button
             new_delta = imgui.get_mouse_drag_delta(0)
@@ -177,25 +199,30 @@ class CamWidget(Widget):
             elif self.did_drag_start_in_render_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
-
-                right = torch.linalg.cross(self.forward, self.up_vector)
-                right = right / torch.linalg.norm(right)
-                cam_up = torch.linalg.cross(right, self.forward)
-                cam_up = cam_up / torch.linalg.norm(cam_up)
-
-                x_change = x_dir * right * -delta.x * self.drag_speed
-                y_change = y_dir * cam_up * delta.y * self.drag_speed
-                self.cam_pos += x_change
-                self.cam_pos += y_change
-                if self.control_modes[self.current_control_mode] == "Orbit":
-                    self.lookat_point += x_change
-                    self.lookat_point += y_change
+                self.pan_camera(delta.x, delta.y, x_dir, y_dir)
             else:
                 self.last_drag_delta = new_delta
         else:
             self.last_drag_delta = imgui.ImVec2(0, 0)
             self.drag_started_in_splitter = False
 
+        self.apply_momentum()
+
+    def pan_camera(self, delta_x, delta_y, x_dir, y_dir):
+        right = torch.linalg.cross(self.forward, self.up_vector)
+        right = right / torch.linalg.norm(right)
+        cam_up = torch.linalg.cross(right, self.forward)
+        cam_up = cam_up / torch.linalg.norm(cam_up)
+
+        x_change = x_dir * right * -delta_x * self.drag_speed
+        y_change = y_dir * cam_up * delta_y * self.drag_speed
+        self.cam_pos += x_change
+        self.cam_pos += y_change
+        if self.control_modes[self.current_control_mode] == "Orbit":
+            self.lookat_point += x_change
+            self.lookat_point += y_change
+
+    def apply_momentum(self):
         self.pose.yaw += self.momentum_x
         self.pose.pitch += self.momentum_y
         self.momentum_x *= self.momentum_dropoff
@@ -259,13 +286,19 @@ class CamWidget(Widget):
                 self.pose.yaw -= self.move_speed
 
     def handle_mouse_wheel(self):
+        if self.viz.detached_render_window is not None:
+            self.apply_mouse_wheel(self.viz.detached_render_window.consume_scroll_y())
+            return
+
         mouse_pos = imgui.get_io().mouse_pos
         if (
             self.viz.render_x <= mouse_pos.x <= self.viz.render_x + self.viz.render_w
             and self.viz.render_y <= mouse_pos.y <= self.viz.render_y + self.viz.render_h
         ):
-            wheel = imgui.get_io().mouse_wheel
-            if self.control_modes[self.current_control_mode] == "WASD":
-                self.cam_pos += self.forward * self.move_speed * wheel
-            elif self.control_modes[self.current_control_mode] == "Orbit":
-                self.radius -= wheel / 10
+            self.apply_mouse_wheel(imgui.get_io().mouse_wheel)
+
+    def apply_mouse_wheel(self, wheel):
+        if self.control_modes[self.current_control_mode] == "WASD":
+            self.cam_pos += self.forward * self.move_speed * wheel
+        elif self.control_modes[self.current_control_mode] == "Orbit":
+            self.radius -= wheel / 10

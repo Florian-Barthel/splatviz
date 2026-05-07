@@ -45,6 +45,10 @@ class LoadWidget(Widget):
                 if len(files_from_dialog) > 0:
                     self.plys.append(files_from_dialog[0])
 
+            detach_label = "Attach Render Window" if viz.detached_render_window is not None else "Detach Render Window"
+            if imgui_utils.button(detach_label, width=viz.button_large_w):
+                viz.toggle_detached_render_window()
+
             if len(self.plys) > 1:
                 _, self.layout_index = imgui.combo("Layout", self.layout_index, self._layout_options)
                 highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
