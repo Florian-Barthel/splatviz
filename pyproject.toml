@@ -5,32 +5,37 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
 dependencies = [
-  "albucore",
   "click",
-  "gdown",
+  "diff-gaussian-rasterization",
   "glfw",
   "gputil",
   "imagecodecs[all]>=2025.3.30",
+  "imageio[ffmpeg]",
   "imgui-bundle==1.5.2",
-  "insightface",
-  "lpips",
   "ninja",
-  "onnxruntime",
+  "numpy<2",
   "opencv-python",
   "pandas>=2.3.3",
   "pillow",
   "plyfile",
-  "pynvml",
   "pyopengl",
+  "pyyaml",
   "requests",
+  "scipy",
+  "setuptools",
   "torch",
   "tqdm",
 ]
 
+[tool.uv]
+no-build-isolation-package = ["diff-gaussian-rasterization"]
+
 [tool.uv.extra-build-dependencies]
+diff-gaussian-rasterization = ["setuptools"]
 file = ["setuptools"]
 
 [tool.uv.sources]
+diff-gaussian-rasterization = { git = "https://github.com/ashawkey/diff-gaussian-rasterization" }
 torch = [
   { index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]

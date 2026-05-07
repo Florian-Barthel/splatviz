@@ -156,28 +156,6 @@ class CamWidget(Widget):
     def handle_dragging_in_window(self, x, y, width, height):
         x_dir = -1 if self.invert_x else 1
         y_dir = -1 if self.invert_y else 1
-        detached_render_window = self.viz.detached_render_window
-
-        if detached_render_window is not None:
-            rotate_delta = detached_render_window.get_mouse_drag_delta(0)
-            pan_delta = detached_render_window.get_mouse_drag_delta(2)
-            if pan_delta is None:
-                pan_delta = detached_render_window.get_mouse_drag_delta(1)
-
-            if rotate_delta is not None:
-                self.momentum_x = (
-                    x_dir * rotate_delta[0] * self.rotate_speed * (1 - self.momentum)
-                    + (self.momentum_x * self.momentum)
-                )
-                self.momentum_y = (
-                    y_dir * rotate_delta[1] * self.rotate_speed * (1 - self.momentum)
-                    + (self.momentum_y * self.momentum)
-                )
-            elif pan_delta is not None:
-                self.pan_camera(pan_delta[0], pan_delta[1], x_dir, y_dir)
-
-            self.apply_momentum()
-            return
 
         if imgui.is_mouse_dragging(0):  # left mouse button
             new_delta = imgui.get_mouse_drag_delta(0)
@@ -286,10 +264,6 @@ class CamWidget(Widget):
                 self.pose.yaw -= self.move_speed
 
     def handle_mouse_wheel(self):
-        if self.viz.detached_render_window is not None:
-            self.apply_mouse_wheel(self.viz.detached_render_window.consume_scroll_y())
-            return
-
         mouse_pos = imgui.get_io().mouse_pos
         if (
             self.viz.render_x <= mouse_pos.x <= self.viz.render_x + self.viz.render_w
