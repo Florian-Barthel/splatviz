@@ -23,11 +23,30 @@ dependencies = [
   "pyyaml",
   "requests>=2.33.1",
   "setuptools",
-  "torch",
 ]
+
+[dependency-groups]
+cuda118 = ["torch"]
+cuda121 = ["torch"]
+cuda124 = ["torch"]
+cuda126 = ["torch"]
+cuda128 = ["torch"]
+cuda129 = ["torch"]
+cuda130 = ["torch"]
 
 [tool.uv]
 no-build-isolation-package = ["diff-gaussian-rasterization"]
+conflicts = [
+  [
+    { group = "cuda118" },
+    { group = "cuda121" },
+    { group = "cuda124" },
+    { group = "cuda126" },
+    { group = "cuda128" },
+    { group = "cuda129" },
+    { group = "cuda130" },
+  ],
+]
 
 [tool.uv.extra-build-dependencies]
 diff-gaussian-rasterization = ["setuptools"]
@@ -36,9 +55,45 @@ file = ["setuptools"]
 [tool.uv.sources]
 diff-gaussian-rasterization = { git = "https://github.com/ashawkey/diff-gaussian-rasterization" }
 torch = [
-  { index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu118", group = "cuda118" },
+  { index = "pytorch-cu121", group = "cuda121" },
+  { index = "pytorch-cu124", group = "cuda124" },
+  { index = "pytorch-cu126", group = "cuda126" },
+  { index = "pytorch-cu128", group = "cuda128" },
+  { index = "pytorch-cu129", group = "cuda129" },
+  { index = "pytorch-cu130", group = "cuda130" },
 ]
 
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cu130"
