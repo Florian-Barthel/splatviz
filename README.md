@@ -33,17 +33,14 @@ Install `uv` first if it is not already available. See the official
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Install the CUDA Toolkit version that matches the `uv` group you plan to use:
-
-| `uv` group | CUDA Toolkit |
-| --- | --- |
-| `cuda118` | [CUDA Toolkit 11.8.0](https://developer.nvidia.com/cuda-11-8-0-download-archive) |
-| `cuda121` | [CUDA Toolkit 12.1.1](https://developer.nvidia.com/cuda-12-1-1-download-archive) |
-| `cuda124` | [CUDA Toolkit 12.4.1](https://developer.nvidia.com/cuda-12-4-1-download-archive) |
-| `cuda126` | [CUDA Toolkit 12.6.3](https://developer.nvidia.com/cuda-12-6-3-download-archive) |
-| `cuda128` | [CUDA Toolkit 12.8.2](https://developer.nvidia.com/cuda-12-8-2-download-archive) |
-| `cuda129` | [CUDA Toolkit 12.9.1](https://developer.nvidia.com/cuda-12-9-1-download-archive) |
-| `cuda130` | [CUDA Toolkit 13.0.3](https://developer.nvidia.com/cuda-13-0-3-download-archive) |
+Install the CUDA Toolkit:
+[11.8](https://developer.nvidia.com/cuda-11-8-0-download-archive)
+[12.1](https://developer.nvidia.com/cuda-12-1-1-download-archive)
+[12.4](https://developer.nvidia.com/cuda-12-4-1-download-archive)
+[12.6](https://developer.nvidia.com/cuda-12-6-3-download-archive)
+[12.8](https://developer.nvidia.com/cuda-12-8-2-download-archive)
+[12.9](https://developer.nvidia.com/cuda-12-9-1-download-archive)
+[13.0](https://developer.nvidia.com/cuda-13-0-3-download-archive)
 
 After installing `uv` and CUDA, clone and install splatviz:
 
