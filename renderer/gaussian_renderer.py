@@ -43,6 +43,7 @@ class GaussianRenderer(Renderer):
         render_alpha=False,
         img_normalize=False,
         use_splitscreen=False,
+        layout="side_by_side",
         highlight_border=False,
         save_ply_path=None,
         colormap=None,
@@ -64,15 +65,28 @@ class GaussianRenderer(Renderer):
 
         render_width = max(int(render_width), 1)
         render_height = max(int(render_height), 1)
-        if use_splitscreen or len(ply_file_paths) <= 1:
-            scene_widths = [render_width] * len(ply_file_paths)
+        num_scenes = len(ply_file_paths)
+        if use_splitscreen:
+            layout = "splitscreen"
+        if num_scenes <= 1:
+            layout = "side_by_side"
+        use_splitscreen = layout == "splitscreen"
+
+        grid_shape = None
+        if layout == "grid":
+            cols = int(np.ceil(np.sqrt(num_scenes)))
+            rows = int(np.ceil(num_scenes / cols))
+            grid_shape = (rows, cols)
+            col_widths = self._split_extent(render_width, cols)
+            row_heights = self._split_extent(render_height, rows)
+            scene_widths = [col_widths[scene_index % cols] for scene_index in range(num_scenes)]
+            scene_heights = [row_heights[scene_index // cols] for scene_index in range(num_scenes)]
+        elif layout == "splitscreen":
+            scene_widths = [render_width] * num_scenes
+            scene_heights = [render_height] * num_scenes
         else:
-            base_width = render_width // len(ply_file_paths)
-            remaining_width = render_width % len(ply_file_paths)
-            scene_widths = [
-                max(base_width + (1 if scene_index < remaining_width else 0), 1)
-                for scene_index in range(len(ply_file_paths))
-            ]
+            scene_widths = self._split_extent(render_width, num_scenes)
+            scene_heights = [render_height] * num_scenes
 
         images = []
         for scene_index, ply_file_path in enumerate(ply_file_paths):
@@ -97,8 +111,9 @@ class GaussianRenderer(Renderer):
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
             scene_width = scene_widths[scene_index]
-            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * scene_width / render_height)
-            render_cam = CustomCam(scene_width, render_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
+            scene_height = scene_heights[scene_index]
+            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * scene_width / scene_height)
+            render_cam = CustomCam(scene_width, scene_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
             render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
             if render_alpha:
                 images.append(render["alpha"])
@@ -122,6 +137,9 @@ class GaussianRenderer(Renderer):
             res,
             normalize=img_normalize,
             use_splitscreen=use_splitscreen,
+            layout=layout,
+            grid_shape=grid_shape,
+            target_size=(render_width, render_height),
             highlight_border=highlight_border,
             colormap=colormap,
             invert=invert

@@ -10,11 +10,13 @@ from widgets.widget import Widget
 class LoadWidget(Widget):
     _settings_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".splatviz_settings.json"))
     _scene_extensions = (".ply", ".yml", ".yaml")
+    _layout_options = ["Side by side", "Grid", "Splitscreen"]
+    _layout_values = ["side_by_side", "grid", "splitscreen"]
 
     def __init__(self, viz):
         super().__init__(viz, "Load")
         self.plys: list[str] = [""]
-        self.use_splitscreen = False
+        self.layout_index = 0
         self.highlight_border = False
         self.last_folder = self._load_last_folder()
 
@@ -44,11 +46,13 @@ class LoadWidget(Widget):
                     self.plys.append(files_from_dialog[0])
 
             if len(self.plys) > 1:
-                use_splitscreen, self.use_splitscreen = imgui.checkbox("Splitscreen", self.use_splitscreen)
+                _, self.layout_index = imgui.combo("Layout", self.layout_index, self._layout_options)
                 highlight_border, self.highlight_border = imgui.checkbox("Highlight Border", self.highlight_border)
 
+        layout = self._layout_values[self.layout_index]
         viz.args.highlight_border = self.highlight_border
-        viz.args.use_splitscreen = self.use_splitscreen
+        viz.args.layout = layout
+        viz.args.use_splitscreen = layout == "splitscreen"
         viz.args.ply_file_paths = self.plys
         viz.args.current_ply_names = [
             ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
