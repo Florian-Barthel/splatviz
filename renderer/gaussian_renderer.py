@@ -62,6 +62,18 @@ class GaussianRenderer(Renderer):
                 self.gaussian_models[i] = None
             self._last_num_scenes = len(ply_file_paths)
 
+        render_width = max(int(render_width), 1)
+        render_height = max(int(render_height), 1)
+        if use_splitscreen or len(ply_file_paths) <= 1:
+            scene_widths = [render_width] * len(ply_file_paths)
+        else:
+            base_width = render_width // len(ply_file_paths)
+            remaining_width = render_width % len(ply_file_paths)
+            scene_widths = [
+                max(base_width + (1 if scene_index < remaining_width else 0), 1)
+                for scene_index in range(len(ply_file_paths))
+            ]
+
         images = []
         for scene_index, ply_file_path in enumerate(ply_file_paths):
             # Load
@@ -84,10 +96,9 @@ class GaussianRenderer(Renderer):
 
             # Render current view
             fov_rad = fov / 360 * 2 * np.pi
-            render_width = max(int(render_width), 1)
-            render_height = max(int(render_height), 1)
-            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * render_width / render_height)
-            render_cam = CustomCam(render_width, render_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
+            scene_width = scene_widths[scene_index]
+            fov_x = 2 * np.arctan(np.tan(fov_rad * 0.5) * scene_width / render_height)
+            render_cam = CustomCam(scene_width, render_height, fovy=fov_rad, fovx=fov_x, extr=cam_params)
             render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color.to("cuda"))
             if render_alpha:
                 images.append(render["alpha"])

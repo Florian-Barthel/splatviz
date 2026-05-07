@@ -76,7 +76,11 @@ class EditWidget(Widget):
         self.safe_load = False
         self.preset_path = "./presets.json"
         self.history_path = "./history.json"
+        self.live_edit_path = "./live_edit.py"
+        self.live_edit_text = ""
+        self.live_edit_mtime_ns = None
         self.load_presets()
+        self.init_live_edit_file()
 
         self.editor = edit.TextEditor()
         self.setup_editor()
@@ -109,11 +113,12 @@ class EditWidget(Widget):
         copy_identifiers.update(custom_identifiers)
         language.m_identifiers = copy_identifiers
         self.editor.set_language_definition(language)
-        self.editor.set_text(self.presets["Default"]["edit_text"])
+        self.editor.set_text(self.live_edit_text)
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
         viz = self.viz
+        self.sync_live_edit_from_file()
         if show:
             self.render_sliders()
             imgui.new_line()
@@ -175,8 +180,52 @@ class EditWidget(Widget):
                 save_json(filename=self.history_path, data=self.history)
             self.last_text = edit_text
 
+        edit_text = self.editor.get_text()
+        self.sync_live_edit_to_file(edit_text)
+        self.last_text = edit_text
         viz.args.edit_text = self.last_text
         viz.args.slider = {slider.key: slider.value for slider in self.sliders}
+
+    def init_live_edit_file(self):
+        if not os.path.exists(self.live_edit_path):
+            with open(self.live_edit_path, "w", encoding="utf-8"):
+                pass
+        self.live_edit_text = self.read_live_edit_file()
+        self.live_edit_mtime_ns = self.get_live_edit_mtime()
+
+    def read_live_edit_file(self):
+        try:
+            with open(self.live_edit_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except OSError:
+            return ""
+
+    def get_live_edit_mtime(self):
+        try:
+            return os.stat(self.live_edit_path).st_mtime_ns
+        except OSError:
+            return None
+
+    def sync_live_edit_from_file(self):
+        mtime_ns = self.get_live_edit_mtime()
+        if mtime_ns is None or mtime_ns == self.live_edit_mtime_ns:
+            return
+        text = self.read_live_edit_file()
+        self.live_edit_mtime_ns = mtime_ns
+        self.live_edit_text = text
+        if text != self.editor.get_text():
+            self.editor.set_text(text)
+
+    def sync_live_edit_to_file(self, text):
+        if text == self.live_edit_text:
+            return
+        try:
+            with open(self.live_edit_path, "w", encoding="utf-8") as f:
+                f.write(text)
+            self.live_edit_text = text
+            self.live_edit_mtime_ns = self.get_live_edit_mtime()
+        except OSError:
+            pass
 
     def load_presets(self):
         if not os.path.exists(self.preset_path):

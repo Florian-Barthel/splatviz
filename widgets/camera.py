@@ -164,8 +164,9 @@ class CamWidget(Widget):
                 self.momentum_x = x_dir * delta.x * self.rotate_speed * (1 - self.momentum) + (self.momentum_x * self.momentum)
                 self.momentum_y = y_dir * delta.y * self.rotate_speed * (1 - self.momentum) + (self.momentum_y * self.momentum)
 
-        elif imgui.is_mouse_dragging(2) or imgui.is_mouse_dragging(1):  # right mouse button or middle mouse button
-            new_delta = imgui.get_mouse_drag_delta(2)
+        elif imgui.is_mouse_dragging(2) or imgui.is_mouse_dragging(1):  # middle mouse button or right mouse button
+            drag_button = 2 if imgui.is_mouse_dragging(2) else 1
+            new_delta = imgui.get_mouse_drag_delta(drag_button)
             if imgui_utils.did_drag_start_in_window(x, y, width, height, new_delta):
                 delta = new_delta - self.last_drag_delta
                 self.last_drag_delta = new_delta
