@@ -49,21 +49,20 @@ git clone https://github.com/Florian-Barthel/splatviz.git
 cd splatviz
 
 uv sync --group <cuda-group>
+
+uv pip install --no-build-isolation git+https://github.com/ashawkey/diff-gaussian-rasterization.git
 ```
 
 Replace `<cuda-group>` with the `uv` CUDA group that matches your system:
 
 ```bash
-uv sync --group cuda118
-uv sync --group cuda121
-uv sync --group cuda124
-uv sync --group cuda126
-uv sync --group cuda128
-uv sync --group cuda129
-uv sync --group cuda130
+uv sync --extra cu118
+uv sync --extra cu126
+uv sync --extra cu128
+uv sync --extra cu130
 ```
 
-
+For Windows you might need c++ build tools: https://visualstudio.microsoft.com/de/visual-cpp-build-tools/
 ## Launch
 
 In some cases you will have to add this variable so that opengl uses the correct version:

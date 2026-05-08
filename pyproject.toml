@@ -1,18 +1,18 @@
 [project]
 name = "splatviz"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 requires-python = ">=3.10,<3.11"
 dependencies = [
+  "setuptools",
+  "ninja",
+
   "click",
-  "diff-gaussian-rasterization",
   "glfw",
   "gputil",
   "imagecodecs[all]>=2025.3.30",
   "imageio[ffmpeg]",
   "imgui-bundle==1.5.2",
-  "ninja",
+
   "numpy",
   "opencv-python",
   "pandas>=2.3.3",
@@ -22,62 +22,37 @@ dependencies = [
   "pyopengl",
   "pyyaml",
   "requests>=2.33.1",
-  "setuptools",
 ]
 
-[dependency-groups]
-cuda118 = ["torch"]
-cuda121 = ["torch"]
-cuda124 = ["torch"]
-cuda126 = ["torch"]
-cuda128 = ["torch"]
-cuda129 = ["torch"]
-cuda130 = ["torch"]
+[project.optional-dependencies]
+cu118 = ["torch"]
+cu126 = ["torch"]
+cu128 = ["torch"]
+cu130 = ["torch"]
 
 [tool.uv]
-no-build-isolation-package = ["diff-gaussian-rasterization"]
+package = false
 conflicts = [
   [
-    { group = "cuda118" },
-    { group = "cuda121" },
-    { group = "cuda124" },
-    { group = "cuda126" },
-    { group = "cuda128" },
-    { group = "cuda129" },
-    { group = "cuda130" },
+    { extra = "cu118" },
+    { extra = "cu126" },
+    { extra = "cu128" },
+    { extra = "cu130" },
   ],
 ]
 
-[tool.uv.extra-build-dependencies]
-diff-gaussian-rasterization = ["setuptools"]
-file = ["setuptools"]
 
 [tool.uv.sources]
-diff-gaussian-rasterization = { git = "https://github.com/ashawkey/diff-gaussian-rasterization" }
 torch = [
-  { index = "pytorch-cu118", group = "cuda118" },
-  { index = "pytorch-cu121", group = "cuda121" },
-  { index = "pytorch-cu124", group = "cuda124" },
-  { index = "pytorch-cu126", group = "cuda126" },
-  { index = "pytorch-cu128", group = "cuda128" },
-  { index = "pytorch-cu129", group = "cuda129" },
-  { index = "pytorch-cu130", group = "cuda130" },
+  { index = "pytorch-cu118", extra = "cu118" },
+  { index = "pytorch-cu126", extra = "cu126" },
+  { index = "pytorch-cu128", extra = "cu128" },
+  { index = "pytorch-cu130", extra = "cu130" },
 ]
-
 
 [[tool.uv.index]]
 name = "pytorch-cu118"
 url = "https://download.pytorch.org/whl/cu118"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu121"
-url = "https://download.pytorch.org/whl/cu121"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
 explicit = true
 
 [[tool.uv.index]]
@@ -88,11 +63,6 @@ explicit = true
 [[tool.uv.index]]
 name = "pytorch-cu128"
 url = "https://download.pytorch.org/whl/cu128"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu129"
-url = "https://download.pytorch.org/whl/cu129"
 explicit = true
 
 [[tool.uv.index]]
