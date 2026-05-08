@@ -17,13 +17,13 @@ from splatviz_utils.dict_utils import EasyDict
 
 
 class GaussianRenderer(Renderer):
-    def __init__(self, num_parallel_scenes=16):
-        super().__init__()
+    def __init__(self, num_parallel_scenes=16, device=None):
+        super().__init__(device=device)
         self.num_parallel_scenes = num_parallel_scenes
         self.gaussian_models: List[GaussianModel | None] = [None] * num_parallel_scenes
         self._current_ply_file_paths: List[str | None] = [None] * num_parallel_scenes
         self._model_stats: List[EasyDict | None] = [None] * num_parallel_scenes
-        self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32).to("cuda")
+        self.bg_color = torch.tensor([0, 0, 0], dtype=torch.float32, device=self._device)
         self._last_num_scenes = 0
 
     def _render_impl(
@@ -55,8 +55,12 @@ class GaussianRenderer(Renderer):
         slider={},
         **other_args,
     ):
-        cam_params = cam_params.to("cuda")
-        background_color = background_color.to("cuda")
+        if self._device.type != "cuda":
+            res.message = "Default Gaussian rendering requires a CUDA device. Use attach mode or run with CUDA enabled."
+            return
+
+        cam_params = cam_params.to(self._device)
+        background_color = background_color.to(self._device)
         slider = EasyDict(slider)
         ply_file_paths = [path for path in ply_file_paths if path]
         if len(ply_file_paths) == 0:
@@ -184,7 +188,7 @@ class GaussianRenderer(Renderer):
     def _load_model(self, ply_file_path):
         ply_file_path_lower = ply_file_path.lower()
         if ply_file_path_lower.endswith(".ply"):
-            model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True)
+            model = GaussianModel(sh_degree=0, disable_xyz_log_activation=True, device=self._device)
             model.load_ply(ply_file_path)
         elif ply_file_path_lower.endswith((".yml", ".yaml")):
             model = run_single_decompression(Path(ply_file_path).parent.absolute())
@@ -197,7 +201,6 @@ class GaussianRenderer(Renderer):
         xyz = gaussian.get_xyz
         return EasyDict(mean_xyz=torch.mean(xyz, dim=0), std_xyz=torch.std(xyz))
 
-    @staticmethod
     def render_video(
         video_path,
         video_cams,
@@ -225,7 +228,7 @@ class GaussianRenderer(Renderer):
         try:
             with torch.no_grad():
                 for cam_params in video_cams:
-                    extr = torch.as_tensor(cam_params, device="cuda", dtype=torch.float32)
+                    extr = torch.as_tensor(cam_params, device=self._device, dtype=torch.float32)
                     render_cam = CustomCam(width, height, fovy=fov_rad, fovx=fov_x, extr=extr)
                     render = render_simple(viewpoint_camera=render_cam, pc=gs, bg_color=background_color)
                     image = (render["render"] * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy()

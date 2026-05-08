@@ -1,4 +1,5 @@
 import os
+import time
 import traceback
 
 import cv2
@@ -9,30 +10,39 @@ from splatviz_utils.dict_utils import EasyDict
 
 
 class Renderer:
-    def __init__(self):
-        self._device = torch.device("cuda")
+    def __init__(self, device=None):
+        self._device = torch.device("cuda" if device is None else device)
+        self._is_cuda = self._device.type == "cuda"
         self._pinned_bufs = dict()
         self._is_timing = False
-        self._start_event = torch.cuda.Event(enable_timing=True)
-        self._end_event = torch.cuda.Event(enable_timing=True)
+        self._start_event = torch.cuda.Event(enable_timing=True) if self._is_cuda else None
+        self._end_event = torch.cuda.Event(enable_timing=True) if self._is_cuda else None
+        self._start_time = None
 
     def render(self, **args):
         self._is_timing = True
-        self._start_event.record(torch.cuda.current_stream(self._device))
+        if self._is_cuda:
+            self._start_event.record(torch.cuda.current_stream(self._device))
+        else:
+            self._start_time = time.perf_counter()
         res = EasyDict()
         try:
             self._render_impl(res, **args)
         except Exception as e:
             res.error = "".join(traceback.format_exception(e))
             res.error += str(e)
-        self._end_event.record(torch.cuda.current_stream(self._device))
+        if self._is_cuda:
+            self._end_event.record(torch.cuda.current_stream(self._device))
         if "image" in res:
             res.image = res.image
         if "error" in res:
             res.error = str(res.error)
         if self._is_timing:
-            self._end_event.synchronize()
-            res.render_time = self._start_event.elapsed_time(self._end_event) * 1e-3
+            if self._is_cuda:
+                self._end_event.synchronize()
+                res.render_time = self._start_event.elapsed_time(self._end_event) * 1e-3
+            else:
+                res.render_time = time.perf_counter() - self._start_time
             self._is_timing = False
         return res
 

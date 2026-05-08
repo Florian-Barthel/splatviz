@@ -50,8 +50,9 @@ class GaussianModel:
         self.rotation_activation = torch.nn.functional.normalize
 
 
-    def __init__(self, sh_degree : int, disable_xyz_log_activation):
+    def __init__(self, sh_degree : int, disable_xyz_log_activation, device="cuda"):
         self.disable_xyz_log_activation = disable_xyz_log_activation
+        self.device = torch.device(device)
         self.active_sh_degree = 0
         self.max_sh_degree = sh_degree  
         self._xyz = torch.empty(0)
@@ -140,7 +141,9 @@ class GaussianModel:
         normals = np.zeros_like(xyz)
         f_dc = self._features_dc.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
         if self._features_rest.shape[0] == 0:
-            f_rest = torch.zeros((self._features_dc.shape[0], 3, (3 + 1) ** 2)).float().cuda()[:,:,1:]
+            f_rest = torch.zeros(
+                (self._features_dc.shape[0], 3, (3 + 1) ** 2), device=self.device, dtype=torch.float
+            )[:, :, 1:]
             f_rest = f_rest.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
         else:
             f_rest = self._features_rest.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
@@ -204,11 +207,11 @@ class GaussianModel:
         for idx, attr_name in enumerate(rot_names):
             rots[:, idx] = np.asarray(plydata.elements[0][attr_name])
 
-        self._xyz = torch.tensor(xyz, dtype=torch.float, device="cuda")
-        self._features_dc = torch.tensor(features_dc, dtype=torch.float, device="cuda").transpose(1, 2).contiguous()
-        self._features_rest = torch.tensor(features_extra, dtype=torch.float, device="cuda").transpose(1, 2).contiguous()
-        self._opacity = torch.tensor(opacities, dtype=torch.float, device="cuda")
-        self._scaling = torch.tensor(scales, dtype=torch.float, device="cuda")
-        self._rotation = torch.tensor(rots, dtype=torch.float, device="cuda")
+        self._xyz = torch.tensor(xyz, dtype=torch.float, device=self.device)
+        self._features_dc = torch.tensor(features_dc, dtype=torch.float, device=self.device).transpose(1, 2).contiguous()
+        self._features_rest = torch.tensor(features_extra, dtype=torch.float, device=self.device).transpose(1, 2).contiguous()
+        self._opacity = torch.tensor(opacities, dtype=torch.float, device=self.device)
+        self._scaling = torch.tensor(scales, dtype=torch.float, device=self.device)
+        self._rotation = torch.tensor(rots, dtype=torch.float, device=self.device)
 
         self.active_sh_degree = self.max_sh_degree

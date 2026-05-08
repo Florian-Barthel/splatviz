@@ -116,14 +116,12 @@ class Texture:
             assert self.is_compatible(image=image)
         with self.bind():
             fmt = get_texture_format(self.dtype, self.channels)
-            gl.glPushClientAttrib(gl.GL_CLIENT_PIXEL_STORE_BIT)
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1)
             gl.glTexImage2D(
                 gl.GL_TEXTURE_2D, 0, fmt.internalformat, self.width, self.height, 0, fmt.format, fmt.type, image
             )
             if self.mipmap:
                 gl.glGenerateMipmap(gl.GL_TEXTURE_2D)
-            gl.glPopClientAttrib()
 
     def draw(self, *, pos=0, zoom=1, align=0, rint=False, color=1, alpha=1, rounding=0):
         zoom = np.broadcast_to(np.asarray(zoom, dtype="float32"), [2])

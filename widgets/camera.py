@@ -15,17 +15,17 @@ from widgets.widget import Widget
 
 
 class CamWidget(Widget):
-    def __init__(self, viz, fov=60, radius=2, up_direction=-1, device="cuda"):
+    def __init__(self, viz, fov=60, radius=2, up_direction=-1):
         super().__init__(viz, "Camera")
-        self.device = device
+        self.device = viz.device
 
         # cam params
         self.fov = fov
         self.radius = radius
-        self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device=device)
-        self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device=device)
-        self.up_vector = torch.tensor([0.0, up_direction, 0.0], device=device)
-        self.forward = torch.tensor([0.0, 0.0, 1.0], device=device)
+        self.lookat_point = torch.tensor((0.0, 0.0, 0.0), device=self.device)
+        self.cam_pos = torch.tensor([0.0, 0.0, -1.0], device=self.device)
+        self.up_vector = torch.tensor([0.0, up_direction, 0.0], device=self.device)
+        self.forward = torch.tensor([0.0, 0.0, 1.0], device=self.device)
 
         # controls
         self.show_cam_speed_options = False

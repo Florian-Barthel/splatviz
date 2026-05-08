@@ -63,9 +63,13 @@ class Camera(nn.Module):
         self.trans = trans
         self.scale = scale
 
-        self.world_view_transform = torch.tensor(getWorld2View2(R, T, trans, scale)).transpose(0, 1).cuda()
+        self.world_view_transform = torch.tensor(
+            getWorld2View2(R, T, trans, scale), device=self.data_device
+        ).transpose(0, 1)
         self.projection_matrix = (
-            getProjectionMatrix(znear=self.znear, zfar=self.zfar, fovX=self.FoVx, fovY=self.FoVy).transpose(0, 1).cuda()
+            getProjectionMatrix(znear=self.znear, zfar=self.zfar, fovX=self.FoVx, fovY=self.FoVy)
+            .transpose(0, 1)
+            .to(self.data_device)
         )
         self.full_proj_transform = (
             self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))
@@ -95,10 +99,13 @@ class CustomCam:
         self.FoVx = fovx
         self.znear = znear
         self.zfar = zfar
+        self.data_device = extr.device
 
         self.world_view_transform = extr.T.inverse()
         self.projection_matrix = (
-            getProjectionMatrix(znear=self.znear, zfar=self.zfar, fovX=self.FoVx, fovY=self.FoVy).transpose(0, 1).cuda()
+            getProjectionMatrix(znear=self.znear, zfar=self.zfar, fovX=self.FoVx, fovY=self.FoVy)
+            .transpose(0, 1)
+            .to(self.data_device)
         )
         self.full_proj_transform = (
             self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))

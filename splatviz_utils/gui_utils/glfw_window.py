@@ -9,6 +9,7 @@
 # its affiliates is strictly prohibited.
 
 import time
+import sys
 import glfw
 import OpenGL.GL as gl
 from PIL import Image
@@ -34,11 +35,19 @@ class GlfwWindow:
         self.current_pressed_keys = set()
 
         # Create window.
-        glfw.init()
+        if not glfw.init():
+            raise RuntimeError("Failed to initialize GLFW.")
         glfw.window_hint(glfw.VISIBLE, False)
+        if sys.platform == "darwin":
+            glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
+            glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+            glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+            glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 2)
         self._glfw_window = glfw.create_window(
             width=window_width, height=window_height, title=title, monitor=None, share=None
         )
+        if self._glfw_window is None:
+            raise RuntimeError("Failed to create GLFW window.")
         self._attach_glfw_callbacks()
         self.make_context_current()
 
@@ -48,8 +57,9 @@ class GlfwWindow:
         if not self._deferred_show:
             glfw.show_window(self._glfw_window)
 
-        icon = Image.open("resources/images/icon.png")
-        glfw.set_window_icon(self._glfw_window, count=1, images=icon)
+        if sys.platform != "darwin":
+            icon = Image.open("resources/images/icon.png")
+            glfw.set_window_icon(self._glfw_window, count=1, images=icon)
 
     def close(self):
         if self._drawing_frame:
@@ -85,18 +95,26 @@ class GlfwWindow:
 
     @property
     def title_bar_height(self):
+        if sys.platform == "darwin":
+            return 0
         _left, top, _right, _bottom = glfw.get_window_frame_size(self._glfw_window)
         return top
 
     @property
     def monitor_width(self):
-        _, _, width, _height = glfw.get_monitor_workarea(glfw.get_primary_monitor())
-        return width
+        monitor = glfw.get_primary_monitor()
+        mode = glfw.get_video_mode(monitor) if monitor is not None else None
+        if mode is None:
+            return self.content_width
+        return mode.size.width
 
     @property
     def monitor_height(self):
-        _, _, _width, height = glfw.get_monitor_workarea(glfw.get_primary_monitor())
-        return height
+        monitor = glfw.get_primary_monitor()
+        mode = glfw.get_video_mode(monitor) if monitor is not None else None
+        if mode is None:
+            return self.content_height
+        return mode.size.height
 
     @property
     def frame_delta(self):
@@ -106,6 +124,10 @@ class GlfwWindow:
         glfw.set_window_title(self._glfw_window, title)
 
     def set_window_size(self, width, height):
+        if sys.platform == "darwin":
+            glfw.set_window_size(self._glfw_window, int(width), int(height))
+            return
+
         width = min(width, self.monitor_width)
         height = min(height, self.monitor_height)
         glfw.set_window_size(self._glfw_window, width, max(height - self.title_bar_height, 0))
@@ -180,14 +202,8 @@ class GlfwWindow:
 
         # Initialize GL state.
         gl.glViewport(0, 0, self.content_width, self.content_height)
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        gl.glTranslate(-1, 1, 0)
-        gl.glScale(2 / max(self.content_width, 1), -2 / max(self.content_height, 1), 1)
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
         gl.glEnable(gl.GL_BLEND)
-        gl.glBlendFunc(gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA)  # Pre-multiplied alpha.
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
         # Clear.
         gl.glClearColor(0, 0, 0, 1)

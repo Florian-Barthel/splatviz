@@ -31,6 +31,8 @@ class Monitor(Thread):
 class PerformanceWidget(Widget):
     def __init__(self, viz):
         super().__init__(viz, "Performance")
+        self.gpu_monitor = None
+        self.has_cuda_device = viz.device.type == "cuda"
         self.num_elements = 500
         self.gui_FPS = [0] * 10
         self.gui_FPS_smooth = [0] * self.num_elements
@@ -40,7 +42,8 @@ class PerformanceWidget(Widget):
         self.use_vsync = False
         self.render_scale = 1.0
 
-        # CUDA
+        if not self.has_cuda_device:
+            return
         self.device_properties = torch.cuda.get_device_properties(0)
         self.device_capability = (self.device_properties.major, self.device_properties.minor)
         self.device_name = self.device_properties.name
@@ -49,7 +52,8 @@ class PerformanceWidget(Widget):
         self.cuda_version = torch.version.cuda
 
     def close(self):
-        self.gpu_monitor.stop()
+        if self.gpu_monitor is not None:
+            self.gpu_monitor.stop()
 
     @imgui_utils.scoped_by_object_id
     def __call__(self, show=True):
@@ -91,30 +95,33 @@ class PerformanceWidget(Widget):
             imgui.text(f"{self.render_FPS_smooth[-1]:.2f}")
             imgui.new_line()
 
-            # CUDA
-            label("Device:", viz.label_w)
-            imgui.text(f"{self.gpu_monitor.gpu.name}")
+            if self.has_cuda_device:
+                label("Device:", viz.label_w)
+                imgui.text(f"{self.gpu_monitor.gpu.name}")
 
-            label("Device Capability:", viz.label_w)
-            imgui.text(f"{self.device_capability[0]}.{self.device_capability[1]}")
+                label("Device Capability:", viz.label_w)
+                imgui.text(f"{self.device_capability[0]}.{self.device_capability[1]}")
 
-            label("Driver:", viz.label_w)
-            imgui.text(f"{self.gpu_monitor.gpu.driver}")
+                label("Driver:", viz.label_w)
+                imgui.text(f"{self.gpu_monitor.gpu.driver}")
 
-            label("CUDA Version:", viz.label_w)
-            imgui.text(f"{self.cuda_version}")
+                label("CUDA Version:", viz.label_w)
+                imgui.text(f"{self.cuda_version}")
 
-            label("Clock Rate:", viz.label_w)
-            imgui.text(f"{torch.cuda.clock_rate()}")
+                label("Clock Rate:", viz.label_w)
+                imgui.text(f"{torch.cuda.clock_rate()}")
 
-            label("Temperature:", viz.label_w)
-            imgui.text(f"{self.gpu_monitor.gpu.temperature}° C")
+                label("Temperature:", viz.label_w)
+                imgui.text(f"{self.gpu_monitor.gpu.temperature}° C")
 
-            label("Memory Used:", viz.label_w)
-            imgui.progress_bar(self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
+                label("Memory Used:", viz.label_w)
+                imgui.progress_bar(self.gpu_monitor.gpu.memoryUsed / self.gpu_monitor.gpu.memoryTotal, imgui.ImVec2(300, 30), f"{self.gpu_monitor.gpu.memoryUsed / 1024:.2f}GB / {self.gpu_monitor.gpu.memoryTotal / 1024:.2f}GB")
 
-            if imgui.button("Empty Cache"):
-                torch.cuda.empty_cache()
+                if imgui.button("Empty Cache"):
+                    torch.cuda.empty_cache()
+            else:
+                label("Device:", viz.label_w)
+                imgui.text(viz.device.type.upper())
 
         viz.args.render_scale = self.render_scale
         viz.set_fps_limit(self.fps_limit)

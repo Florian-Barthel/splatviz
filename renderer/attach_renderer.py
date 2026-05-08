@@ -42,8 +42,8 @@ class AsyncConnector(Thread):
 
 
 class AttachRenderer(Renderer):
-    def __init__(self, host, port):
-        super().__init__()
+    def __init__(self, host, port, device=None):
+        super().__init__(device=device)
         self.host = host
         self.port = port
         self.connector = AsyncConnector(1, host, port)
@@ -111,7 +111,7 @@ class AttachRenderer(Renderer):
         render_grad=False,
         **other_args,
     ):
-        cam_params = cam_params.to("cuda")
+        cam_params = cam_params.to(self._device)
         self.socket = self.connector.socket
         if self.socket is None:
             if self.connector.finished:

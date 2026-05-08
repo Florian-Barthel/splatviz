@@ -25,6 +25,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+cpu = ["torch"]
 cu118 = ["torch"]
 cu126 = ["torch"]
 cu128 = ["torch"]
@@ -34,6 +35,7 @@ cu130 = ["torch"]
 package = false
 conflicts = [
   [
+    { extra = "cpu" },
     { extra = "cu118" },
     { extra = "cu126" },
     { extra = "cu128" },

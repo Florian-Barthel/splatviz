@@ -27,6 +27,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
     def __init__(self, mode, host, port):
         self.code_font_path = "resources/fonts/jetbrainsmono/JetBrainsMono-Regular.ttf"
         self.regular_font_path = "resources/fonts/source_sans_pro/SourceSansPro-Regular.otf"
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         super().__init__(
             title="splatviz",
@@ -53,7 +54,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
                 edit.EditWidget(self),
                 eval.EvalWidget(self),
             ]
-            renderer = GaussianRenderer()
+            renderer = GaussianRenderer(device=self.device)
         elif mode == "attach":
             self.widgets = [
                 camera.CamWidget(self),
@@ -63,7 +64,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
                 edit.EditWidget(self),
                 training.TrainingWidget(self),
             ]
-            renderer = AttachRenderer(host=host, port=port)
+            renderer = AttachRenderer(host=host, port=port, device=self.device)
             update_all_the_time = True
         else:
             raise NotImplementedError(f"Mode '{mode}' not recognized.")
