@@ -19,6 +19,7 @@ from widgets import (
     save,
     render,
     training,
+    video,
 )
 
 
@@ -45,6 +46,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
             self.widgets = [
                 load_ply.LoadWidget(self),
                 camera.CamWidget(self),
+                video.VideoWidget(self),
                 performance.PerformanceWidget(self),
                 save.CaptureWidget(self),
                 render.RenderWidget(self),
@@ -55,6 +57,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
         elif mode == "attach":
             self.widgets = [
                 camera.CamWidget(self),
+                video.VideoWidget(self),
                 performance.PerformanceWidget(self),
                 render.RenderWidget(self),
                 edit.EditWidget(self),
