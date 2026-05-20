@@ -26,9 +26,6 @@ class FeatureWidget(Widget):
             label("Enabled", viz.label_w)
             self.enabled = checkbox(self.enabled, "features_enabled")
 
-            label("Model", viz.label_w)
-            _changed, self.model_index = imgui.combo("##feature_model", self.model_index, self.models)
-
             label("DINO", viz.label_w)
             _changed, self.dino_index = imgui.combo("##dino_model", self.dino_index, self.dino_models)
 
@@ -49,7 +46,6 @@ class FeatureWidget(Widget):
 
         viz.args.feature = {
             "enabled": self.enabled,
-            "model": self.models[self.model_index],
             "dino_model": self.dino_models[self.dino_index],
             "sam_type": self.sam_types[self.sam_type_index],
             "sam_checkpoint": self.sam_checkpoint,
