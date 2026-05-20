@@ -49,6 +49,7 @@ class GaussianRenderer(Renderer):
         use_splitscreen=False,
         layout="side_by_side",
         highlight_border=False,
+        scene_texts=None,
         save_ply_path=None,
         colormap=None,
         invert=False,
@@ -58,7 +59,13 @@ class GaussianRenderer(Renderer):
         cam_params = cam_params.to("cuda")
         background_color = background_color.to("cuda")
         slider = EasyDict(slider)
-        ply_file_paths = [path for path in ply_file_paths if path]
+        scene_items = [
+            (path, scene_texts[index] if scene_texts is not None and index < len(scene_texts) else "")
+            for index, path in enumerate(ply_file_paths)
+            if path
+        ]
+        ply_file_paths = [path for path, _scene_text in scene_items]
+        scene_texts = [scene_text for _path, scene_text in scene_items]
         if len(ply_file_paths) == 0:
             res.message = "Load a 3D Gaussian Splatting scene by dragging a supported  \n.ply or .yml file into the window, or select Browse to choose one."
             return
@@ -179,6 +186,7 @@ class GaussianRenderer(Renderer):
             highlight_border=highlight_border,
             colormap=colormap,
             invert=invert,
+            scene_texts=scene_texts,
         )
 
     def _load_model(self, ply_file_path):

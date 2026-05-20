@@ -16,6 +16,7 @@ class LoadWidget(Widget):
     def __init__(self, viz):
         super().__init__(viz, "Load")
         self.plys: list[str] = [""]
+        self.scene_texts: list[str] = [""]
         self.layout_index = 0
         self.highlight_border = False
         self.last_folder = self._load_last_folder()
@@ -26,6 +27,10 @@ class LoadWidget(Widget):
         self._handle_dropped_files()
         if show:
             plys_to_remove = []
+            while len(self.scene_texts) < len(self.plys):
+                self.scene_texts.append("")
+            if len(self.scene_texts) > len(self.plys):
+                self.scene_texts = self.scene_texts[: len(self.plys)]
             for i, ply in enumerate(self.plys):
                 if imgui_utils.button(f"Browse {i + 1}", width=viz.button_w):
                     files_from_dialog = self._open_ply_dialog()
@@ -37,13 +42,17 @@ class LoadWidget(Widget):
                         plys_to_remove.append(i)
                     imgui.same_line()
                 imgui.text(f"Scene {i + 1}: {ply}")
+                with imgui_utils.item_width(viz.label_w_large):
+                    _, self.scene_texts[i] = imgui.input_text(f"Text {i + 1}##scene_text_{i}", self.scene_texts[i])
 
             for i in plys_to_remove[::-1]:
                 self.plys.pop(i)
+                self.scene_texts.pop(i)
             if imgui_utils.button("Add Scene", width=viz.button_w):
                 files_from_dialog = self._open_ply_dialog()
                 if len(files_from_dialog) > 0:
                     self.plys.append(files_from_dialog[0])
+                    self.scene_texts.append("")
 
             if len(self.plys) > 1:
                 _, self.layout_index = imgui.combo("Layout", self.layout_index, self._layout_options)
@@ -54,6 +63,7 @@ class LoadWidget(Widget):
         viz.args.layout = layout
         viz.args.use_splitscreen = layout == "splitscreen"
         viz.args.ply_file_paths = self.plys
+        viz.args.scene_texts = self.scene_texts
         viz.args.current_ply_names = [
             ply.replace("/", "_").replace("\\", "_").replace(":", "_").replace(".", "_") for ply in self.plys
         ]
@@ -81,8 +91,10 @@ class LoadWidget(Widget):
 
         if self.plys == [""]:
             self.plys = scene_paths
+            self.scene_texts = [""] * len(scene_paths)
         else:
             self.plys.extend(scene_paths)
+            self.scene_texts.extend([""] * len(scene_paths))
         self.last_folder = os.path.dirname(os.path.abspath(scene_paths[0]))
         self._save_last_folder()
 

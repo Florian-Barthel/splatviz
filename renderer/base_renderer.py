@@ -54,12 +54,14 @@ class Renderer:
         highlight_border: bool = False,
         on_top: bool = False,
         colormap = None,
-        invert = False
+        invert = False,
+        scene_texts = None,
     ) -> None:
 
         if not isinstance(images, list):
             images = [images]
 
+        scene_regions = Renderer._scene_regions(images, layout, use_splitscreen, grid_shape, target_size)
         if layout == "grid":
             img = Renderer._compose_grid(images, grid_shape, target_size, highlight_border)
         elif use_splitscreen:
@@ -86,9 +88,10 @@ class Renderer:
         img = (img * 255).clamp(0, 255).to(torch.uint8).permute(1, 2, 0)
         if invert:
             img = 255 - img
-        img = img.cpu().numpy()
+        img = img.cpu().numpy().copy()
         if colormap is not None:
             img = cv2.applyColorMap(img, colormap)
+        Renderer._draw_scene_texts(img, scene_texts, scene_regions)
         res.image = img
 
     @staticmethod
@@ -118,6 +121,66 @@ class Renderer:
                 img[..., y - 1 : y, :] = 1
 
         return img
+
+    @staticmethod
+    def _scene_regions(images, layout, use_splitscreen, grid_shape, target_size):
+        if len(images) == 0:
+            return []
+
+        if layout == "grid":
+            rows, cols = grid_shape
+            target_width, target_height = target_size
+            row_heights = Renderer._split_extent(target_height, rows)
+            col_widths = Renderer._split_extent(target_width, cols)
+            regions = []
+            for scene_index in range(len(images)):
+                row = scene_index // cols
+                col = scene_index % cols
+                x = sum(col_widths[:col])
+                y = sum(row_heights[:row])
+                regions.append((x, y, col_widths[col], row_heights[row]))
+            return regions
+
+        if use_splitscreen:
+            height, width = images[0].shape[-2:]
+            split_size = width // len(images)
+            return [(scene_index * split_size, 0, split_size, height) for scene_index in range(len(images))]
+
+        regions = []
+        x = 0
+        for image in images:
+            height, width = image.shape[-2:]
+            regions.append((x, 0, width, height))
+            x += width
+        return regions
+
+    @staticmethod
+    def _draw_scene_texts(img, scene_texts, scene_regions):
+        if scene_texts is None:
+            return
+
+        for text, (x, y, width, height) in zip(scene_texts, scene_regions):
+            text = str(text).strip()
+            if not text:
+                continue
+
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            scale = max(min(width, height) / 360, 0.8)
+            margin = max(round(scale * 14), 12)
+            max_text_width = max(width - margin * 2, 1)
+            thickness = max(round(scale * 2), 2)
+            (text_width, text_height), baseline = cv2.getTextSize(text, font, scale, thickness)
+
+            if text_width > max_text_width:
+                scale *= max_text_width / text_width
+                thickness = max(round(scale * 2), 1)
+                (text_width, text_height), baseline = cv2.getTextSize(text, font, scale, thickness)
+
+            text_x = x + max((width - text_width) // 2, margin)
+            text_y = y + margin + text_height
+            border_thickness = thickness + max(round(scale * 2), 2)
+            cv2.putText(img, text, (text_x, text_y), font, scale, (255, 255, 255), border_thickness, cv2.LINE_AA)
+            cv2.putText(img, text, (text_x, text_y), font, scale, (0, 0, 0), thickness, cv2.LINE_AA)
 
     @staticmethod
     def _split_extent(extent, parts):

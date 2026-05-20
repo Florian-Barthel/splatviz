@@ -20,6 +20,7 @@ from widgets import (
     render,
     training,
     video,
+    features,
 )
 
 
@@ -50,6 +51,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
                 performance.PerformanceWidget(self),
                 save.CaptureWidget(self),
                 render.RenderWidget(self),
+                features.FeatureWidget(self),
                 edit.EditWidget(self),
                 eval.EvalWidget(self),
             ]
@@ -60,6 +62,7 @@ class Splatviz(WindowHelper, imgui_window.ImguiWindow):
                 video.VideoWidget(self),
                 performance.PerformanceWidget(self),
                 render.RenderWidget(self),
+                features.FeatureWidget(self),
                 edit.EditWidget(self),
                 training.TrainingWidget(self),
             ]
